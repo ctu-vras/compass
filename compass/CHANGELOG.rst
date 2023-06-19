@@ -2,8 +2,8 @@
 Changelog for package compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2023-06-19)
+------------------
 * Made use of cras_cpp_common's node_from_nodelet CMake macro.
 * Removed imu_transformer workaround
 * Added option to force magnetic declination value.
