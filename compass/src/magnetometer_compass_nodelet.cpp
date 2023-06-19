@@ -35,7 +35,6 @@
 #include <compass_msgs/Azimuth.h>
 
 #include <compass/magnetometer_compass_nodelet.h>
-#include <compass/transform_imu.h>
 
 #define WMM2010 "wmm2010"
 #define WMM2015 "wmm2015v2"
@@ -296,9 +295,8 @@ void MagnetometerCompassNodelet::imuMagCb(const sensor_msgs::Imu& imu, const sen
 
   try
   {
-    // do not use tf2::doTransform(Imu), it's buggy!
     auto transform = this->tf.lookupTransform(this->frame, imu.header.frame_id, imu.header.stamp, ros::Duration(0.1));
-    compass::doTransform(imu, this->lastImuInBody, transform);
+    tf2::doTransform(imu, this->lastImuInBody, transform);
   }
   catch (const tf2::TransformException& e)
   {
@@ -406,9 +404,8 @@ void AzimuthPublishersConfig::publishAzimuths(
       geometry_msgs::TransformStamped tf;
       tf.header.stamp = imuInBody.header.stamp;
       tf.header.frame_id = imuInBody.header.frame_id + "_ned";
-      // do not use tf2::doTransform(Imu), it's buggy!
       tf2::convert(this->enuToNed, tf.transform.rotation);
-      compass::doTransform(imuInBody, imuNed, tf);
+      tf2::doTransform(imuInBody, imuNed, tf);
     }
     this->ned.publishAzimuths(nedAzimuth, variance, stamp, imuNed);
   }
@@ -459,9 +456,8 @@ void AzimuthPublishersConfigForOrientation::publishAzimuths(
 
       geometry_msgs::TransformStamped tf;
       tf.header = imuInBody.header;
-      // do not use tf2::doTransform(Imu), it's buggy!
       tf2::convert(diffRot, tf.transform.rotation);
-      compass::doTransform(imuInBody, this->imuMsg, tf);
+      tf2::doTransform(imuInBody, this->imuMsg, tf);
       
       this->imuMsg.orientation_covariance[8] = variance;
       

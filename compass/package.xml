@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>compass</name>
   <version>1.0.0</version>
   <description>Compass based on a 3-axis magnetometer, attitude readings and possibly also GPS.</description>
@@ -15,7 +15,8 @@
   <build_depend>compass_msgs</build_depend>
   <build_depend>geographiclib</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>imu_transformer</build_depend>
+  <build_depend condition="$ROS_DISTRO == 'melodic'" version_gte="0.2.4">imu_transformer</build_depend>
+  <build_depend condition="$ROS_DISTRO == 'noetic'" version_gte="0.3.1">imu_transformer</build_depend>
   <build_depend>message_filters</build_depend>
   <build_depend>nodelet</build_depend>
   <build_depend>roscpp</build_depend>
