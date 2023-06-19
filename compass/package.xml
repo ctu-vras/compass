@@ -13,6 +13,7 @@
 
   <build_depend>angles</build_depend>
   <build_depend>compass_msgs</build_depend>
+  <build_depend>cras_cpp_common</build_depend>
   <build_depend>geographiclib</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend condition="$ROS_DISTRO == 'melodic'" version_gte="0.2.4">imu_transformer</build_depend>
