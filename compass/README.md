@@ -1,4 +1,4 @@
-# magnetometer\_compass
+# compass
 
 Compass based on a 3-axis magnetometer, attitude readings and possibly also GPS.
 
