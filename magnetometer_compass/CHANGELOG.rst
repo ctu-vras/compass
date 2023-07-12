@@ -2,8 +2,8 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2023-07-12)
+------------------
 * Fixed installation of data
 * Contributors: Martin Pecka
 
