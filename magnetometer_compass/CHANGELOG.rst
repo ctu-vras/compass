@@ -2,8 +2,8 @@
 Changelog for package compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2023-07-12)
+------------------
 * Renamed compass -> magnetometer_compass
 * Contributors: Martin Pecka
 
