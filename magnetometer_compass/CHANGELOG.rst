@@ -1,6 +1,11 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package compass
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package magnetometer_compass
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Forthcoming
+-----------
+* Fixed installation of data
+* Contributors: Martin Pecka
 
 1.0.2 (2023-07-12)
 ------------------
