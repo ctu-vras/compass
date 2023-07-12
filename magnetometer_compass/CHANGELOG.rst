@@ -2,6 +2,11 @@
 Changelog for package compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Renamed compass -> magnetometer_compass
+* Contributors: Martin Pecka
+
 1.0.1 (2023-06-19)
 ------------------
 * Made use of cras_cpp_common's node_from_nodelet CMake macro.
