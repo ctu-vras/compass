@@ -21,7 +21,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/buffer.h>
 
-namespace compass
+namespace magnetometer_compass
 {
 
 struct MagnetometerCompassNodeletPrivate;

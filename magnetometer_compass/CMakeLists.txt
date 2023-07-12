@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(compass)
+project(magnetometer_compass)
 
 find_package(catkin REQUIRED COMPONENTS
   angles

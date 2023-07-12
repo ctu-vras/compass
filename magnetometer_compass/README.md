@@ -1,4 +1,4 @@
-# compass
+# magnetometer\_compass
 
 Compass based on a 3-axis magnetometer, attitude readings and possibly also GPS.
 
@@ -35,7 +35,7 @@ topic for this measurement, and until at least one message arrives, the node wil
 have a node publishing the bias, you can alternatively provide it via parameters. Depending on the application, it
 may be required to re-estimate the bias from time to time even during runtime.
 
-## Node compass\_node and nodelet magnetometer\_compass/Compass
+## Node magnetometer\_compass and nodelet magnetometer\_compass/magnetometer\_compass
 
 ### Subscribed topics
 - `imu/data` (`sensor_msgs/Imu`): Output from an IMU or an orientation filtering algorithm. It should have valid

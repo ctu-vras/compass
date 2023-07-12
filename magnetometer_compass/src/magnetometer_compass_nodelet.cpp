@@ -34,13 +34,13 @@
 
 #include <compass_msgs/Azimuth.h>
 
-#include <compass/magnetometer_compass_nodelet.h>
+#include <magnetometer_compass/magnetometer_compass_nodelet.h>
 
 #define WMM2010 "wmm2010"
 #define WMM2015 "wmm2015v2"
 #define WMM2020 "wmm2020"
 
-namespace compass
+namespace magnetometer_compass
 {
 
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Imu, sensor_msgs::MagneticField> SyncPolicy;
@@ -141,7 +141,7 @@ void MagnetometerCompassNodelet::onInit()
   else
   {
     this->magneticModelsPath = pnh.param(
-      "magnetic_models_path", ros::package::getPath("compass") + "/data/magnetic");
+      "magnetic_models_path", ros::package::getPath("magnetometer_compass") + "/data/magnetic");
     this->forcedMagneticModelName = pnh.param("magnetic_model", std::string());
   }
   
@@ -594,4 +594,4 @@ void MagnetometerCompassNodelet::updateVariance()
 
 }
 
-PLUGINLIB_EXPORT_CLASS(compass::MagnetometerCompassNodelet, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(magnetometer_compass::MagnetometerCompassNodelet, nodelet::Nodelet)
