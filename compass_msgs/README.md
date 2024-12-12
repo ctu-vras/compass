@@ -16,9 +16,9 @@ meaning of each message:
   - `UNIT_RAD`: `azimuth` field is in radians and `variance` in rad^2
 - `orientation`
   - `ORIENTATION_ENU`: The azimuth is measured in East-North-Up frame. Azimuth 0 thus points to the East and increases
-                       counter-clockwise.
+      counter-clockwise.
   - `ORIENTATION_NED`: The azimuth is measured in North-East-Down frame. Azimuth 0 thus points to the North and
-                       increases clockwise.
+      increases clockwise.
 - `reference`: Which North reference is used.
   - `REFERENCE_MAGNETIC`: Magnetic North.
   - `REFERENCE_GEOGRAPHIC`: Geographic North.

@@ -15,10 +15,8 @@ may be required to re-estimate the bias from time to time even during runtime.
 ### Subscribed topics
 - `imu/mag` (`sensor_msgs/MagneticField`): 3-axis magnetometer measurements (bias not removed).
 - `imu/mag_bias` (`sensor_msgs/MagneticField`): Bias of the magnetometer. This value will be subtracted from the
-                                                incoming magnetometer measurements. Messages on this topic do not
-                                                need to come repeatedly if the bias does not change. The
-                                                `magnetic_field_covariance` field can be "misused" to carry a 3x3
-                                                bias scaling matrix.
+    incoming magnetometer measurements. Messages on this topic do not need to come repeatedly if the bias does not
+    change. The `magnetic_field_covariance` field can be "misused" to carry a 3x3 bias scaling matrix.
 
 ### Published topics (see above for explanation)
 - `imu/mag_unbiased` (`sensor_msgs/MagneticField`): The magnetic field measurement with bias removed.
@@ -48,20 +46,20 @@ Magnetometer bias estimation node.
 ### Provided services
 
 - `calibrate_magnetometer` (`std_srvs/Trigger`): Call this service to start bias estimation. Rotate the robot in as much
-                                                 axes as possible during the calibration.
+    axes as possible during the calibration.
 
 ### Parameters
 
 - `~measuring_time` (double, default 30 s): How long should the bias estimation phase be.
 - `~2d_mode` (bool, default true): If true, the calibration expects motion in only 2 axes instead of 3.
 - `~2d_mode_ignore_axis` ('X', 'Y' or 'Z', default autodetect): If you know which magnetometer local axis will not be
-                                                                used in 2D calibration, you can set it here.
+    used in 2D calibration, you can set it here.
 - `~load_from_params` (bool, default false): If true, initial bias estimate will be loaded from ROS params.
 - `magnetometer_bias_x` (double, default 0.0): The initial bias estimate for X axis (if `~load_from_params` is true).
 - `magnetometer_bias_y` (double, default 0.0): The initial bias estimate for Y axis (if `~load_from_params` is true).
 - `magnetometer_bias_z` (double, default 0.0): The initial bias estimate for Z axis (if `~load_from_params` is true).
 - `~load_from_file` (bool, default true): If true, the initial bias estimate will be loaded from
-                                          `~/.ros/magnetometer_calib.yaml`.
+    `~/.ros/magnetometer_calib.yaml`.
 - `~calibration_file_path` (str, default `~/.ros/magnetometer_calib.yaml`): Path to the calibration file.
 - `~save_to_file` (bool, default true): If true, the last estimated bias will be saved to the calibration file.
 

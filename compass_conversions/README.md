@@ -26,10 +26,10 @@ The converter accepts several parameters that modify its behavior:
 - `utm_grid_convergence` (double, radians, optional): If set, forces this value of UTM grid convergence.
 - `magnetic_models_path` (string, default `"$PACKAGE/data/magnetic"`): Path where WMM magnetic models can be found.
 - `magnetic_model` (string, optional): If set, forces using the given WMM model instead of determining the proper
-                                      one by year. Example value is "wmm2020".
+    one by year. Example value is "wmm2020".
 - `utm_zone` (int, optional): If set, forces using this UTM zone instead of determining the proper one.
 - `keep_utm_zone` (bool, default true): If true, the first automatically determined UTM zone will be used for all future
-                                        conversions.
+    conversions.
 - `initial_lat` (double, degrees, optional): If set, use this latitude before the first navsat pose is received.
 - `initial_lon` (double, degrees, optional): If set, use this longitude before the first navsat pose is received.
 - `initial_alt` (double, meters, optional): If set, use this altitude before the first navsat pose is received.
@@ -39,7 +39,7 @@ The converter accepts several parameters that modify its behavior:
 A [message filter](https://wiki.ros.org/message_filters) `Subscriber` that subscribes any of the supported azimuth
 representations (
 [Azimuth](https://docs.ros.org/en/api/compass_msgs/html/msg/Azimuth.html),
-[QuaternionsStamped](https://docs.ros.org/en/api/geometry_msgs/html/msg/QuaternionStamped.html),
+[QuaternionStamped](https://docs.ros.org/en/api/geometry_msgs/html/msg/QuaternionStamped.html),
 [PoseWithCovarianceStamped](https://docs.ros.org/en/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html),
 [Imu](https://docs.ros.org/en/api/sensor_msgs/html/msg/Imu.html),
 ) and converts it to [Azimuth](https://docs.ros.org/en/api/compass_msgs/html/msg/Azimuth.html).
@@ -101,38 +101,31 @@ The nodelet can also be launched as a standalone node using `rosrun compass_conv
 #### Published topics:
 
  - `~azimuth_out` or `~azimuth_out/SUFFIX`: The transformed azimuth. If `~target_append_suffix` is true, the variant
-                                            with topic name suffix will be used (e.g. `~azimuth_out/mag/enu/deg`).
-                                            The type of the published message is determined by `~target_type`.
+    with topic name suffix will be used (e.g. `~azimuth_out/mag/enu/deg`). The type of the published message is
+    determined by `~target_type`.
 
 #### Parameters:
 
 - `~queue_size` (int, default 10): Queue size for the subscribers and publishers.
 - `~target_unit` (str, 'deg' or 'rad', default: no change): Angular unit to be used in the transformed messages.
 - `~target_orientation` (str, 'enu' or 'ned', default: no change): ENU or NED orientation to be used in the
-                                                                   transformed messages.
+    transformed messages.
 - `~target_reference` (str, 'magnetic', 'geographic' or 'UTM', default: no change): North reference to be used in the
-                                                                                    transformed messages.
+    transformed messages.
 - `~target_type` (str, 'azimuth', 'quaternion', 'pose' or 'imu', default 'azimuth'): The Type of output messages.
 - `~target_append_suffix` (bool, default false): If true, the output topic will be suffixed with a metadata-based
-                                                 string.
+    string.
 - `~target_frame` (str, default: no change): TF frame to transform the messages to. Please note that frames that are
-                                             too "titled" from gravity will not make much sense.
+    too "titled" from gravity will not make much sense.
 - `~subscribe_fix` (bool, default true): Whether to subscribe `fix` topic. In some cases, you don't need it.
 - `~subscribe_utm` (bool, default true): Whether to subscribe `utm_zone` topic. It is fully optional.
 - `~input_orientation` (str, 'enu' or 'ned', default: unspecified): ENU or NED orientation to be used to interpret
-                                                                    input messages (in case orientation cannot be
-                                                                    derived either from message contents or topic
-                                                                    name).
+    input messages (in case orientation cannot be derived either from message contents or topic name).
 - `~input_reference` (str, 'magnetic', 'geographic' or 'UTM', default: no change): North reference to be used to
-                                                                                   interpret input messages (in case
-                                                                                   reference cannot be derived either
-                                                                                   from message contents or topic
-                                                                                   name).
+    interpret input messages (in case reference cannot be derived either from message contents or topic name).
 - `~input_variance` (double, optional, rad^2): If specified, this variance will be used in the output messages
-                                               if variance cannot be determined from the input messages (e.g. for
-                                               `QuaternionStamped`).
+    if variance cannot be determined from the input messages (e.g. for `QuaternionStamped`).
 - `~strict` (bool, default true): If true, conversions between magnetic and geographic North will fail if the used
-                                  magnetic model is used outside its declared bounds of validity (mostly year and
-                                  altitude).
+    magnetic model is used outside its declared bounds of validity (mostly year and altitude).
 - All parameters consumed by `CompassConverter` (most interesting are `initial_lat`, `initial_lon`, that can relieve
-  this nodelet from subscribing `fix` topic, if you know the approximate coordinates in advance).
+    this nodelet from subscribing `fix` topic, if you know the approximate coordinates in advance).

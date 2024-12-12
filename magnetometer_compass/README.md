@@ -17,14 +17,14 @@ So that you know what output is the right for you.
 
 ### Orientation
 - NED (North-East-Down): Azimuth will be 0 pointing to north, and increases clockwise. This is consistent with the
-                         azimuth used in cartography and by tourists.
+  azimuth used in cartography and by tourists.
 - ENU (East-North-Up): Azimuth will be 0 pointing to east, and increases counter-clockwise. This is consistent with
-                       REP-103 and robot_localization package.
+  REP-103 and robot_localization package.
 ### References for north
 - Magnetic: points towards the magnetic north of Earth (travels in time).
 - Geographic ("true"): points towards the geographic Earth (i.e. the WGS84 North Pole). It is static in time.
 - UTM: points in the north direction on the cartesian UTM grid (similar to Geographic, but it can slightly diverge
-       at the edges of UTM maps). You probably want this azimuth reference for navigation tasks in UTM coordinates.
+  at the edges of UTM maps). You probably want this azimuth reference for navigation tasks in UTM coordinates.
 
 Magnetic azimuth can be computed directly from the magnetometer and IMU orientation. To compute the other two
 references, you need to provide the latitude, longitude, altitude and time in addition to the magnetometer and
@@ -42,22 +42,20 @@ may be required to re-estimate the bias from time to time even during runtime.
 
 ### Subscribed topics
 - `imu/data` (`sensor_msgs/Imu`): Output from an IMU or an orientation filtering algorithm. It should have valid
-                                  contents of `orientation` and at least roll and pitch should be estimated as
-                                  well as possible (relative to the gravity vector). These messages should come at
-                                  the same rate as the magnetometer data (or faster).
+    contents of `orientation` and at least roll and pitch should be estimated as well as possible (relative to the
+    gravity vector). These messages should come at the same rate as the magnetometer data (or faster).
 - `imu/mag` (`sensor_msgs/MagneticField`): 3-axis magnetometer raw measurements (bias not removed) (disabled by param
-                                           `~subscribe_mag_unbiased`).
+    `~subscribe_mag_unbiased`).
 - `imu/mag_bias` (`sensor_msgs/MagneticField`): Bias of the magnetometer. This value will be subtracted from the
-                                                incoming magnetometer measurements. Messages on this topic do not
-                                                need to come repeatedly if the bias does not change. Disabled by
-                                                param `~subscribe_mag_unbiased`.
+    incoming magnetometer measurements. Messages on this topic do not need to come repeatedly if the bias does not
+    change. Disabled by param `~subscribe_mag_unbiased`.
 - `imu/mag_unbiased` (`sensor_msgs/MagneticField`): 3-axis magnetometer unbiased measurements (enabled by param
-                                                    `~subscribe_mag_unbiased`).
+    `~subscribe_mag_unbiased`).
 - `gps/fix` (`sensor_msgs/NavSatFix`, optional): GPS fix messages from which the latitude, longitude, altitude and
-                                                 current year can be read. These are further used to compute
-                                                 magnetic declination and UTM grid convergence factor if requested.
+    current year can be read. These are further used to compute magnetic declination and UTM grid convergence factor if
+    requested.
 - TF: This node requires a (usually static) transform between `~frame` and the frame ID of the IMU and magnetometer
-      messages.
+    messages.
 
 ### Published topics (see above for explanation)
 - `imu/mag_unbiased` (`sensor_msgs/MagneticField`, enabled by param `~publish_mag_unbiased`, off by default):
@@ -135,7 +133,7 @@ may be required to re-estimate the bias from time to time even during runtime.
   Such configuration is invalid and the node will not start.
 - `~frame` (string, default `base_link`): Frame into which the IMU and magnetometer data should be transformed.
 - `~low_pass_ratio` (double, default 0.95): The azimuth is filtered with a low-pass filter. This sets its
-                                            aggressivity (0 means raw measurements, 1 means no updates).
+    aggressivity (0 means raw measurements, 1 means no updates).
 - `~initial_mag_bias_x` (double, no default, optional): Magnetometer bias in the X axis.
 - `~initial_mag_bias_y` (double, no default, optional): Magnetometer bias in the Y axis.
 - `~initial_mag_bias_z` (double, no default, optional): Magnetometer bias in the Z axis.
@@ -146,9 +144,8 @@ may be required to re-estimate the bias from time to time even during runtime.
 - `~initial_alt` (double, default 0): Altitude in meters (it is usually okay to omit it and use the default).
 - `~initial_year` (int, no default, optional): If set, overrides the current time for declination computation.
 - `~magnetic_declination` (double, no default, optional, radians): If this parameter is set, the magnetic models are
-                                                                   ignored and this value for declination is forced.
-                                                                   This can be useful either if you know the value
-                                                                   in advance or in simulation.
+    ignored and this value for declination is forced. This can be useful either if you know the value in advance or in
+    simulation.
 - `~utm_grid_convergence` (double, no default, optional, radians): If set, forces this value of UTM grid convergence.
 - `~magnetic_models_path` (string, defaults to a pre-installed directory): Path where WMM magnetic models can be found.
      If set to empty string, the models will be searched in a default folder of GeographicLib. Environment variables
@@ -168,14 +165,12 @@ This node visualizes `Azimuth` messages in RViz converting them to a pose.
 ### Subscribed topics
 
 - `~azimuth` (multiple types supported): The azimuth to visualize. Any type supported by compass_conversions package
-                                         can be used: `compass_msgs/Azimuth`, `geometry_msgs/Quaternion`,
-                                         `geometry_msgs/PoseWithCovarianceStamped` or `sensor_msgs/Imu`. If other
-                                         types than `compass_msgs/Azimuth` are used, either the resolved topic name
-                                         must contain the azimuth type identification (e.g. end with `mag/enu/imu`),
-                                         or you must provide parameters `~input_reference` and `~input_orientation`.
+    can be used: `compass_msgs/Azimuth`, `geometry_msgs/Quaternion`, `geometry_msgs/PoseWithCovarianceStamped` or
+    `sensor_msgs/Imu`. If other types than `compass_msgs/Azimuth` are used, either the resolved topic name must contain
+    the azimuth type identification (e.g. end with `mag/enu/imu`), or you must provide parameters `~input_reference` and
+    `~input_orientation`.
 - `gps/fix` (`sensor_msgs/NavSatFix`, optional): GPS fix messages from which the latitude, longitude, altitude and
-                                                 current year can be read. These are further used to compute
-                                                 magnetic declination and UTM grid convergence factor.
+    current year can be read. These are further used to compute magnetic declination and UTM grid convergence factor.
 - `utm_zone` (`std_msgs/Int32`, optional): Optional UTM zone updates.
 
 ### Published topics
@@ -191,22 +186,15 @@ This node visualizes `Azimuth` messages in RViz converting them to a pose.
     If set to empty string, the models will be searched in a default folder of GeographicLib. Environment variables
     `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA` influence the location of this folder.
 - `magnetic_model` (string, optional): If set, forces using the given WMM model instead of determining the proper
-                                       one by year. Example value is "wmm2020".
+    one by year. Example value is "wmm2020".
 - `utm_zone` (int, optional): If set, forces using this UTM zone instead of determining the proper one.
-- `keep_utm_zone` (bool, default true): If true, the first determined UTM zone will be used for all future
-                                        conversions.
+- `keep_utm_zone` (bool, default true): If true, the first determined UTM zone will be used for all future conversions.
 - `initial_lat` (double, degrees, optional): If set, use this latitude before the first navsat pose is received.
 - `initial_lon` (double, degrees, optional): If set, use this longitude before the first navsat pose is received.
 - `initial_alt` (double, meters, optional): If set, use this altitude before the first navsat pose is received.
 - `~input_orientation` (str, 'enu' or 'ned', default: unspecified): ENU or NED orientation to be used to interpret
-                                                                    input messages (in case orientation cannot be
-                                                                    derived either from message contents or topic
-                                                                    name).
+    input messages (in case orientation cannot be derived either from message contents or topic name).
 - `~input_reference` (str, 'magnetic', 'geographic' or 'UTM', default: no change): North reference to be used to
-                                                                                   interpret input messages (in case
-                                                                                   reference cannot be derived either
-                                                                                   from message contents or topic
-                                                                                   name).
+    interpret input messages (in case reference cannot be derived either from message contents or topic name).
 - `~input_variance` (double, optional, rad^2): If specified, this variance will be used in the output messages
-                                               if variance cannot be determined from the input messages (e.g. for
-                                               `QuaternionStamped`).
+    if variance cannot be determined from the input messages (e.g. for `QuaternionStamped`).
