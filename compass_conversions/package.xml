@@ -9,7 +9,7 @@
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
   <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
 
-  <license file="../LICENSES/BSD-3-Clause.txt">BSD</license>
+  <license file="LICENSE">BSD</license>
 
   <url type="repository">https://github.com/ctu-vras/compass</url>
   <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
