@@ -5,8 +5,8 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2024-12-12)
+------------------
 * Fixed license issues preventing bloom-release.
 * Fixed documentation generation.
 * Contributors: Martin Pecka

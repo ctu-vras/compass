@@ -5,8 +5,8 @@
 Changelog for package compass_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2024-12-12)
+------------------
 * Fixed license issues preventing bloom-release.
 * Improved readme.
 * Contributors: Martin Pecka
