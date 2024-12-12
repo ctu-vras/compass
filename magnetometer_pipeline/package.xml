@@ -2,9 +2,9 @@
 <!-- SPDX-License-Identifier: BSD-3-Clause -->
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 <package format="3">
-  <name>magnetometer_compass</name>
+  <name>magnetometer_pipeline</name>
   <version>1.0.3</version>
-  <description>Compass based on a 3-axis magnetometer, attitude readings and possibly also GNSS.</description>
+  <description>Calibration and removing of magnetometer bias.</description>
 
   <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
@@ -13,37 +13,28 @@
 
   <url type="repository">https://github.com/ctu-vras/compass</url>
   <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
-  <url type="website">https://wiki.ros.org/magnetometer_compass</url>
+  <url type="website">https://wiki.ros.org/magnetometer_pipeline</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>compass_msgs</depend>
   <depend>cras_cpp_common</depend>
+  <depend>message_filters</depend>
+  <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>tf2</depend>
 
-  <build_depend>angles</build_depend>
-  <build_depend>compass_conversions</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend condition="$ROS_DISTRO == 'melodic'" version_gte="0.2.4">imu_transformer</build_depend>
-  <build_depend condition="$ROS_DISTRO == 'noetic'" version_gte="0.3.1">imu_transformer</build_depend>
-  <build_depend>magnetometer_pipeline</build_depend>
-  <build_depend>message_filters</build_depend>
   <build_depend>nodelet</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>tf2_geometry_msgs</build_depend>
-  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_eigen</build_depend>
 
-  <exec_depend>angles</exec_depend>
-  <exec_depend>compass_conversions</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>imu_transformer</exec_depend>
-  <exec_depend>magnetometer_pipeline</exec_depend>
-  <exec_depend>message_filters</exec_depend>
   <exec_depend>nodelet</exec_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>tf2_geometry_msgs</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-numpy</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-numpy</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>tf2_eigen</exec_depend>
 
   <test_depend condition="$ROS_PYTHON_VERSION == 2">python-catkin-lint</test_depend>
   <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-catkin-lint</test_depend>

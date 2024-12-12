@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<launch>
+    <test test-name="test_compass_transformer_nodelet" pkg="compass_conversions" type="test_compass_transformer_nodelet" />
+</launch>

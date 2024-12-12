@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<launch>
+    <test test-name="test_visualize_azimuth_nodelet" pkg="magnetometer_compass" type="test_visualize_azimuth_nodelet" />
+    <node name="visualize_azimuth" pkg="magnetometer_compass" type="visualize_azimuth" />
+</launch>

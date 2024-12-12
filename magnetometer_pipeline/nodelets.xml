@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<library path="lib/libmagnetometer_bias_remover_nodelet">
+    <class name="magnetometer_pipeline/magnetometer_bias_remover" type="magnetometer_pipeline::MagnetometerBiasRemoverNodelet"
+           base_class_type="nodelet::Nodelet">
+        <description>Remove known bias from 3-axis magnetometer.</description>
+    </class>
+</library>

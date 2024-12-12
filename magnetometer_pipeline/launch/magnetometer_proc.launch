@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+
+<!-- Run magnetometer bias observer and remover so that they together provide topic imu/mag_unbiased . -->
+<launch>
+    <arg name="nodelet_manager" default="" doc="If nonempty, the name of the nodelet manager to load the nodelets into." />
+    <arg name="two_d_mode" default="true" doc="If true, calibration will only be done in 2 dimensions instead of 3." />
+    <arg name="calibration_file_path" default="" doc="If nonempty, specifies path to the calibration file." />
+    <arg name="load_from_params" default="false" doc="Whether to load initial calibration from ROS params." />
+    <arg name="load_from_file" default="true" doc="Whether to load initial calibration from calibration file." />
+    <arg name="save_to_file" default="true" doc="Whether to save updated calibration to calibration file." />
+
+    <node name="mag_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" respawn="true" if="$(eval nodelet_manager == '')" />
+
+    <arg name="nodelet_manager_name" value="mag_nodelet_manager" if="$(eval nodelet_manager == '')" />
+    <arg name="nodelet_manager_name" value="$(arg nodelet_manager)" if="$(eval nodelet_manager != '')" />
+
+    <node name="mag_bias_observer" pkg="magnetometer_pipeline" type="magnetometer_bias_observer" respawn="true">
+        <param name="2d_mode" value="$(arg two_d_mode)" />
+        <param name="calibration_file_path" value="$(arg calibration_file_path)" if="$(eval calibration_file_path != '')" />
+        <param name="load_from_params" value="$(arg load_from_params)" />
+        <param name="load_from_file" value="$(arg load_from_file)" />
+        <param name="save_to_file" value="$(arg save_to_file)" />
+    </node>
+    <node name="mag_bias_remover" pkg="nodelet" type="nodelet" args="load magnetometer_pipeline/magnetometer_bias_remover $(arg nodelet_manager_name)" respawn="true" />
+</launch>

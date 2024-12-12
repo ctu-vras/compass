@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+
+<library path="lib/libcompass_transformer_nodelet">
+    <class name="compass_conversions/compass_transformer" type="compass_conversions::CompassTransformerNodelet"
+           base_class_type="nodelet::Nodelet">
+        <description>Nodelet transforming Azimuth message to different TF frames or representations.</description>
+    </class>
+</library>

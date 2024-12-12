@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+
+<!-- Run magnetometer compass to provide azimuth. -->
+
+<launch>
+    <arg name="nodelet_manager" default="" doc="If nonempty, the name of the nodelet manager to load the nodelets into." />
+    <arg name="frame" default="base_link" doc="The frame in which the azimuth should be computed." />
+    <arg name="unbias" default="true" doc="When true, magnetometer bias observer and remover will be launched." />
+    <arg name="low_pass_ratio" default="" doc="Low pass smoothing ratio. 0 = raw measurements, 1 = no updates." />
+    <arg name="visualize" default="true" doc="Whether to publish a visualization of the azimuth" />
+
+    <node name="compass_nodelet_manager" pkg="cras_cpp_common" type="nodelet_manager_sharing_tf_buffer" respawn="true" if="$(eval nodelet_manager == '')" />
+
+    <arg name="nodelet_manager_name" value="compass_nodelet_manager" if="$(eval nodelet_manager == '')" />
+    <arg name="nodelet_manager_name" value="$(arg nodelet_manager)" if="$(eval nodelet_manager != '')" />
+
+    <include file="$(find magnetometer_pipeline)/launch/magnetometer_proc.launch" pass_all_args="true" if="$(arg unbias)">
+        <arg name="nodelet_manager" value="$(arg nodelet_manager_name)" />
+    </include>
+
+    <node name="compass" pkg="nodelet" type="nodelet" args="load magnetometer_compass/magnetometer_compass $(arg nodelet_manager_name)" respawn="true">
+        <param name="frame" value="$(arg frame)" />
+        <param name="low_pass_ratio" value="$(arg low_pass_ratio)" if="$(eval low_pass_ratio != '')" />
+        <param name="subscribe_mag_unbiased" value="$(arg unbias)" />
+    </node>
+
+    <node name="visualize_azimuth" pkg="nodelet" type="nodelet" args="load magnetometer_compass/visualize_azimuth $(arg nodelet_manager_name)" respawn="true" if="$(arg visualize)">
+        <remap from="~azimuth" to="compass/mag/ned/deg" />
+        <remap from="~azimuth_vis" to="compass/vis" />
+        <param name="max_rate" value="10" />
+    </node>
+</launch>
