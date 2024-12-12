@@ -5,6 +5,14 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Restructured the repo, created compass_conversions, magnetic_model and magnetometer_pipeline packages.
+  The behavior of the compass nodelet should not change.
+  The visualize_azimuth Python script was substituted by a C++ node with the same name and compatible behavior.
+  The data directory with WMM was moved from magnetometer_compass to magnetic_model.
+* Contributors: Martin Pecka
+
 1.0.3 (2023-07-12)
 ------------------
 * Fixed installation of data
