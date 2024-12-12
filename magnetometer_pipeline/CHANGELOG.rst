@@ -5,8 +5,8 @@
 Changelog for package magnetometer_pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2024-12-12)
+------------------
 * Restructured the repo, created compass_conversions, magnetic_model and magnetometer_pipeline packages.
 * Contributors: Martin Pecka
 

@@ -5,8 +5,8 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2024-12-12)
+------------------
 * Restructured the repo, created compass_conversions, magnetic_model and magnetometer_pipeline packages.
   The behavior of the compass nodelet should not change.
   The visualize_azimuth Python script was substituted by a C++ node with the same name and compatible behavior.
