@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-FileCopyrightText: Czech Technical University in Prague
+
+- builder: doxygen
+  required: True
+  file_patterns: '*.h *.hpp *.hh *.dox /README.md'
+  use_mdfile_as_mainpage: 'README.md'
+  generate_treeview: True

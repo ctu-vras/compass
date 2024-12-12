@@ -1,9 +1,13 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-FileCopyrightText: Czech Technical University in Prague
+
 Header header
 
-# The represented azimuth angle (angular difference between a given direction and north/east)
+# The represented azimuth angle (angular difference between a given direction and north/east) in unit corresponding to
+# the 'unit' field.
 float64 azimuth
 
-# Variance of the measurement (i.e. standard deviation squared)
+# Variance of the measurement (i.e. standard deviation squared) in units corresponding to squared 'unit' field.
 float64 variance
 
 # Unit of measurement:

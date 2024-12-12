@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<launch>
+    <test test-name="test_magnetometer_bias_remover_nodelet" pkg="magnetometer_pipeline" type="test_magnetometer_bias_remover_nodelet" />
+    <node name="mag_bias_remover" pkg="magnetometer_pipeline" type="magnetometer_bias_remover" />
+</launch>

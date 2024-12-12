@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<package format="3">
+  <name>compass_conversions</name>
+  <version>1.0.3</version>
+  <description>Common conversions for compass data.</description>
+
+  <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
+  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
+
+  <license file="../LICENSES/BSD-3-Clause.txt">BSD</license>
+
+  <url type="repository">https://github.com/ctu-vras/compass</url>
+  <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
+  <url type="website">https://wiki.ros.org/compass_conversions</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>angles</build_depend>
+  <build_depend>geographiclib</build_depend>
+  <build_depend>magnetic_model</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+
+  <exec_depend>angles</exec_depend>
+  <exec_depend>geographiclib</exec_depend>
+  <exec_depend>magnetic_model</exec_depend>
+  <exec_depend>nodelet</exec_depend>
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+
+  <depend>compass_msgs</depend>
+  <depend>cras_cpp_common</depend>
+  <depend>geometry_msgs</depend>
+  <depend>message_filters</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2</depend>
+  <depend>topic_tools</depend>
+
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-catkin-lint</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-catkin-lint</test_depend>
+  <test_depend>roslint</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+    <nodelet plugin="${prefix}/nodelets.xml" />
+  </export>
+</package>

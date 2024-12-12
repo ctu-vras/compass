@@ -1,6 +1,17 @@
-<library path="lib/libmagnetometer_compass_nodelet">
-    <class name="magnetometer_compass/magnetometer_compass" type="magnetometer_compass::MagnetometerCompassNodelet"
-           base_class_type="nodelet::Nodelet">
-        <description>Compass based on a 3-axis magnetometer and odometry pose readings.</description>
-    </class>
-</library>
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<class_libraries>
+    <library path="lib/libmagnetometer_compass_nodelet">
+        <class name="magnetometer_compass/magnetometer_compass" type="magnetometer_compass::MagnetometerCompassNodelet"
+               base_class_type="nodelet::Nodelet">
+            <description>Compass based on a 3-axis magnetometer and odometry pose readings.</description>
+        </class>
+    </library>
+    <library path="lib/libvisualize_azimuth_nodelet">
+        <class name="magnetometer_compass/visualize_azimuth" type="magnetometer_compass::VisualizeAzimuthNodelet"
+               base_class_type="nodelet::Nodelet">
+            <description>Azimuth visualization as a Pose pointing to North.</description>
+        </class>
+    </library>
+</class_libraries>
