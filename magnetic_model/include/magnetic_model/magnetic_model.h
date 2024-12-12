@@ -109,8 +109,8 @@ public:
     const sensor_msgs::NavSatFix& fix, const ros::Time& stamp) const;
 
   /**
-   * \brief Get the magnetic field components on the provided place on Earth.
-   * \param[in] fix The place for which magnetic field components are queried. Timestamp from the message is ignored.
+   * \brief Get the components of the measured magnetic field.
+   * \param[in] field The measured magnetic field.
    * \param[in] stamp The time for which magnetic field components are queried.
    * \return The magnetic field components.
    */

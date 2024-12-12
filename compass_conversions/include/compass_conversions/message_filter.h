@@ -51,6 +51,7 @@ public:
   /**
    * \brief Constructor
    *
+   * \param log Logger.
    * \param nh The ros::NodeHandle to use for subscribing.
    * \param topic The topic to subscribe to.
    * \param queueSize Queue size of the subscription.
@@ -245,6 +246,7 @@ public:
    * \param[in] azimuthInput The message filter producing azimuth messages.
    * \param[in] unit The output azimuth unit.
    * \param[in] orientation The output azimuth orientation.
+   * \param[in] reference The output azimuth reference.
    */
   template<class AzimuthInput>
   CompassFilter(const cras::LogHelperPtr& log, const std::shared_ptr<CompassConverter>& converter,
