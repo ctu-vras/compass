@@ -100,6 +100,8 @@ protected:
 
 void VisualizeAzimuthNodelet::onInit()
 {
+  cras::Nodelet::onInit();
+
   auto nh = this->getNodeHandle();
   auto pnh = this->getPrivateNodeHandle();
 

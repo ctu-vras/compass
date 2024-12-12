@@ -291,6 +291,8 @@ MagnetometerCompassNodelet::~MagnetometerCompassNodelet() = default;
 
 void MagnetometerCompassNodelet::onInit()
 {
+  cras::Nodelet::onInit();
+
   auto nh = this->getNodeHandle();
   auto pnh = this->getPrivateNodeHandle();
 

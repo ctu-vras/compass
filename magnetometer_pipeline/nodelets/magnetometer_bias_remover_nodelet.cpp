@@ -69,6 +69,8 @@ MagnetometerBiasRemoverNodelet::~MagnetometerBiasRemoverNodelet() = default;
 
 void MagnetometerBiasRemoverNodelet::onInit()
 {
+  cras::Nodelet::onInit();
+
   auto nh = this->getNodeHandle();
   auto topicNh = ros::NodeHandle(nh, "imu");
   auto params = this->privateParams();
