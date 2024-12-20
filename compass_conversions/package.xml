@@ -3,7 +3,7 @@
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 <package format="3">
   <name>compass_conversions</name>
-  <version>2.0.2</version>
+  <version>2.0.3</version>
   <description>Common conversions for compass data.</description>
 
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>

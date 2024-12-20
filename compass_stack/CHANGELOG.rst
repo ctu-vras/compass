@@ -2,8 +2,8 @@
 Changelog for package compass_stack
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.3 (2024-12-20)
+------------------
 * Changelog.
 * Added compass_stack.
 * Contributors: Martin Pecka
