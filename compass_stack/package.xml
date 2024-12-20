@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<package format="3">
+  <name>compass_stack</name>
+  <version>2.0.2</version>
+  <description>Tools for working with azimuths, compasses and magnetometers.</description>
+
+  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
+  <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
+
+  <license file="LICENSE">BSD</license>
+
+  <url type="repository">https://github.com/ctu-vras/compass</url>
+  <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
+  <url type="website">https://wiki.ros.org/compass_stack</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>compass_conversions</exec_depend>
+  <exec_depend>compass_msgs</exec_depend>
+  <exec_depend>magnetic_model</exec_depend>
+  <exec_depend>magnetometer_compass</exec_depend>
+  <exec_depend>magnetometer_pipeline</exec_depend>
+
+  <export>
+    <metapackage />
+  </export>
+</package>
