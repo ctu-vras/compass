@@ -5,6 +5,9 @@
 Changelog for package compass_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.0.2 (2024-12-20)
 ------------------
 * Fixed README rendering on ROS Wiki.
