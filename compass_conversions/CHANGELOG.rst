@@ -5,6 +5,11 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed README rendering on ROS Wiki.
+* Contributors: Martin Pecka
+
 2.0.1 (2024-12-12)
 ------------------
 * Fixed license issues preventing bloom-release.

@@ -5,6 +5,12 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed README rendering on ROS Wiki.
+* Fixed nodelet initialization.
+* Contributors: Martin Pecka
+
 2.0.1 (2024-12-12)
 ------------------
 * Fixed license issues preventing bloom-release.
