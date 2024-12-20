@@ -69,7 +69,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     Magnetic azimuth in NED as a quaternion.
 - `compass/mag/ned/imu` (`sensor_msgs/Imu`, enabled by param `~publish_mag_azimuth_ned_imu`, off by default):
     Magnetic azimuth in NED inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/mag/ned/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_mag_azimuth_ned_pose`, off by default):
+- `compass/mag/ned/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_mag_azimuth_ned_pose`, off by default):
     Magnetic azimuth in NED as a pose (translation will always be zero).
 
 - `compass/mag/enu/deg` (`compass_msgs/Azimuth`, enabled by param `~publish_mag_azimuth_enu_deg`, off by default):
@@ -80,7 +80,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     Magnetic azimuth in ENU as a quaternion.
 - `compass/mag/enu/imu` (`sensor_msgs/Imu`, enabled by param `~publish_mag_azimuth_enu_imu`, off by default):
     Magnetic azimuth in ENU inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/mag/enu/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_mag_azimuth_enu_pose`, off by default):
+- `compass/mag/enu/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_mag_azimuth_enu_pose`, off by default):
     Magnetic azimuth in ENU as a pose (translation will always be zero).
 
 - `compass/true/ned/deg` (`compass_msgs/Azimuth`, enabled by param `~publish_true_azimuth_ned_deg`, off by default):
@@ -91,7 +91,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     Geographic ("true") azimuth in NED as a quaternion.
 - `compass/true/ned/imu` (`sensor_msgs/Imu`, enabled by param `~publish_true_azimuth_ned_imu`, off by default):
     Geographic ("true") azimuth in NED inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/true/ned/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_true_azimuth_ned_pose`, off by default):
+- `compass/true/ned/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_true_azimuth_ned_pose`, off by default):
     Geographic ("true") azimuth in NED as a pose (translation will always be zero).
 
 - `compass/true/enu/deg` (`compass_msgs/Azimuth`, enabled by param `~publish_true_azimuth_enu_deg`, off by default):
@@ -102,7 +102,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     Geographic ("true") azimuth in ENU as a quaternion.
 - `compass/true/enu/imu` (`sensor_msgs/Imu`, enabled by param `~publish_true_azimuth_enu_imu`, off by default):
     Geographic ("true") azimuth in ENU inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/true/enu/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_true_azimuth_enu_pose`, off by default):
+- `compass/true/enu/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_true_azimuth_enu_pose`, off by default):
     Geographic ("true") azimuth in ENU as a pose (translation will always be zero).
 
 - `compass/utm/ned/deg` (`compass_msgs/Azimuth`, enabled by param `~publish_utm_azimuth_ned_deg`, off by default):
@@ -113,7 +113,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     UTM heading in NED as a quaternion.
 - `compass/utm/ned/imu` (`sensor_msgs/Imu`, enabled by param `~publish_utm_azimuth_ned_imu`, off by default):
     UTM heading in NED inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/utm/ned/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_utm_azimuth_ned_pose`, off by default):
+- `compass/utm/ned/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_utm_azimuth_ned_pose`, off by default):
     UTM heading in NED as a pose (translation will always be zero).
 
 - `compass/utm/enu/deg` (`compass_msgs/Azimuth`, enabled by param `~publish_utm_azimuth_enu_deg`, off by default):
@@ -124,7 +124,7 @@ may be required to re-estimate the bias from time to time even during runtime.
     UTM heading in ENU as a quaternion.
 - `compass/utm/enu/imu` (`sensor_msgs/Imu`, enabled by param `~publish_utm_azimuth_enu_imu`, off by default):
     UTM heading in ENU inside an IMU message (only `orientation` and `header` fields are valid).
-- `compass/utm/enu/pose` (`geometry_msgs/PoseStamped`, enabled by param `~publish_utm_azimuth_enu_pose`, off by default):
+- `compass/utm/enu/pose` (`geometry_msgs/PoseWithCovarianceStamped`, enabled by param `~publish_utm_azimuth_enu_pose`, off by default):
     UTM heading in ENU as a pose (translation will always be zero).
 
 ### Parameters
