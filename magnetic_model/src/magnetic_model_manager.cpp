@@ -84,7 +84,9 @@ void MagneticModelManager::setModelPath(const cras::optional<std::string>& model
 std::string MagneticModelManager::getBestMagneticModelName(const ros::Time& date) const
 {
   const auto year = cras::getYear(date);  // If the conversion failed, year would be 0, thus triggering the last branch.
-  if (year >= 2020)
+  if (year >= 2025)
+    return MagneticModel::WMM2025;
+  else if (year >= 2020)
     return MagneticModel::WMM2020;
   else if (year >= 2015)
     return MagneticModel::WMM2015;

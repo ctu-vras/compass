@@ -64,6 +64,7 @@ public:
   static const char* WMM2010;  //!< WMM 2010 model name
   static const char* WMM2015;  //!< WMM 2015v2 model name
   static const char* WMM2020;  //!< WMM 2020 model name
+  static const char* WMM2025;  //!< WMM 2025 model name
 
   /**
    * \brief Create the magnetic model.

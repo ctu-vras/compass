@@ -1,0 +1,22 @@
+WMMF-2
+# A World Magnetic Model (Format 1) file.  For documentation on the
+# format of this file see
+# http://geographiclib.sf.net/html/magnetic.html#magneticformat
+Name            wmm2025
+Description     World Magnetic Model 2025
+URL             https://ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml
+Publisher       National Oceanic and Atmospheric Administration
+ReleaseDate     2024-11-13
+ConversionDate  2024-12-18
+DataVersion     1
+Radius          6371200
+Epoch           2025
+MinTime         2025
+MaxTime         2030
+MinHeight       -1000
+MaxHeight       850000
+
+# The coefficients are stored in a file obtained by appending ".cof" to
+# the name of this file.  The coefficients were obtained from
+# WMM.COF in the wmm2025 distribution.
+ID              WMM2025A

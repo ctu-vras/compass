@@ -33,6 +33,9 @@ TEST(MagneticModel, Construct)  // NOLINT
   ASSERT_NO_THROW(magnetic_model::MagneticModel model(
     log, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true));
 
+  ASSERT_NO_THROW(magnetic_model::MagneticModel model(
+    log, magnetic_model::MagneticModel::WMM2025, TEST_DATA_DIR, true));
+
   ASSERT_THROW(magnetic_model::MagneticModel model(
     log, "nonexisting", TEST_DATA_DIR, true), std::invalid_argument);
 }
@@ -183,6 +186,10 @@ TEST(MagneticModelManager, GetBestModelName)
   magnetic_model::MagneticModelManager manager(log, TEST_DATA_DIR);
 
   EXPECT_EQ(
+    magnetic_model::MagneticModel::WMM2025,
+    manager.getBestMagneticModelName(cras::parseTime("2029-11-18T13:00:00Z")));
+
+  EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2020,
     manager.getBestMagneticModelName(cras::parseTime("2024-11-18T13:00:00Z")));
 
@@ -199,7 +206,7 @@ TEST(MagneticModelManager, GetBestModelName)
     manager.getBestMagneticModelName(cras::parseTime("2004-11-18T13:00:00Z")));
 
   EXPECT_EQ(
-    magnetic_model::MagneticModel::WMM2020,
+    magnetic_model::MagneticModel::WMM2025,
     manager.getBestMagneticModelName(cras::parseTime("2034-11-18T13:00:00Z")));
 }
 

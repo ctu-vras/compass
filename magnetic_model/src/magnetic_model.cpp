@@ -31,6 +31,7 @@ namespace magnetic_model
 const char* MagneticModel::WMM2010 = "wmm2010";
 const char* MagneticModel::WMM2015 = "wmm2015v2";
 const char* MagneticModel::WMM2020 = "wmm2020";
+const char* MagneticModel::WMM2025 = "wmm2025";
 
 using Az = compass_msgs::Azimuth;
 
@@ -103,6 +104,18 @@ MagneticModel::MagneticModel(
     this->data->errors.I = 0.21;
     this->data->errors.D_ofs = 0.26;
     this->data->errors.D_lin = 5625;
+  }
+  else if (name == WMM2025)
+  {
+    // https://www.ncei.noaa.gov/products/world-magnetic-model/accuracy-limitations-error-model
+    this->data->errors.X = 137;
+    this->data->errors.Y = 89;
+    this->data->errors.Z = 141;
+    this->data->errors.H = 133;
+    this->data->errors.F = 138;
+    this->data->errors.I = 0.20;
+    this->data->errors.D_ofs = 0.26;
+    this->data->errors.D_lin = 5417;
   }
 
   CRAS_INFO("Initialized magnetic model %s.", name.c_str());
