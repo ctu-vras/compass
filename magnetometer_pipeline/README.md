@@ -5,7 +5,7 @@
 
 Calibration and removing of magnetometer bias.
 
-## Node magnetometer\_bias\_remover and nodelet magnetometer\_pipeline/magnetometer\_compass\_remover
+## Node magnetometer\_bias\_remover and nodelet magnetometer\_pipeline/magnetometer\_bias\_remover
 
 For the magnetometer to work correctly, it is required to measure its bias. This node listens on the `imu/mag_bias`
 topic for this measurement, and until at least one message arrives, the node will not publish anything. If you do not
