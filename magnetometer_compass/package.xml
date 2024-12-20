@@ -3,7 +3,7 @@
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 <package format="3">
   <name>magnetometer_compass</name>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
   <description>Compass based on a 3-axis magnetometer, attitude readings and possibly also GNSS.</description>
 
   <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
