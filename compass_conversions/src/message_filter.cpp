@@ -88,13 +88,15 @@ void UniversalAzimuthSubscriber::configFromParams(const cras::BoundParamHelper& 
   if (params.hasParam("input_orientation"))
     inputOrientation = params.getParam<decltype(Az::orientation), std::string>(
       "input_orientation", cras::nullopt, "",
-      {.resultToStr = &compass_msgs::orientationToString, .toResult = &compass_msgs::parseOrientation});
+      cras::GetParamConvertingOptions<decltype(Az::orientation), std::string>(
+        &compass_msgs::orientationToString, &compass_msgs::parseOrientation));
 
   cras::optional<decltype(Az::reference)> inputReference;
   if (params.hasParam("input_reference"))
     inputReference = params.getParam<decltype(Az::reference), std::string>(
       "input_reference", cras::nullopt, "",
-      {.resultToStr = &compass_msgs::referenceToString, .toResult = &compass_msgs::parseReference});
+      cras::GetParamConvertingOptions<decltype(Az::reference), std::string>(
+        &compass_msgs::referenceToString, &compass_msgs::parseReference));
 
   cras::optional<decltype(Az::variance)> inputVariance;
   if (params.hasParam("input_variance"))

@@ -146,18 +146,21 @@ protected:
     auto pnh = this->getPrivateNodeHandle();
 
     const auto targetUnit = params->getParam<decltype(Az::unit), std::string>("target_unit", Az::UNIT_RAD, "",
-      {.resultToStr = &compass_msgs::unitToString, .toResult = &compass_msgs::parseUnit});
+      cras::GetParamConvertingOptions<decltype(Az::unit), std::string>(
+        &compass_msgs::unitToString, &compass_msgs::parseUnit));
 
     const auto targetOrientation = params->getParam<decltype(Az::orientation), std::string>(
       "target_orientation", Az::ORIENTATION_ENU, "",
-      {.resultToStr = &compass_msgs::orientationToString, .toResult = &compass_msgs::parseOrientation});
+      cras::GetParamConvertingOptions<decltype(Az::orientation), std::string>(
+        &compass_msgs::orientationToString, &compass_msgs::parseOrientation));
 
     const auto targetReference = params->getParam<decltype(Az::reference), std::string>(
       "target_reference", Az::REFERENCE_GEOGRAPHIC, "",
-      {.resultToStr = &compass_msgs::referenceToString, .toResult = &compass_msgs::parseReference});
+      cras::GetParamConvertingOptions<decltype(Az::reference), std::string>(
+       &compass_msgs::referenceToString, &compass_msgs::parseReference));
 
     this->targetType = params->getParam<OutputType, std::string>("target_type", this->targetType, "",
-      {.resultToStr = &outputTypeToString, .toResult = &parseOutputType});
+      cras::GetParamConvertingOptions<OutputType, std::string>(&outputTypeToString, &parseOutputType));
 
     const auto targetAppendSuffix = params->getParam("target_append_suffix", false);
 
