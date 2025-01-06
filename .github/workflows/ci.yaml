@@ -14,7 +14,12 @@ jobs:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: noetic, ROS_REPO: testing}
+          - ROS_DISTRO: melodic
+            DOCKER_IMAGE: "ros:melodic-robot-bionic"
+            AFTER_SETUP_UPSTREAM_WORKSPACE: "echo 'yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml' > /etc/ros/rosdep/sources.list.d/21-master.list && rosdep update --include-eol-distros --rosdistro melodic"
+          - ROS_DISTRO: noetic
+            ROS_REPO: testing
+            DOCKER_IMAGE: "ros:noetic-robot-focal"
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache # Directory for ccache (and how we enable ccache in industrial_ci)
       UPSTREAM_WORKSPACE: .github/ci.rosinstall
