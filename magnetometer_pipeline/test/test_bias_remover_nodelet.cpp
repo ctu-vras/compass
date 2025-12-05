@@ -8,26 +8,30 @@
  */
 
 #include <cmath>
-#include <gtest/gtest.h>
-#include <magnetometer_pipeline/magnetometer_bias_remover_nodelet.hpp>
-#include <map>
 #include <memory>
 #include <optional>
+#include <string>
+
+#include <gtest/gtest.h>
+
+#include <cras_cpp_common/test_utils.hpp>
+#include <magnetometer_pipeline/magnetometer_bias_remover_nodelet.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
-#include <string>
-#include <utility>
 
 using Field = sensor_msgs::msg::MagneticField;
+
 using namespace std::chrono_literals;
 
-std::shared_ptr<magnetometer_pipeline::MagnetometerBiasRemoverNodelet> createNodelet(rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
+std::shared_ptr<magnetometer_pipeline::MagnetometerBiasRemoverNodelet> createNodelet(
+  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
 {
-  auto nodelet = std::make_shared<magnetometer_pipeline::MagnetometerBiasRemoverNodelet>(node_options);
-  return nodelet;
+  return std::make_shared<magnetometer_pipeline::MagnetometerBiasRemoverNodelet>(node_options);
 }
 
-TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
+class MagnetometerBiasRemoverNodelet : public cras::RclcppTestFixture {};
+
+TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
 {
   // The values in this test are extracted from a real-world bag file recording.
 
@@ -48,38 +52,32 @@ TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   pub_qos.depth = dep;
   sub_qos.depth = dep;
 
-  std::list<rclcpp::PublisherBase::SharedPtr> pubs;  
-  auto magPub = node->create_publisher<Field>("imu/mag", rclcpp::SystemDefaultsQoS(pub_qos)); pubs.push_back(magPub);
-  auto magBiasPub = node->create_publisher<Field>("imu/mag_bias", rclcpp::SystemDefaultsQoS(pub_qos).transient_local()); pubs.push_back(magBiasPub);
+  std::list<rclcpp::PublisherBase::SharedPtr> pubs;
+  auto magPub = node->create_publisher<Field>("imu/mag", rclcpp::SystemDefaultsQoS(pub_qos));
+  pubs.push_back(magPub);
+  auto magBiasPub = node->create_publisher<Field>("imu/mag_bias", rclcpp::SystemDefaultsQoS(pub_qos).transient_local());
+  pubs.push_back(magBiasPub);
 
   std::list<rclcpp::SubscriptionBase::SharedPtr> subs;
-  
-  auto magUnbiasedSub = node->create_subscription<Field>("imu/mag_unbiased", rclcpp::SensorDataQoS(sub_qos), magCb); subs.push_back(magUnbiasedSub);
+
+  auto magUnbiasedSub = node->create_subscription<Field>("imu/mag_unbiased", rclcpp::SensorDataQoS(sub_qos), magCb);
+  subs.push_back(magUnbiasedSub);
 
   const auto pubTest = [](const rclcpp::PublisherBase::SharedPtr p) {return p->get_subscription_count() == 0;};
 
   for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i)
   {
-    rclcpp::sleep_for(10ms);
-    executor.spin_once();
+    executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for publisher connections.");
   }
 
-  RCLCPP_INFO(node->get_logger(), "A");
-
   const auto subTest = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
-    
-  RCLCPP_INFO(node->get_logger(), "B");
 
   for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i)
   {
-    RCLCPP_INFO(node->get_logger(), "C");
-    rclcpp::sleep_for(10ms);
-    executor.spin_once();
+    executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for subscriber connections.");
   }
-
-  RCLCPP_INFO(node->get_logger(), "D");
 
   ASSERT_FALSE(std::any_of(pubs.begin(), pubs.end(), pubTest));
   ASSERT_FALSE(std::any_of(subs.begin(), subs.end(), subTest));
@@ -97,22 +95,16 @@ TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   mag.magnetic_field.y = -0.538677;
   mag.magnetic_field.z = 0.157033;
   magPub->publish(mag);
-  RCLCPP_INFO(node->get_logger(), "E");
 
   for (size_t i = 0; i < 5 && !lastField.has_value() && rclcpp::ok(); ++i)
   {
-    RCLCPP_INFO(node->get_logger(), "F");
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
-  // Missing bias, nothing published
-  RCLCPP_INFO(node->get_logger(), "G");
 
+  // Missing bias, nothing published
   ASSERT_FALSE(lastField.has_value());
-  RCLCPP_INFO(node->get_logger(), "H");
 
   // Publish bias. Now it should have everything.
-
   Field bias;
   bias.header.stamp = time;
   bias.header.frame_id = "imu";
@@ -124,17 +116,13 @@ TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   executor.spin_once();
 
   // Wait until the latched messages are received
-
-  rclcpp::sleep_for(200ms);
-  executor.spin_once();
-
+  executor.spin_all(200ms);
 
   magPub->publish(mag);
 
   for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastField.has_value());
 
@@ -159,8 +147,7 @@ TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
 
   for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastField.has_value());
 
@@ -171,10 +158,8 @@ TEST(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   EXPECT_NEAR(0.149800, lastField->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-  rclcpp::shutdown();
 }

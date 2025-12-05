@@ -8,12 +8,14 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include "tl/expected.hpp"
 #include <memory>
-#include <rclcpp/logger.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/magnetic_field.hpp>
 #include <string>
+
+#include <cras_cpp_common/expected.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
+#include <sensor_msgs/msg/magnetic_field.hpp>
 
 namespace magnetometer_pipeline
 {
@@ -26,12 +28,19 @@ struct MagnetometerBiasRemoverPrivate;
 class MagnetometerBiasRemover
 {
 public:
-  explicit MagnetometerBiasRemover();
+  using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
+  using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
+
+  using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
+    NodeLoggingInterface,
+    NodeParametersInterface
+  >;
+
+  explicit MagnetometerBiasRemover(RequiredInterfaces node);
   virtual ~MagnetometerBiasRemover();
 
   /**
    * \brief Configure the bias remover from ROS parameters.
-   * \param[in] params The parameters.
    *
    * The following parameters are read:
    * - `~initial_mag_bias_x` (double, no default, optional): Magnetometer bias in the X axis.
@@ -39,7 +48,7 @@ public:
    * - `~initial_mag_bias_z` (double, no default, optional): Magnetometer bias in the Z axis.
    * - `~initial_scaling_matrix` (double[9], optional): Magnetometer scaling matrix (row-major).
    */
-  void configFromParams(const rclcpp::Node* node);
+  void configFromParams();
 
   /**
    * \brief Whether bias has already been set.
@@ -65,9 +74,10 @@ public:
    * \param[in] mag The raw measured magnetic field strength.
    * \return The measured magnetic field corrected for bias, or error message.
    */
-  tl::expected<sensor_msgs::msg::MagneticField, std::string> removeBias(const sensor_msgs::msg::MagneticField& mag);
+  cras::expected<sensor_msgs::msg::MagneticField, std::string> removeBias(const sensor_msgs::msg::MagneticField& mag);
 
 private:
   std::unique_ptr<MagnetometerBiasRemoverPrivate> data;  //!< PIMPL
 };
+
 }

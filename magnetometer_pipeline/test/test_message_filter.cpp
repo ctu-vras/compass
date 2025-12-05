@@ -8,13 +8,15 @@
  */
 
 #include <gtest/gtest.h>
-#include <magnetometer_pipeline/message_filter.h>
+
 #include <memory>
-#include <message_filters/message_event.h>
-#include <message_filters/simple_filter.h>
+#include <string>
+
+#include <magnetometer_pipeline/message_filter.hpp>
+#include <message_filters/message_event.hpp>
+#include <message_filters/simple_filter.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
-#include <string>
 
 using Field = sensor_msgs::msg::MagneticField;
 
@@ -39,7 +41,7 @@ TEST(MessageFilter, Basic)  // NOLINT
 
   TestInput<Field> magInput;
   TestInput<Field> magBiasInput;
-  magnetometer_pipeline::BiasRemoverFilter filter(&node, magInput, magBiasInput);
+  magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
 
   Field::ConstSharedPtr outMessage;
   const auto cb = [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage)
@@ -110,11 +112,11 @@ TEST(MessageFilter, Basic)  // NOLINT
 
 TEST(MessageFilter, ConfigFromParams)  // NOLINT
 {
-  rclcpp::Node node = rclcpp::Node("test_node");//, rclcpp::NodeOptions().allow_undeclared_parameters(true));
-  // const auto clk = rclcpp::Clock();
+  rclcpp::Node node = rclcpp::Node("test_node");
+
   TestInput<Field> magInput;
   TestInput<Field> magBiasInput;
-  magnetometer_pipeline::BiasRemoverFilter filter(&node, magInput, magBiasInput);
+  magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
   Field::ConstSharedPtr outMessage;
   const auto cb = [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage)
   {
@@ -178,7 +180,7 @@ TEST(MessageFilter, ConfigFromParams)  // NOLINT
   EXPECT_NEAR(0.149800, outMessage->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);

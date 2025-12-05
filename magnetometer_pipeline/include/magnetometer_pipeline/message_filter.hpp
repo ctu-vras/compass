@@ -8,12 +8,16 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <magnetometer_pipeline/bias_remover.h>
 #include <memory>
-#include <message_filters/connection.h>
-#include <message_filters/message_event.h>
-#include <message_filters/simple_filter.h>
-#include <message_filters/subscriber.h>
+
+#include <magnetometer_pipeline/bias_remover.hpp>
+#include <message_filters/connection.hpp>
+#include <message_filters/message_event.hpp>
+#include <message_filters/simple_filter.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
 namespace magnetometer_pipeline
@@ -27,9 +31,11 @@ namespace magnetometer_pipeline
  * Example usage:
  * \code{.cpp}
  * std::shared_ptr<rclcpp::Node> node = createNodelet();
- * message_filters::Subscriber<sensor_msgs::msg::MagneticField> magInput = node->create_subscription<sensor_msgs::msg::MagneticField>("imu/mag", 100);
- * message_filters::Subscriber<sensor_msgs::msg::MagneticField>  biasInput = node->create_subscription<sensor_msgs::msg::MagneticField>("imu/mag_bias", 10);
- * magnetometer_pipeline::BiasRemoverFilter filter(node->get_logger(), magInput, biasInput);
+ * message_filters::Subscriber<sensor_msgs::msg::MagneticField> magInput =
+ *   node->create_subscription<sensor_msgs::msg::MagneticField>("imu/mag", 100);
+ * message_filters::Subscriber<sensor_msgs::msg::MagneticField> biasInput =
+ *   node->create_subscription<sensor_msgs::msg::MagneticField>("imu/mag_bias", 10);
+ * magnetometer_pipeline::BiasRemoverFilter filter(*node, magInput, biasInput);
  * filter->configFromParams();
  * filter.registerCallback([](const sensor_msgs::msg::MagneticField::ConstSharedPtr& unbiasedMsg) {
  *   ...  // Handle the unbiased data
@@ -39,19 +45,29 @@ namespace magnetometer_pipeline
 class BiasRemoverFilter : public message_filters::SimpleFilter<sensor_msgs::msg::MagneticField>
 {
 public:
+  using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
+  using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
+  using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
+
+  using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
+    NodeClockInterface,
+    NodeLoggingInterface,
+    NodeParametersInterface
+  >;
+
   /**
    * \brief Construct azimuth filter that can convert all parameters.
    *
    * \tparam MagInput The type of the input filter.
    * \tparam BiasInput The type of the bias filter.
-   * \param[in] log Logger.
+   * \param[in] node The node to use.
    * \param[in] magInput The message filter producing raw magnetometer measurements messages.
    * \param[in] biasInput The message filter producing magnetometer bias messages.
    */
   template<class MagInput, class BiasInput>
-  BiasRemoverFilter(const rclcpp::Node* node, MagInput& magInput, BiasInput& biasInput) : node(node)
+  BiasRemoverFilter(RequiredInterfaces node, MagInput& magInput, BiasInput& biasInput) : node(node)
   {
-    this->remover = std::make_unique<MagnetometerBiasRemover>();
+    this->remover = std::make_unique<MagnetometerBiasRemover>(node);
     this->connectMagnetometerInput(magInput);
     this->connectBiasInput(biasInput);
   }
@@ -76,7 +92,6 @@ public:
 
   /**
    * \brief Configure the bias removal process from ROS parameters.
-   * \param[in] params The parameters.
    *
    * The following parameters are read:
    * - `~initial_mag_bias_x` (double, no default, optional): Magnetometer bias in the X axis.
@@ -94,7 +109,7 @@ protected:
   message_filters::Connection biasConnection;  //!< Connection to the bias input.
 
   std::unique_ptr<MagnetometerBiasRemover> remover;  //!< The bias remover that does the actual computations.
-  const rclcpp::Node* node;
+  RequiredInterfaces node;
 };
 
 }

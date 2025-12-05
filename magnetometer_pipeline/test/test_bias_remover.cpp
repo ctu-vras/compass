@@ -8,12 +8,15 @@
  */
 
 #include <gtest/gtest.h>
-#include <magnetometer_pipeline/bias_remover.h>
+
 #include <memory>
+#include <string>
+
+#include <magnetometer_pipeline/bias_remover.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
-#include <string>
+
 
 using Field = sensor_msgs::msg::MagneticField;
 
@@ -21,7 +24,8 @@ TEST(MagnetometerBiasRemover, Basic)  // NOLINT
 {
   // The values in this test are extracted from a real-world bag file recording.
 
-  auto remover = magnetometer_pipeline::MagnetometerBiasRemover();
+  auto node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
+  auto remover = magnetometer_pipeline::MagnetometerBiasRemover(node);
 
   EXPECT_FALSE(remover.hasBias());
 
@@ -87,11 +91,9 @@ TEST(MagnetometerBiasRemover, ConfigFromParams)  // NOLINT
 {
   // The values in this test are extracted from a real-world bag file recording.
 
-  
-  rclcpp::Node node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
-  // const auto log = rclcpp::get_logger("test_logger");
 
-  auto remover = magnetometer_pipeline::MagnetometerBiasRemover();
+  auto node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
+  auto remover = magnetometer_pipeline::MagnetometerBiasRemover(node);
   EXPECT_FALSE(remover.hasBias());
 
   rclcpp::Parameter param1("initial_mag_bias_x", -0.097227663);
@@ -101,7 +103,7 @@ TEST(MagnetometerBiasRemover, ConfigFromParams)  // NOLINT
   rclcpp::Parameter param3("initial_mag_bias_z", 0.0);
   node.set_parameter(param3);
 
-  remover.configFromParams(&node);
+  remover.configFromParams();
 
   EXPECT_TRUE(remover.hasBias());
 
@@ -153,9 +155,9 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
 {
   // The values in this test are extracted from a real-world bag file recording.
 
-  rclcpp::Node node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
+  auto node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
+  auto remover = magnetometer_pipeline::MagnetometerBiasRemover(node);
 
-  auto remover = magnetometer_pipeline::MagnetometerBiasRemover();
   EXPECT_FALSE(remover.hasBias());
 
   rclcpp::Parameter param1("initial_mag_bias_x", -0.097227663);
@@ -180,7 +182,7 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
   rclcpp::Parameter param4("initial_mag_scaling_matrix", scaling_matrix);
   node.set_parameter(param4);
 
-  remover.configFromParams(&node);
+  remover.configFromParams();
 
   EXPECT_TRUE(remover.hasBias());
 
@@ -228,7 +230,7 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
   EXPECT_NEAR(0.149800, maybeMagUnbiased->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
