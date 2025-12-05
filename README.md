@@ -13,6 +13,14 @@ This collection of packages provides support for working with azimuths in ROS.
 - [magnetometer_compass](magnetometer_compass): Support and ROS nodes for extracting azimuths from 3-axis magnetometers.
 - [magnetometer_pipeline](magnetometer_pipeline): Calibration and removing of magnetometer bias.
 
+## Installation
+
+Code on `master` branch is for ROS 1 and it has binary releases.
+
+Code on `ros2` branch is for ROS 2 Jazzy and Kilted and does not yet have binary releases.
+
+To build this package on ROS 2, you'll need additional packages in your workspace: [rosinstall file](.github/ci.ros2.rosinstall).
+
 ## Definitions
 
 **ENU** frame is the [standard orientation used in ROS](https://www.ros.org/reps/rep-0103.html). The abbreviation means
