@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <!-- SPDX-License-Identifier: BSD-3-Clause -->
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 <package format="3">
@@ -7,49 +8,46 @@
   <description>Common conversions for compass data.</description>
 
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
-  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
 
   <license file="LICENSE">BSD</license>
 
   <url type="repository">https://github.com/ctu-vras/compass</url>
   <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
-  <url type="website">https://wiki.ros.org/compass_conversions</url>
+  <url type="website">https://index.ros.org/p/compass_conversions</url>
+
+  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>angles</build_depend>
   <build_depend>geographiclib</build_depend>
-  <build_depend>libexpected-dev</build_depend>
   <build_depend>magnetic_model</build_depend>
-  <build_depend>nodelet</build_depend>
-  <build_depend>tf2_ros</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>rclcpp_components</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
 
-  <build_export_depend>libexpected-dev</build_export_depend>
-
+  <exec_depend>angles</exec_depend>
   <exec_depend>geographiclib</exec_depend>
   <exec_depend>magnetic_model</exec_depend>
-  <exec_depend>nodelet</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
-  
-  <depend>angles</depend>
-  <depend>tf2_geometry_msgs</depend>
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>rclcpp_components</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+
   <depend>compass_interfaces</depend>
-  <depend>compass_utils</depend>
+  <depend>cras_cpp_common</depend>
   <depend>geometry_msgs</depend>
   <depend>message_filters</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>tf2</depend>
-  <depend>topic_tools</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-  <test_depend>roslint</test_depend>
-  <test_depend>rostest</test_depend>
-  
+  <test_depend>ament_cmake_ros</test_depend>
+  <test_depend>cras_lint</test_depend>
+
   <export>
-    <rosdoc config="rosdoc.yaml" />
     <build_type>ament_cmake</build_type>
   </export>
 </package>

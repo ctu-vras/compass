@@ -7,12 +7,15 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <angles/angles.h>
-#include <compass_conversions/tf2_compass_msgs.h>
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/tf2_utils.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <string>
+
+#include <angles/angles.h>
+#include <compass_conversions/tf2_compass_msgs.hpp>
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <cras_cpp_common/tf2_utils.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <rclcpp/time.hpp>
+#include <tf2/time.hpp>
 
 using Az = compass_interfaces::msg::Azimuth;
 
@@ -22,7 +25,7 @@ namespace tf2
 template<>
 tf2::TimePoint getTimestamp(const compass_interfaces::msg::Azimuth& t)
 {
-  return tf2::timeFromSec((double)t.header.stamp.sec + t.header.stamp.nanosec * 1e-9);
+  return tf2::TimePoint(tf2::Duration(rclcpp::Time(t.header.stamp).nanoseconds()));
 }
 
 template<>
@@ -43,13 +46,14 @@ void fromMsg(const compass_interfaces::msg::Azimuth& msg, compass_interfaces::ms
 
 template<>
 void doTransform(
-  const compass_interfaces::msg::Azimuth& t_in, compass_interfaces::msg::Azimuth& t_out, const geometry_msgs::msg::TransformStamped& transform)
+  const compass_interfaces::msg::Azimuth& t_in, compass_interfaces::msg::Azimuth& t_out,
+  const geometry_msgs::msg::TransformStamped& transform)
 {
   t_out = t_in;
   t_out.header.frame_id = transform.header.frame_id;
   t_out.header.stamp = transform.header.stamp;
 
-  auto yaw = compass_utils::getYaw(transform.transform.rotation);
+  auto yaw = cras::getYaw(transform.transform.rotation);
   if (t_in.unit == Az::UNIT_DEG)
     yaw = angles::to_degrees(yaw);
 

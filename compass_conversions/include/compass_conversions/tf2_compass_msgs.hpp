@@ -9,11 +9,12 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
+#include <string>
+
 #include <compass_interfaces/msg/azimuth.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <rclcpp/time.hpp>
-#include <string>
-#include <tf2/convert.h>
+#include <tf2/convert.hpp>
+#include <tf2/time.hpp>
 
 namespace tf2
 {
@@ -29,5 +30,6 @@ void fromMsg(const compass_interfaces::msg::Azimuth& msg, compass_interfaces::ms
 
 template<>
 void doTransform(
-  const compass_interfaces::msg::Azimuth& t_in, compass_interfaces::msg::Azimuth& t_out, const geometry_msgs::msg::TransformStamped& transform);
+  const compass_interfaces::msg::Azimuth& t_in, compass_interfaces::msg::Azimuth& t_out,
+  const geometry_msgs::msg::TransformStamped& transform);
 }

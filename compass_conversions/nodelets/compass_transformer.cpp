@@ -7,29 +7,28 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_conversions/compass_converter.h>
-#include <compass_conversions/compass_transformer.h>
-#include <compass_conversions/message_filter.h>
-#include <compass_conversions/tf2_compass_msgs.h>
-#include <compass_conversions/topic_names.h>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+#include <compass_conversions/compass_converter.hpp>
+#include <compass_conversions/compass_transformer.hpp>
+#include <compass_conversions/message_filter.hpp>
+#include <compass_conversions/tf2_compass_msgs.hpp>
+#include <compass_conversions/topic_names.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/string_utils.hpp>
+#include <compass_interfaces/string_utils.hpp>
+#include <cras_cpp_common/string_utils.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
-#include <limits>
-#include <memory>
-#include <message_filters/subscriber.h>
-#include <optional>
-#include <rclcpp/duration.hpp>
-#include <rclcpp/generic_publisher.hpp>
+#include <message_filters/subscriber.hpp>
+#include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
-#include <stdexcept>
-#include <string>
 #include <tf2/exceptions.h>
 #include <tf2_ros/create_timer_ros.h>
 #include <tf2_ros/message_filter.h>
@@ -43,7 +42,7 @@ namespace compass_conversions
 
 OutputType parseOutputType(const std::string& outputType)
 {
-  const auto output = compass_utils::toLower(outputType);
+  const auto output = cras::toLower(outputType);
   if (output == "azimuth")
     return OutputType::Azimuth;
   else if (output == "imu")
@@ -78,10 +77,11 @@ std::string outputTypeToString(const OutputType type)
  *        TF frame.
  *
  * Subscribed topics:
- * - `~azimuth_in` (compass_interfaces/msg/Azimuth or geometry_msgs/msg/QuaternionStamped or geometry_msgs/msg/PoseWithCovarianceStamped
- *     or sensor_msgs/msg/Imu): The input azimuth. The name of the topic (if you remap it) can be used to autodetect some
- *     metadata for the conversion.
- *  - `fix` (sensor_msgs/msg/NavSatFix): GNSS fix messages that can be used to determine some parameters for the conversion.
+ * - `~azimuth_in` (compass_interfaces/msg/Azimuth or geometry_msgs/msg/QuaternionStamped or
+ *     geometry_msgs/msg/PoseWithCovarianceStamped or sensor_msgs/msg/Imu): The input azimuth. The name of the topic
+ *     (if you remap it) can be used to autodetect some metadata for the conversion.
+ *  - `fix` (sensor_msgs/msg/NavSatFix): GNSS fix messages that can be used to determine some parameters for the
+ *      conversion.
  *  - `utm_zone` (std_msgs/msg/Int32): Optional messages with forced UTM zone.
  *  - TF (only if `~target_frame` is nonempty)
  *
@@ -122,43 +122,18 @@ std::string outputTypeToString(const OutputType type)
  * - All parameters consumed by `CompassConverter` (most interesting are `initial_lat`, `initial_lon`, that can relieve
  *   this nodelet from subscribing `fix` topic, if you know the approximate coordinates in advance).
  */
-
-void CompassTransformerNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, bool using_dedicated_thread)
+CompassTransformerNodelet::CompassTransformerNodelet(const rclcpp::NodeOptions& options)
+  : rclcpp::Node("compass_transformer_nodelet", options)
 {
-  this->buffer = buffer;
-  this->buffer->setUsingDedicatedThread(using_dedicated_thread);
-  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
-    this->get_node_base_interface(),
-    this->get_node_timers_interface());
-    buffer->setCreateTimerInterface(timer_interface);
-  this->listener = std::make_shared<tf2_ros::TransformListener>(*this->buffer);
+  this->setBuffer(std::make_shared<tf2_ros::Buffer>(this->get_clock()), true);
 }
 
-CompassTransformerNodelet::CompassTransformerNodelet(const rclcpp::NodeOptions & options)
-  : rclcpp::Node("compass_transformer_nodelet", options),
-  buffer(std::make_shared<tf2_ros::Buffer>(this->get_clock())),
-  listener(std::make_shared<tf2_ros::TransformListener>(*buffer))
+CompassTransformerNodelet::~CompassTransformerNodelet()
 {
-  this->buffer->setUsingDedicatedThread(true);
-  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
-    this->get_node_base_interface(),
-    this->get_node_timers_interface());
-    buffer->setCreateTimerInterface(timer_interface);
+  this->listener.reset();
+  this->buffer.reset();
+  this->converter.reset();
 }
-
-CompassTransformerNodelet::CompassTransformerNodelet()
-  : rclcpp::Node("compass_transformer_nodelet"),
-  buffer(std::make_shared<tf2_ros::Buffer>(this->get_clock())),
-  listener(std::make_shared<tf2_ros::TransformListener>(*buffer))
-{
-  this->buffer->setUsingDedicatedThread(true);
-  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
-    this->get_node_base_interface(),
-    this->get_node_timers_interface());
-    buffer->setCreateTimerInterface(timer_interface);
-}
-
-CompassTransformerNodelet::~CompassTransformerNodelet() = default;
 
 void CompassTransformerNodelet::init()
 {
@@ -179,9 +154,11 @@ void CompassTransformerNodelet::init()
   this->declare_parameter<double>("input_variance", -1.);
   // Custom params:
   this->declare_parameter<int>("queue_size", 10);
-  this->declare_parameter<std::string>("target_unit", compass_utils::unitToString(Az::UNIT_RAD));
-  this->declare_parameter<std::string>("target_orientation", compass_utils::orientationToString(Az::ORIENTATION_ENU));
-  this->declare_parameter<std::string>("target_reference", compass_utils::referenceToString(Az::REFERENCE_GEOGRAPHIC));
+  this->declare_parameter<std::string>("target_unit", compass_interfaces::unitToString(Az::UNIT_RAD));
+  this->declare_parameter<std::string>("target_orientation",
+    compass_interfaces::orientationToString(Az::ORIENTATION_ENU));
+  this->declare_parameter<std::string>("target_reference",
+    compass_interfaces::referenceToString(Az::REFERENCE_GEOGRAPHIC));
   this->declare_parameter<std::string>("target_type", outputTypeToString(this->targetType));
   this->declare_parameter<bool>("target_append_suffix", false);
   this->declare_parameter<std::string>("target_frame", std::string());
@@ -190,15 +167,20 @@ void CompassTransformerNodelet::init()
   this->declare_parameter<bool>("subscribe_utm", true);
   this->declare_parameter<bool>("strict", true);
 
-
-
   const auto queue_size = this->get_parameter_or<int>("queue_size", 10);
 
-  const uint8_t targetUnit = compass_utils::parseUnit(this->get_parameter_or<std::string>("target_unit", compass_utils::unitToString(Az::UNIT_RAD)));
-  const uint8_t targetOrientation = compass_utils::parseOrientation(this->get_parameter_or<std::string>("target_orientation", compass_utils::orientationToString(Az::ORIENTATION_ENU)));
-  const uint8_t targetReference = compass_utils::parseReference(this->get_parameter_or<std::string>("target_reference", compass_utils::referenceToString(Az::REFERENCE_GEOGRAPHIC)));
+  const uint8_t targetUnit = compass_interfaces::parseUnit(
+    this->get_parameter_or<std::string>("target_unit", compass_interfaces::unitToString(Az::UNIT_RAD)));
+  const uint8_t targetOrientation = compass_interfaces::parseOrientation(
+    this->get_parameter_or<std::string>("target_orientation",
+      compass_interfaces::orientationToString(Az::ORIENTATION_ENU)));
+  const uint8_t targetReference = compass_interfaces::parseReference(
+    this->get_parameter_or<std::string>("target_reference", compass_interfaces::referenceToString(
+      Az::REFERENCE_GEOGRAPHIC)));
 
-  this->targetType = parseOutputType(this->get_parameter_or<std::string>("target_type", outputTypeToString(this->targetType)));
+  this->targetType = parseOutputType(
+    this->get_parameter_or<std::string>("target_type", outputTypeToString(this->targetType)));
+
   const auto targetAppendSuffix = this->get_parameter_or<bool>("target_append_suffix", false);
   this->targetFrame = this->get_parameter_or<std::string>("target_frame", std::string());
   this->outFrameId = this->get_parameter_or<std::string>("out_frame_id", std::string());
@@ -212,50 +194,57 @@ void CompassTransformerNodelet::init()
 
   std::string outputTopicSuffix;
   std::string topicName;
+  const rclcpp::SystemDefaultsQoS qos;
   switch (this->targetType)
   {
     case OutputType::Imu:
       outputTopicSuffix = getAzimuthTopicSuffix<sensor_msgs::msg::Imu>(targetUnit, targetOrientation, targetReference);
-      topicName = targetAppendSuffix ? "azimuth_out/"+outputTopicSuffix :  "azimuth_out";
-      this->pub_imu = this->create_publisher<sensor_msgs::msg::Imu>(
-        topicName, rclcpp::SystemDefaultsQoS());
-      break;
+      topicName = targetAppendSuffix ? "azimuth_out/" + outputTopicSuffix : "azimuth_out";
+      this->pub_imu = this->create_publisher<sensor_msgs::msg::Imu>(topicName, qos);
+    break;
     case OutputType::Pose:
       outputTopicSuffix = getAzimuthTopicSuffix<geometry_msgs::msg::PoseWithCovarianceStamped>(
         targetUnit, targetOrientation, targetReference);
-      topicName = targetAppendSuffix ? "azimuth_out/"+outputTopicSuffix :  "azimuth_out";
-      this->pub_pose = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
-        topicName, rclcpp::SystemDefaultsQoS());
-      break;
+      topicName = targetAppendSuffix ? "azimuth_out/" + outputTopicSuffix : "azimuth_out";
+      this->pub_pose = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(topicName, qos);
+    break;
     case OutputType::Quaternion:
       outputTopicSuffix = getAzimuthTopicSuffix<geometry_msgs::msg::QuaternionStamped>(
         targetUnit, targetOrientation, targetReference);
-      topicName = targetAppendSuffix ? "azimuth_out/"+outputTopicSuffix :  "azimuth_out";
-      this->pub_quat = this->create_publisher<geometry_msgs::msg::QuaternionStamped>(
-        topicName, rclcpp::SystemDefaultsQoS());
-      break;
+      topicName = targetAppendSuffix ? "azimuth_out/" + outputTopicSuffix : "azimuth_out";
+      this->pub_quat = this->create_publisher<geometry_msgs::msg::QuaternionStamped>(topicName, qos);
+    break;
     default:
       outputTopicSuffix = getAzimuthTopicSuffix<Az>(targetUnit, targetOrientation, targetReference);
-      topicName = targetAppendSuffix ? "azimuth_out/"+outputTopicSuffix :  "azimuth_out";
-      this->pub_az = this->create_publisher<Az>(
-        topicName, rclcpp::SystemDefaultsQoS());
-      break;
+      topicName = targetAppendSuffix ? "azimuth_out/" + outputTopicSuffix : "azimuth_out";
+      this->pub_az = this->create_publisher<Az>(topicName, qos);
+    break;
   }
 
   this->azimuthInput = std::make_unique<UniversalAzimuthSubscriber>(this, "azimuth_in", queue_size);
-  this->azimuthInput->configFromParams(this);
+  this->azimuthInput->configFromParams();
 
   this->compassFilter = std::make_unique<CompassFilter>(
     this, this->converter, *this->azimuthInput, targetUnit, targetOrientation, targetReference);
 
   if (subscribeFix)
   {
-    this->fixInput = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix");
+#if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
+    const rclcpp::QoS qos(10);
+#else
+    const rmw_qos_profile_t qos = rclcpp::QoS(10).get_rmw_qos_profile();
+#endif
+    this->fixInput = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix", qos);
     this->compassFilter->connectFixInput(*this->fixInput);
   }
 
   if (subscribeUTMZone)
   {
+#if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
+    const rclcpp::QoS qos(10);
+#else
+    const rmw_qos_profile_t qos = rclcpp::QoS(10).get_rmw_qos_profile();
+#endif
     this->utmZoneInput = std::make_unique<message_filters::Subscriber<std_msgs::msg::Int32>>(this, "utm_zone");
     this->compassFilter->connectUTMZoneInput(*this->utmZoneInput);
   }
@@ -277,7 +266,18 @@ void CompassTransformerNodelet::init()
   RCLCPP_INFO(log, "Publishing azimuth to topic %s (type %s).",
     topicName.c_str(), outputTypeToString(this->targetType).c_str());
 }
-  
+
+void CompassTransformerNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, const bool using_dedicated_thread)
+{
+  this->buffer = buffer;
+  this->buffer->setUsingDedicatedThread(using_dedicated_thread);
+  const auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
+    this->get_node_base_interface(),
+    this->get_node_timers_interface());
+  this->buffer->setCreateTimerInterface(timer_interface);
+  this->listener = std::make_shared<tf2_ros::TransformListener>(*this->buffer, this, true);
+}
+
 void CompassTransformerNodelet::publish(const Az::ConstSharedPtr& msg)
 {
   switch (this->targetType)
@@ -344,11 +344,8 @@ void CompassTransformerNodelet::transformAndPublish(const Az::ConstSharedPtr& ms
   try
   {
     Az::SharedPtr outMsg(new Az{});
-
     *outMsg = this->buffer->transform(*msg, this->targetFrame, tf2::durationFromSec(0.1));
-
     this->publish(outMsg);
-
   }
   catch (const tf2::TransformException& e)
   {
@@ -356,21 +353,13 @@ void CompassTransformerNodelet::transformAndPublish(const Az::ConstSharedPtr& ms
   }
 }
 
-void CompassTransformerNodelet::failedCb(const Az::ConstSharedPtr& /*msg*/, const tf2_ros::filter_failure_reasons::FilterFailureReason reason)
+void CompassTransformerNodelet::failedCb(const Az::ConstSharedPtr& msg,
+  const tf2_ros::filter_failure_reasons::FilterFailureReason reason)
 {
-  RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000., "Can't transform incoming Azimuth data to frame %s. Reason %d",
-    this->targetFrame.c_str(), reason);
+  RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000.,
+    "Can't transform incoming Azimuth data to frame %s. Reason %d", this->targetFrame.c_str(), reason);
 }
+
 }
 
 RCLCPP_COMPONENTS_REGISTER_NODE(compass_conversions::CompassTransformerNodelet)
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<compass_conversions::CompassTransformerNodelet>();
-  node->init();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-  return 0;
-}

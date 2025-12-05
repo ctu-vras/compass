@@ -7,15 +7,18 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <angles/angles.h>
 #include <cmath>
-#include <compass_conversions/tf2_compass_msgs.h>
-#include <compass_utils/time_utils.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <gtest/gtest.h>
 #include <list>
 #include <memory>
 #include <string>
+
+#include <gtest/gtest.h>
+
+#include <angles/angles.h>
+#include <compass_conversions/tf2_compass_msgs.hpp>
+#include <cras_cpp_common/string_utils.hpp>
+#include <cras_cpp_common/time_utils.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2/convert.h>
 
 using Az = compass_interfaces::msg::Azimuth;
@@ -23,11 +26,12 @@ using Az = compass_interfaces::msg::Azimuth;
 TEST(TF2CompassMsgs, Tf2MessageTraits)  // NOLINT
 {
   Az inMessage;
-  inMessage.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00.000Z");
+  inMessage.header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
   inMessage.header.frame_id = "test";
 
   EXPECT_EQ(inMessage.header.frame_id, tf2::getFrameId(inMessage));
-  EXPECT_NEAR(inMessage.header.stamp.sec + inMessage.header.stamp.nanosec * 1e-9, tf2::timeToSec(tf2::getTimestamp(inMessage)), 1e-9);
+  EXPECT_NEAR(inMessage.header.stamp.sec + inMessage.header.stamp.nanosec * 1e-9,
+    tf2::timeToSec(tf2::getTimestamp(inMessage)), 1e-9);
   EXPECT_EQ(inMessage, tf2::toMsg(inMessage));
 
   Az msg2;
@@ -38,7 +42,7 @@ TEST(TF2CompassMsgs, Tf2MessageTraits)  // NOLINT
 TEST(TF2CompassMsgs, TransformRadNed)  // NOLINT
 {
   Az inMessage;
-  inMessage.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00.000Z");
+  inMessage.header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
   inMessage.header.frame_id = "test";
   inMessage.unit = Az::UNIT_RAD;
   inMessage.orientation = Az::ORIENTATION_NED;
@@ -70,7 +74,7 @@ TEST(TF2CompassMsgs, TransformRadNed)  // NOLINT
 TEST(TF2CompassMsgs, TransformRadEnu)  // NOLINT
 {
   Az inMessage;
-  inMessage.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00.000Z");
+  inMessage.header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
   inMessage.header.frame_id = "test";
   inMessage.unit = Az::UNIT_RAD;
   inMessage.orientation = Az::ORIENTATION_ENU;
@@ -102,7 +106,7 @@ TEST(TF2CompassMsgs, TransformRadEnu)  // NOLINT
 TEST(TF2CompassMsgs, TransformDegNed)  // NOLINT
 {
   Az inMessage;
-  inMessage.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00.000Z");
+  inMessage.header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
   inMessage.header.frame_id = "test";
   inMessage.unit = Az::UNIT_DEG;
   inMessage.orientation = Az::ORIENTATION_NED;
@@ -134,7 +138,7 @@ TEST(TF2CompassMsgs, TransformDegNed)  // NOLINT
 TEST(TF2CompassMsgs, TransformDegEnu)  // NOLINT
 {
   Az inMessage;
-  inMessage.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00.000Z");
+  inMessage.header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
   inMessage.header.frame_id = "test";
   inMessage.unit = Az::UNIT_DEG;
   inMessage.orientation = Az::ORIENTATION_ENU;
@@ -163,7 +167,7 @@ TEST(TF2CompassMsgs, TransformDegEnu)  // NOLINT
   }
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

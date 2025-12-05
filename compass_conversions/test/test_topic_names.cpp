@@ -7,14 +7,16 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_conversions/topic_names.h>
+#include <string>
+#include <tuple>
+
+#include <gtest/gtest.h>
+
+#include <compass_conversions/topic_names.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
-#include <gtest/gtest.h>
 #include <sensor_msgs/msg/imu.hpp>
-#include <string>
-#include <tuple>
 
 using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
@@ -164,17 +166,17 @@ TEST(TopicNames, ParseTopicWrong)  // NOLINT
 
 TEST(TopicNames, ParseTopicFromConnectionHeader)  // NOLINT
 {
-  std::shared_ptr<std::map< std::string, std::string >> header;
+  std::shared_ptr<std::map<std::string, std::string>> header;
   EXPECT_FALSE(compass_conversions::parseAzimuthTopicName(header).has_value());
 
-  header.reset(new std::map< std::string, std::string >{});
+  header.reset(new std::map<std::string, std::string>{});
   EXPECT_FALSE(compass_conversions::parseAzimuthTopicName(header).has_value());
 
   (*header)["topic"] = "azimuth/test/utm/ned/rad";
   EXPECT_EQ(std::make_tuple(rad, ned, utm), compass_conversions::parseAzimuthTopicName(header));
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

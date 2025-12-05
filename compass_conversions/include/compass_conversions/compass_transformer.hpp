@@ -9,22 +9,20 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_conversions/compass_converter.h>
-#include <compass_conversions/message_filter.h>
-#include <compass_conversions/tf2_compass_msgs.h>
-#include <compass_conversions/topic_names.h>
+#include <memory>
+#include <string>
+
+#include <compass_conversions/compass_converter.hpp>
+#include <compass_conversions/message_filter.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/string_utils.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
-#include <memory>
-#include <message_filters/subscriber.h>
-#include <optional>
-#include <rclcpp/rclcpp.hpp>
+#include <message_filters/subscriber.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
-#include <string>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
@@ -41,13 +39,12 @@ enum class OutputType
 };
 
 OutputType parseOutputType(const std::string& outputType);
-std::string outputTypeToString(const OutputType type);
+std::string outputTypeToString(OutputType type);
 
 class CompassTransformerNodelet : public rclcpp::Node
 {
 public:
-  CompassTransformerNodelet();
-  CompassTransformerNodelet(const rclcpp::NodeOptions & options);
+  explicit CompassTransformerNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~CompassTransformerNodelet() override;
 
   void init();
@@ -57,7 +54,7 @@ protected:
   void publish(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg);
   void transformAndPublish(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg);
   void failedCb(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg,
-                const tf2_ros::filter_failure_reasons::FilterFailureReason reason);
+                tf2_ros::filter_failure_reasons::FilterFailureReason reason);
 
   std::shared_ptr<CompassConverter> converter;
   std::unique_ptr<UniversalAzimuthSubscriber> azimuthInput;
@@ -76,7 +73,6 @@ protected:
   OutputType targetType {OutputType::Azimuth};
   tf2_ros::Buffer::SharedPtr buffer;
   std::shared_ptr<tf2_ros::TransformListener> listener;
-  // std::map< std::string, std::string > remaps {};
 };
 
-}  // namespace compass_conversions
+}

@@ -9,18 +9,25 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-#include <geometry_msgs/msg/quaternion_stamped.hpp>
 #include <map>
+#include <memory>
 #include <optional>
-#include <sensor_msgs/msg/imu.hpp>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <geometry_msgs/msg/quaternion_stamped.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+
 namespace compass_conversions
 {
+
+using Unit = compass_interfaces::msg::Azimuth::_unit_type;
+using Orientation = compass_interfaces::msg::Azimuth::_orientation_type;
+using Reference = compass_interfaces::msg::Azimuth::_reference_type;
 
 /**
  * \brief Get the suffix of topic name that identifies the particular representation of azimuth.
@@ -32,15 +39,12 @@ namespace compass_conversions
  * \return The suffix.
  */
 template<typename T, typename ::std::enable_if_t<
-    std::is_same<T, compass_interfaces::msg::Azimuth>::value ||
-    std::is_same<T, geometry_msgs::msg::PoseWithCovarianceStamped>::value ||
-    std::is_same<T, geometry_msgs::msg::QuaternionStamped>::value ||
-    std::is_same<T, sensor_msgs::msg::Imu>::value
+    std::is_same_v<T, compass_interfaces::msg::Azimuth> ||
+    std::is_same_v<T, geometry_msgs::msg::PoseWithCovarianceStamped> ||
+    std::is_same_v<T, geometry_msgs::msg::QuaternionStamped> ||
+    std::is_same_v<T, sensor_msgs::msg::Imu>
   >* = nullptr>
-std::string getAzimuthTopicSuffix(
-  decltype(compass_interfaces::msg::Azimuth::unit) unit,
-  decltype(compass_interfaces::msg::Azimuth::orientation) orientation,
-  decltype(compass_interfaces::msg::Azimuth::reference) reference);
+std::string getAzimuthTopicSuffix(Unit unit, Orientation orientation, Reference reference);
 
 /**
  * \brief Autodetect azimuth representation from the name of the topic on which the message came.
@@ -48,11 +52,7 @@ std::string getAzimuthTopicSuffix(
  * \param[in] topic The topic to parse.
  * \return The autodetected parameters, or nullopt if autodetection failed.
  */
-std::optional<std::tuple<
-  decltype(compass_interfaces::msg::Azimuth::unit),
-  decltype(compass_interfaces::msg::Azimuth::orientation),
-  decltype(compass_interfaces::msg::Azimuth::reference)
->> parseAzimuthTopicName(const std::string& topic);
+std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(const std::string& topic);
 
 /**
  * \brief Autodetect azimuth representation from connection header of a topic it came on.
@@ -60,10 +60,7 @@ std::optional<std::tuple<
  * \param[in] connectionHeaderPtr Pointer to the connection header, should contain key "topic".
  * \return The autodetected parameters, or nullopt if autodetection failed.
  */
-std::optional<std::tuple<
-  decltype(compass_interfaces::msg::Azimuth::unit),
-  decltype(compass_interfaces::msg::Azimuth::orientation),
-  decltype(compass_interfaces::msg::Azimuth::reference)
->> parseAzimuthTopicName(const std::shared_ptr<std::map<std::string, std::string>>& connectionHeaderPtr);
+std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(
+  const std::shared_ptr<std::map<std::string, std::string>>& connectionHeaderPtr);
 
 }

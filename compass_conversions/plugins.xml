@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<library path="compass_transformer_nodelet">
+    <class type="compass_conversions::CompassTransformerNodelet" base_class_type="rclcpp::Node">
+        <description>Component node transforming Azimuth message to different TF frames or representations.</description>
+    </class>
+</library>

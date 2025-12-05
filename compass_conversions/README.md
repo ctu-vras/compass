@@ -78,22 +78,27 @@ When you include this file, `tf2::convert()` and similar functions will gain the
 Functions that assign topic names (or suffixes) to various parametrizations and representations of azimuths.
 These unique topic name suffixes can be used to add important metadata to messages that do not carry them inside.
 
-## Nodelets
+## Component nodes
 
-### compass\_conversions/compass\_transformer
+### Node compass\_transformer and component node compass\_conversions::CompassTransformerNodelet
 
-This nodelet subscribes to incoming azimuth messages (using the `UniversalAzimuthSubscriber` described above),
+This component node subscribes to incoming azimuth messages (using the `UniversalAzimuthSubscriber` described above),
 transforms them into a different parametrization (using `CompassFilter`), transforms them into a different TF frame
 (using `tf2_compass_msgs.h`) and publishes them in the desired parametrization and representation (possibly using
 `CompassConverter` to do the conversion).
 
-The nodelet can also be launched as a standalone node using `rosrun compass_conversions compass_transformer`.
+The component can also be launched as a standalone node using `ros2 run compass_conversions compass_transformer`.
 
 #### Subscribed topics:
 
-- `~azimuth_in` (compass_interfaces/Azimuth or geometry_msgs/QuaternionStamped or geometry_msgs/PoseWithCovarianceStamped
-    or sensor_msgs/Imu): The input azimuth. The name of the topic (if you remap it) can be used to autodetect some
-    metadata for the conversion.
+- `~azimuth_in` (compass_interfaces/Azimuth): The input azimuth. The name of the topic (if you remap it)
+    can be used to autodetect some metadata for the conversion.
+- `~azimuth_in/imu` (sensor_msgs/Imu): The input azimuth in IMU format. The name of the topic (if you remap it)
+    can be used to autodetect some metadata for the conversion.
+- `~azimuth_in/pose` (geometry_msgs/PoseWithCovarianceStamped): The input azimuth in IMU format. The name of the
+    topic (if you remap it) can be used to autodetect some metadata for the conversion.
+- `~azimuth_in/quat` (geometry_msgs/QuaternionStamped): The input azimuth in IMU format. The name of the topic
+    (if you remap it) can be used to autodetect some metadata for the conversion.
  - `fix` (sensor_msgs/NavSatFix): GNSS fix messages that can be used to determine some parameters for the conversion.
  - `utm_zone` (std_msgs/Int32): Optional messages with forced UTM zone.
  - TF (only if `~target_frame` is nonempty)
