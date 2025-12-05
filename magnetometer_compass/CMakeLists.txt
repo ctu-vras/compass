@@ -23,13 +23,30 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+find_package(Eigen3 REQUIRED)
+
 ament_export_dependencies(
   cras_cpp_common
   compass_interfaces
+  Eigen3
   geometry_msgs
   rclcpp
   sensor_msgs
   tf2_ros
+)
+
+# LIBRARY 0 - do not use in outside projects - this library is scheduled for removal
+add_library(_tf2_sensor_msgs INTERFACE)
+target_sources(_tf2_sensor_msgs INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/tf2_sensor_msgs.hpp>)
+target_link_libraries(_tf2_sensor_msgs INTERFACE
+  ${sensor_msgs_TARGETS}
+  tf2::tf2
+  tf2_ros::tf2_ros
+  Eigen3::Eigen
+)
+target_include_directories(_tf2_sensor_msgs INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
 
 # LIBRARY 1
@@ -50,6 +67,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   cras_cpp_common::cras_tf2_utils
   tf2::tf2
   tf2_geometry_msgs::tf2_geometry_msgs
+  _tf2_sensor_msgs
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
@@ -78,6 +96,7 @@ target_link_libraries(${PROJECT_NAME}_nodelet_lib PRIVATE
   cras_cpp_common::cras_string_utils
   cras_cpp_common::cras_tf2_utils
   tf2_geometry_msgs::tf2_geometry_msgs
+  _tf2_sensor_msgs
 )
 target_include_directories(${PROJECT_NAME}_nodelet_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
@@ -126,7 +145,7 @@ pluginlib_export_plugin_description_file(rclcpp plugins.xml)
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
 
-install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} _tf2_sensor_msgs EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -163,6 +182,7 @@ if(BUILD_TESTING)
     cras_cpp_common::cras_tf2_utils
     tf2_geometry_msgs::tf2_geometry_msgs
     tf2_sensor_msgs::tf2_sensor_msgs
+    _tf2_sensor_msgs
   )
   target_include_directories(test_magnetometer_compass_nodelet PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"

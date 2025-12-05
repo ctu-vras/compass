@@ -21,6 +21,7 @@
 
   <depend>cras_cpp_common</depend>
   <depend>compass_interfaces</depend>
+  <depend>eigen</depend>
   <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
