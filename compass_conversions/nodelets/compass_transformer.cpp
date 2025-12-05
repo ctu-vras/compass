@@ -245,7 +245,7 @@ void CompassTransformerNodelet::init()
 #else
     const rmw_qos_profile_t qos = rclcpp::QoS(10).get_rmw_qos_profile();
 #endif
-    this->utmZoneInput = std::make_unique<message_filters::Subscriber<std_msgs::msg::Int32>>(this, "utm_zone");
+    this->utmZoneInput = std::make_unique<message_filters::Subscriber<std_msgs::msg::Int32>>(this, "utm_zone", qos);
     this->compassFilter->connectUTMZoneInput(*this->utmZoneInput);
   }
 
