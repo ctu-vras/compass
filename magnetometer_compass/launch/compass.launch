@@ -5,34 +5,27 @@
 <!-- Run magnetometer compass to provide azimuth. -->
 
 <launch>
-    <arg name="frame" default="base_link" description="The frame in which the azimuth should be computed." />
     <arg name="unbias" default="true" description="When true, magnetometer bias observer and remover will be launched." />
+    <arg name="visualize" default="true" description="Whether to publish a visualization of the azimuth" />
+
+    <arg name="frame" default="base_link" description="The frame in which the azimuth should be computed." />
     <arg name="low_pass_ratio" default="0.93" description="Low pass smoothing ratio. 0 = raw measurements, 1 = no updates." />
     <arg name="initial_variance" default="9.87" description="Compass uses static covariance for now." />
-    <arg name="visualize" default="true" description="Whether to publish a visualization of the azimuth" />
-    <arg name="magnetic_model" default="gazebo" />
-    <arg name="initial_mag_bias_x" default="0.0" />
-    <arg name="initial_mag_bias_y" default="0.0" />
-    <arg name="initial_mag_bias_z" default="0.0" />
 
-    <include file="$(find-pkg-share magnetometer_pipeline)/launch/magnetometer_proc_launch_sim.xml" if="$(var unbias)">
+    <include file="$(find-pkg-share magnetometer_pipeline)/launch/bias_remover.launch" if="$(var unbias)">
     </include>
 
     <node pkg="magnetometer_compass" exec="magnetometer_compass_nodelet" name="compass" respawn="true">
         <param name="frame" value="$(var frame)" />
         <param name="low_pass_ratio" value="$(var low_pass_ratio)" />
-        <param name="strict" value="false" />
         <param name="initial_variance" value="$(var initial_variance)" />
         <param name="subscribe_mag_unbiased" value="$(var unbias)" />
         <param name="publish_mag_azimuth_enu_rad" value="true" />
         <param name="publish_mag_azimuth_enu_imu" value="true" />
+        <param name="publish_true_azimuth_enu_rad" value="true" />
         <param name="publish_true_azimuth_enu_imu" value="true" />
         <param name="publish_utm_azimuth_enu_rad" value="true" />
         <param name="publish_utm_azimuth_enu_imu" value="true" />
-        <param name="magnetic_model" value="$(var magnetic_model)" />
-        <param name="initial_mag_bias_x" value="$(var initial_mag_bias_x)" />
-        <param name="initial_mag_bias_y" value="$(var initial_mag_bias_y)" />
-        <param name="initial_mag_bias_z" value="$(var initial_mag_bias_z)" />
     </node>
 
     <node pkg="magnetometer_compass" exec="visualize_azimuth_nodelet" name="visualize_azimuth" if="$(var visualize)">
@@ -40,6 +33,5 @@
         <param name="max_rate" value="10." />
         <param name="input_orientation" value="enu" />
         <param name="input_reference" value="utm" />
-        <param name="magnetic_model" value="$(var magnetic_model)" />
     </node>
 </launch>

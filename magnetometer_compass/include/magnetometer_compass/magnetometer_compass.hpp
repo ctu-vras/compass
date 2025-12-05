@@ -8,17 +8,20 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include "tl/expected.hpp"
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <map>
 #include <memory>
-#include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
+#include <string>
+
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <cras_cpp_common/expected.hpp>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
-#include <string>
-#include <tf2/buffer_core.h>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
+
 namespace magnetometer_compass
 {
 
@@ -30,31 +33,30 @@ struct MagnetometerCompassPrivate;
 class MagnetometerCompass
 {
 public:
-  /**
-   * \brief Create the compass.
-   * \param[in] log Logger.
-   * \param[in] frame The target frame in which the azimuth is expressed. Its Z axis should approx. point upwards.
-   *                  Azimuth is the angle between magnetic North and this frame's X axis.
-   * \param[in] tf TF buffer for transforming incoming data to `frame`. If you are sure data are already in the target
-   *               frame, you can pass an empty buffer.
-   */
-  MagnetometerCompass(rclcpp::Node* node, const std::string& frame, const std::shared_ptr<tf2::BufferCore>& tf);
+  using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
+  using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
+  using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
+
+  using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
+    NodeClockInterface,
+    NodeLoggingInterface,
+    NodeParametersInterface
+  >;
 
   /**
    * \brief Create the compass.
-   * \param[in] log Logger.
+   * \param[in] node The node to use.
    * \param[in] frame The target frame in which the azimuth is expressed. Its Z axis should approx. point upwards.
    *                  Azimuth is the angle between magnetic North and this frame's X axis.
    * \param[in] tf TF buffer for transforming incoming data to `frame`. If you are sure data are already in the target
    *               frame, you can pass an empty buffer.
    */
-  MagnetometerCompass(rclcpp::Node* node, const std::string& frame, const std::shared_ptr<tf2_ros::Buffer>& tf);
+  MagnetometerCompass(RequiredInterfaces node, const std::string& frame, const std::shared_ptr<tf2_ros::Buffer>& tf);
 
   virtual ~MagnetometerCompass();
 
   /**
    * \brief Configure the bias remover from ROS parameters.
-   * \param[in] params The parameters.
    *
    * The following parameters are read:
    * - `~initial_variance` (double, default 0): Variance of the measurement used at startup (in rad^2).
@@ -63,8 +65,7 @@ public:
    */
   virtual void configFromParams();
 
-  geometry_msgs::msg::Quaternion getRotationBetweenFrames(
-    const sensor_msgs::msg::Imu& imu_msg);
+  geometry_msgs::msg::Quaternion getRotationBetweenFrames(const sensor_msgs::msg::Imu& imu_msg);
 
   /**
    * \brief The azimuth is filtered with a low-pass filter. This sets its aggressivity.
@@ -80,7 +81,7 @@ public:
    * \note The function does not check time synchronization of the two inputs.
    * \note Both inputs have to be transformable to the configured target frame.
    */
-  virtual tl::expected<compass_interfaces::msg::Azimuth, std::string> computeAzimuth(
+  virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> computeAzimuth(
     const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased);
 
   /**
@@ -97,7 +98,8 @@ protected:
 
 private:
   std::unique_ptr<MagnetometerCompassPrivate> data;  //!< PIMPL
-  const rclcpp::Node* node;
-  geometry_msgs::msg::Quaternion last_imu_orientation = geometry_msgs::msg::Quaternion();
+  RequiredInterfaces node;
+  geometry_msgs::msg::Quaternion last_imu_orientation {};
 };
+
 }

@@ -7,31 +7,37 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/time_utils.hpp>
-#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-#include <gtest/gtest.h>
-#include <magnetometer_compass/visualize_azimuth_nodelet.hpp>
 #include <memory>
 #include <optional>
-#include <rclcpp/utilities.hpp>
-#include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <string>
+
+#include <gtest/gtest.h>
+
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <cras_cpp_common/string_utils.hpp>
+#include <cras_cpp_common/test_utils.hpp>
+#include <cras_cpp_common/time_utils.hpp>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <magnetometer_compass/visualize_azimuth_nodelet.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using Az = compass_interfaces::msg::Azimuth;
 using Quat = geometry_msgs::msg::QuaternionStamped;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
 using Fix = sensor_msgs::msg::NavSatFix;
+
 using namespace std::chrono_literals;
 
-std::shared_ptr<magnetometer_compass::VisualizeAzimuthNodelet> createNodelet(rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
+class VisualizeAzimuthNodelet : public cras::RclcppTestFixture {};
+
+std::shared_ptr<magnetometer_compass::VisualizeAzimuthNodelet> createNodelet(
+  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
 {
-  auto nodelet = std::make_shared<magnetometer_compass::VisualizeAzimuthNodelet>(node_options);
-  return nodelet;
+  return std::make_shared<magnetometer_compass::VisualizeAzimuthNodelet>(node_options);
 }
 
-TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
+TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
 {
   auto node = createNodelet();
   node->init();
@@ -49,36 +55,37 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
   sub_qos.depth = dep;
 
   std::list<rclcpp::PublisherBase::SharedPtr> pubs;
-  auto azPub = node->create_publisher<Az>("visualize_azimuth/azimuth", rclcpp::SystemDefaultsQoS(pub_qos)); pubs.push_back(azPub);
-  auto fixPub = node->create_publisher<Fix>("gps/fix", rclcpp::SystemDefaultsQoS(pub_qos).transient_local()); pubs.push_back(fixPub);
+  auto azPub = node->create_publisher<Az>("visualize_azimuth/azimuth", rclcpp::SystemDefaultsQoS(pub_qos));
+  pubs.push_back(azPub);
+  auto fixPub = node->create_publisher<Fix>("gps/fix", rclcpp::SystemDefaultsQoS(pub_qos).transient_local());
+  pubs.push_back(fixPub);
 
   std::list<rclcpp::SubscriptionBase::SharedPtr> subs;
-  auto visSub = node->create_subscription<Pose>("visualize_azimuth/azimuth_vis", rclcpp::SensorDataQoS(sub_qos), poseCb); subs.push_back(visSub);
+  rclcpp::SensorDataQoS qos(sub_qos);
+  auto visSub = node->create_subscription<Pose>("visualize_azimuth/azimuth_vis", qos, poseCb); subs.push_back(visSub);
 
   const auto pubTest = [](const rclcpp::PublisherBase::SharedPtr p) {return p->get_subscription_count() == 0;};
 
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
-  
+
   for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i)
   {
-    rclcpp::sleep_for(10ms);
-    executor.spin_once();
+    executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for publisher connections.");
   }
 
   const auto subTest = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
   for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i)
   {
-    rclcpp::sleep_for(10ms);
-    executor.spin_once();
+    executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for subscriber connections.");
   }
 
   ASSERT_FALSE(std::any_of(pubs.begin(), pubs.end(), pubTest));
   ASSERT_FALSE(std::any_of(subs.begin(), subs.end(), subTest));
 
-  rclcpp::Time time_rclcpp = compass_utils::parseTime("2024-11-18T13:00:00Z");
+  rclcpp::Time time_rclcpp = cras::parseTime("2024-11-18T13:00:00Z");
   builtin_interfaces::msg::Time time;
   time.sec = time_rclcpp.seconds();
   time.nanosec = time_rclcpp.nanoseconds() % 1'000'000'000;
@@ -95,8 +102,7 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
 
   for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastPose.has_value());
   EXPECT_EQ(time, lastPose->header.stamp);
@@ -117,8 +123,7 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
 
   for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastPose.has_value());
   EXPECT_EQ(time, lastPose->header.stamp);
@@ -139,8 +144,7 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
 
   for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
 
   ASSERT_TRUE(lastPose.has_value());
@@ -165,8 +169,7 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
 
   for (size_t i = 0; i < 5 && !lastPose.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
   ASSERT_FALSE(lastPose.has_value());
 
@@ -180,15 +183,14 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
   fix.status.status = sensor_msgs::msg::NavSatStatus::STATUS_FIX;
   fixPub->publish(fix);
   // Wait until the fix arrives
-  rclcpp::sleep_for(200ms);
+  executor.spin_all(200ms);
 
   lastPose.reset();
   azimuth.azimuth = M_PI;
   azPub->publish(azimuth);
   for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i)
   {
-    executor.spin_once();
-    rclcpp::sleep_for(100ms);
+    executor.spin_all(100ms);
   }
 
   ASSERT_TRUE(lastPose.has_value());
@@ -205,10 +207,8 @@ TEST(VisualizeAzimuthNodelet, Basic)  // NOLINT
   EXPECT_NEAR(0.741358, lastPose->pose.pose.orientation.w, 1e-6);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-  rclcpp::shutdown();
 }

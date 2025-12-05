@@ -7,15 +7,18 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <angles/angles.h>
-#include <gtest/gtest.h>
-#include <list>
-#include <magnetometer_compass/magnetometer_compass.h>
-#include <map>
 #include <memory>
-#include <sensor_msgs/msg/imu.h>
-#include <sensor_msgs/msg/magnetic_field.hpp>
 #include <string>
+
+#include <gtest/gtest.h>
+
+#include <builtin_interfaces/msg/time.hpp>
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <magnetometer_compass/magnetometer_compass.hpp>
+#include <rclcpp/node.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/magnetic_field.hpp>
+#include <tf2_ros/buffer.hpp>
 
 using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
@@ -28,7 +31,7 @@ TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
   tf->setUsingDedicatedThread(true);
 
-  magnetometer_compass::MagnetometerCompass compass(&node, "base_link", tf);
+  magnetometer_compass::MagnetometerCompass compass(node, "base_link", tf);
   compass.setLowPassRatio(0.0);
 
   builtin_interfaces::msg::Time time;
@@ -144,7 +147,7 @@ TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
   tf->setUsingDedicatedThread(true);
 
-  magnetometer_compass::MagnetometerCompass compass(&node, "base_link", tf);
+  magnetometer_compass::MagnetometerCompass compass(node, "base_link", tf);
 
   rclcpp::Parameter parameter1("low_pass_ratio", 0.0);
   node.set_parameter(parameter1);
@@ -257,7 +260,7 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
   tf->setUsingDedicatedThread(true);
 
-  magnetometer_compass::MagnetometerCompass compass(&node, "base_link", tf);
+  magnetometer_compass::MagnetometerCompass compass(node, "base_link", tf);
   compass.setLowPassRatio(0.5);
 
   builtin_interfaces::msg::Time time;
@@ -360,11 +363,10 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
   rclcpp::shutdown();
-
 }

@@ -1,7 +1,15 @@
-<library path="magnetometer_compass_nodelet">
-  <class name="magnetometer_compass::MagnetometerCompassNodelet"
-         type="magnetometer_compass::MagnetometerCompassNodelet"
-         base_class_type="rclcpp::Node">
-    <description>A compass nodelet</description>
-  </class>
-</library>
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
+<class_libraries>
+    <library path="magnetometer_compass_nodelet_lib">
+      <class type="magnetometer_compass::MagnetometerCompassNodelet" base_class_type="rclcpp::Node">
+        <description>A compass nodelet</description>
+      </class>
+    </library>
+    <library path="visualize_azimuth_nodelet_lib">
+      <class type="magnetometer_compass::VisualizeAzimuthNodelet" base_class_type="rclcpp::Node">
+        <description>A compass visualization nodelet</description>
+      </class>
+    </library>
+</class_libraries>

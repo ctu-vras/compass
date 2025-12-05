@@ -7,29 +7,29 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <compass_conversions/compass_converter.h>
-#include <compass_conversions/message_filter.h>
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/rate_limiter.h>
-#include <geometry_msgs/msg/pose_with_covariance_stamped.h>
-#include <magnetometer_compass/visualize_azimuth_nodelet.hpp>
 #include <memory>
-#include <message_filters/subscriber.h>
 #include <optional>
+#include <string>
+
+#include <compass_conversions/compass_converter.hpp>
+#include <compass_conversions/message_filter.hpp>
+#include <compass_interfaces/msg/azimuth.hpp>
+#include <cras_cpp_common/rate_limiter.h>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <magnetometer_compass/visualize_azimuth_nodelet.hpp>
+#include <message_filters/subscriber.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/node.hpp>
-#include <rclcpp/publisher.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/subscription.hpp>
+#include <rclcpp/node_options.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
-#include <sensor_msgs/msg/nav_sat_fix.h>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
-#include <string>
-#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 namespace magnetometer_compass
 {
+
 using Az = compass_interfaces::msg::Azimuth;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
 using Fix = sensor_msgs::msg::NavSatFix;
@@ -53,7 +53,7 @@ using Zone = std_msgs::msg::Int32;
  * Published topics (see above for explanation):
  * - `~azimuth_vis` (`sensor_msgs/MagneticField`, enabled by param `~publish_mag_unbiased`, off by default):
  *     The magnetic field measurement with bias removed.
- * 
+ *
  * Parameters:
  * - `max_rate` (double, optional): If specified, visualization messages frequency will be at most this value [Hz].
  * - `magnetic_declination` (double, radians, optional): If set, forces this value of magnetic declination.
@@ -83,16 +83,15 @@ using Zone = std_msgs::msg::Int32;
  *                                                `QuaternionStamped`).
  */
 
-VisualizeAzimuthNodelet::VisualizeAzimuthNodelet() : Node("visualize_azimuth_nodelet")
+VisualizeAzimuthNodelet::VisualizeAzimuthNodelet(const rclcpp::NodeOptions& options)
+  : Node("visualize_azimuth_nodelet", options)
 {
 }
-VisualizeAzimuthNodelet::VisualizeAzimuthNodelet(const rclcpp::NodeOptions & options) : Node("visualize_azimuth_nodelet", options)
-{
-}
+
 VisualizeAzimuthNodelet::~VisualizeAzimuthNodelet() = default;
 
 void VisualizeAzimuthNodelet::init()
-{  
+{
   this->declare_parameter<double>("max_rate", -1.);
   // CompassConverter params:
   this->declare_parameter<double>("magnetic_declination", -9999.);
@@ -111,9 +110,10 @@ void VisualizeAzimuthNodelet::init()
   this->declare_parameter<double>("input_variance", -1.);
 
   double rate;
-  if (this->has_parameter("max_rate") && this->get_parameter("max_rate").get_value<double>() != -1.) {
+  if (this->has_parameter("max_rate") && this->get_parameter("max_rate").as_double() != -1.)
+  {
     this->get_parameter<double>("max_rate", rate);
-    this->rateLimiter = std::make_unique<compass_utils::TokenBucketLimiter>(this->get_clock(), rclcpp::Rate(rate));
+    this->rateLimiter = std::make_unique<cras::TokenBucketLimiter>(rclcpp::Rate(rate, this->get_clock()));
   }
   // set compass converter
   this->converter = std::make_shared<compass_conversions::CompassConverter>(this, true);
@@ -123,11 +123,17 @@ void VisualizeAzimuthNodelet::init()
   this->visPub = this->create_publisher<Pose>("visualize_azimuth/azimuth_vis", rclcpp::SystemDefaultsQoS());
 
   // subscribe azimuth, gps fix, utm_zone
-  this->azSub = std::make_unique<compass_conversions::UniversalAzimuthSubscriber>(this, "visualize_azimuth/azimuth", 100);
-  this->azSub->configFromParams(this);
+  this->azSub = std::make_unique<compass_conversions::UniversalAzimuthSubscriber>(
+    this, "visualize_azimuth/azimuth", 100);
+  this->azSub->configFromParams();
 
-  this->fixSub = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix");//, 10);
-  this->zoneSub = std::make_unique<message_filters::Subscriber<Zone>>(this, "utm_zone");//, 10);
+#if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
+  const rclcpp::QoS qos(10);
+#else
+  const rmw_qos_profile_t qos = rclcpp::QoS(10).get_rmw_qos_profile();
+#endif
+  this->fixSub = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix", qos);
+  this->zoneSub = std::make_unique<message_filters::Subscriber<Zone>>(this, "utm_zone", qos);
 
   // set compass filter
   this->filter = std::make_unique<compass_conversions::CompassFilter>(
@@ -137,7 +143,6 @@ void VisualizeAzimuthNodelet::init()
 
   RCLCPP_INFO(this->get_logger(), "Visualizing azimuth messages from [%s] on topic [%s]",
     this->azSub->getTopic().c_str(), this->visPub->get_topic_name());
-  
 }
 
 void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
@@ -151,7 +156,8 @@ void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
   const auto maybePose = this->converter->convertToPose(azimuthNorth);
   if (!maybePose.has_value())
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 10000., "Visualizing azimuth failed: %s", maybePose.error().c_str());
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 10000.,
+      "Visualizing azimuth failed: %s", maybePose.error().c_str());
     return;
   }
 
@@ -171,13 +177,3 @@ void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
 }
 
 RCLCPP_COMPONENTS_REGISTER_NODE(magnetometer_compass::VisualizeAzimuthNodelet)
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<magnetometer_compass::VisualizeAzimuthNodelet>();
-  node->init();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-  return 0;
-}

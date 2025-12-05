@@ -38,7 +38,7 @@ topic for this measurement, and until at least one message arrives, the node wil
 have a node publishing the bias, you can alternatively provide it via parameters. Depending on the application, it
 may be required to re-estimate the bias from time to time even during runtime.
 
-## Node magnetometer\_compass and nodelet magnetometer\_compass/magnetometer\_compass
+## Node magnetometer\_compass\_nodelet and component node magnetometer\_compass/MagnetometerCompassNodelet
 
 ### Subscribed topics
 - `imu/data` (`sensor_msgs/Imu`): Output from an IMU or an orientation filtering algorithm. It should have valid
@@ -158,7 +158,7 @@ may be required to re-estimate the bias from time to time even during runtime.
 - `utm_zone` (int, optional): If set, forces using this UTM zone instead of determining the proper one.
 - `keep_utm_zone` (bool, default true): If true, the first determined UTM zone will be used for all future conversions.
 
-## Nodelet visualize\_azimuth\_nodelet and node visualize\_azimuth
+## Node visualize\_azimuth\_nodelet and component node magnetometer\_compass::VisualizeAzimuthNodelet
 
 This node visualizes `Azimuth` messages in RViz converting them to a pose.
 

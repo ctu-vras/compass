@@ -8,29 +8,29 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
- 
-#include <compass_conversions/compass_converter.h>
-#include <compass_conversions/topic_names.h>
+#include <memory>
+#include <string>
+
+#include <compass_conversions/compass_converter.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/string_utils.hpp>
-#include <compass_utils/tf2_utils.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
-#include <magnetometer_compass/magnetometer_compass.h>
-#include <magnetometer_compass/tf2_sensor_msgs.h>
-#include <magnetometer_pipeline/message_filter.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/synchronizer.h>
-#include <rclcpp/logger.hpp>
+#include <magnetometer_compass/magnetometer_compass.hpp>
+#include <magnetometer_compass/tf2_sensor_msgs.hpp>
+#include <magnetometer_pipeline/message_filter.hpp>
+#include <message_filters/subscriber.hpp>
+#include <message_filters/sync_policies/approximate_time.hpp>
+#include <message_filters/synchronizer.hpp>
 #include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/subscription.hpp>
-#include <sensor_msgs/msg/imu.h>
+#include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf2/LinearMath/Quaternion.hpp>
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_listener.hpp>
 
 namespace magnetometer_compass
 {
@@ -64,10 +64,11 @@ struct AzimuthPublishersConfigForOrientation
 
   bool publish{false};
 
-  explicit AzimuthPublishersConfigForOrientation();
+  AzimuthPublishersConfigForOrientation();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node, const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
     const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, uint8_t orientation,
     const std::string& referenceStr, const std::string& orientationStr);
 
@@ -89,19 +90,20 @@ struct AzimuthPublishersConfig
   const tf2::Quaternion nedToEnu{-M_SQRT2 / 2, -M_SQRT2 / 2, 0, 0};
   const tf2::Quaternion enuToNed{this->nedToEnu.inverse()};
 
-  explicit AzimuthPublishersConfig();
+  AzimuthPublishersConfig();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node, const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
     const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, const std::string& referenceStr);
 
   void publishAzimuths(const Az& nedAzimuth, const Imu& imuInBody);
 };
-    
+
 /**
  * \brief Compute various azimuth values based on a magnetometer, IMU orientation and possibly also GPS coordinates.
  *
- * Because there is no well established Azimuth message in ROS, this node publishes our custom compass_interfaces/Azimuth
+ * Because there is no well established Azimuth message in ROS, this node publishes custom compass_interfaces/Azimuth
  * as well as a few other formats that are capable of carrying orientation information. It also offers the azimuth
  * values in both radians and degrees, because radians are the ROS standard, while degrees are more used in the
  * geographic area. There are tens of possible combinations of the output data formats, so each of the published
@@ -253,9 +255,9 @@ struct AzimuthPublishersConfig
 class MagnetometerCompassNodelet : public rclcpp::Node
 {
 public:
-  MagnetometerCompassNodelet();
-  MagnetometerCompassNodelet(const rclcpp::NodeOptions & options);
+  explicit MagnetometerCompassNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~MagnetometerCompassNodelet() override;
+
   void init();
   void setBuffer(tf2_ros::Buffer::SharedPtr buffer, bool using_dedicated_thread);
 
