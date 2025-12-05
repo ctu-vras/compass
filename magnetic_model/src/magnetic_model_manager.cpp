@@ -7,23 +7,27 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include "tl/expected.hpp"
-#include <GeographicLib/MagneticModel.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <compass_utils/string_utils.hpp>
-#include <compass_utils/time_utils.hpp>
 #include <format>
-#include <magnetic_model/magnetic_model.h>
-#include <magnetic_model/magnetic_model_manager.h>
 #include <map>
 #include <memory>
 #include <optional>
-#include <rclcpp/logger.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/time.hpp>
 #include <stdexcept>
 #include <string>
 #include <utility>
+
+#include <GeographicLib/MagneticModel.hpp>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/string_utils.hpp>
+#include <cras_cpp_common/time_utils.hpp>
+#include <magnetic_model/magnetic_model.hpp>
+#include <magnetic_model/magnetic_model_manager.hpp>
+#include <rclcpp/logger.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/time.hpp>
 
 namespace magnetic_model
 {
@@ -38,11 +42,14 @@ struct MagneticModelManagerPrivate
 
   //! \brief Path to the models on disk. Empty means system default.
   std::string modelPath;
+
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr log;
 };
 
-MagneticModelManager::MagneticModelManager(const rclcpp::Node* node, const std::optional<std::string>& modelPath):
-  node(node), data(new MagneticModelManagerPrivate{}) //logger(std::make_unique<rclcpp::Logger>())
+MagneticModelManager::MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& modelPath)
+  : data(new MagneticModelManagerPrivate{}), node(node)
 {
+  this->data->log = node.get_node_logging_interface();
   this->setModelPath(modelPath);
 }
 
@@ -64,7 +71,6 @@ void MagneticModelManager::setModelPath(const std::optional<std::string>& modelP
   }
   else
   {
-    //const auto packagePath = ros::package::getPath("magnetic_model");
     const auto packagePath = ament_index_cpp::get_package_share_directory("magnetic_model");
     if (!packagePath.empty())
     {
@@ -72,19 +78,21 @@ void MagneticModelManager::setModelPath(const std::optional<std::string>& modelP
     }
     else
     {
-      RCLCPP_ERROR(this->node->get_logger(), "Could not resolve package magnetic_model. Is the workspace properly sourced?");
+      RCLCPP_ERROR(this->data->log->get_logger(),
+        "Could not resolve package magnetic_model. Is the workspace properly sourced?");
       this->data->modelPath = GeographicLib::MagneticModel::DefaultMagneticPath();
     }
   }
 
   this->data->magneticModels.clear();
 
-  RCLCPP_INFO(this->node->get_logger(), "Using WMM models from directory %s.", this->data->modelPath.c_str());
+  RCLCPP_INFO(this->data->log->get_logger(), "Using WMM models from directory %s.", this->data->modelPath.c_str());
 }
 
 std::string MagneticModelManager::getBestMagneticModelName(const rclcpp::Time& date) const
 {
-  const auto year = compass_utils::getYear(date);  // If the conversion failed, year would be 0, thus triggering the last branch.
+  // If the conversion failed, year would be 0, thus triggering the last branch.
+  const auto year = cras::getYear(date);
   if (year >= 2025)
     return MagneticModel::WMM2025;
   else if (year >= 2020)
@@ -97,32 +105,33 @@ std::string MagneticModelManager::getBestMagneticModelName(const rclcpp::Time& d
     return MagneticModel::IGRF14;
 }
 
-tl::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
+cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
   const rclcpp::Time& stamp, const bool strict) const
 {
   const auto name = this->getBestMagneticModelName(stamp);
   const auto model = this->getMagneticModel(name, strict);
   if (!model.has_value())
-    return compass_utils::make_unexpected(model.error());
+    return cras::make_unexpected(model.error());
   if (strict && !model.value()->isValid(stamp))
-    return compass_utils::make_unexpected(std::format(
-      "The best magnetic model {} is not valid at time {}.", name.c_str(), compass_utils::to_pretty_string(stamp).c_str()));
+    return cras::make_unexpected(std::format(
+      "The best magnetic model {} is not valid at time {}.", name, cras::to_pretty_string(stamp)));
   return *model;
 }
 
-tl::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
+cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
   const std::string& name, const bool strict) const
 {
   const auto key = std::make_pair(name, strict);
-  if (this->data->magneticModels.find(key) == this->data->magneticModels.end())
+  if (!this->data->magneticModels.contains(key))
   {
     try
     {
-      this->data->magneticModels[key] = std::make_shared<MagneticModel>(this->node, name, this->data->modelPath, strict);
+      this->data->magneticModels[key] = std::make_shared<MagneticModel>(
+        this->node, name, this->data->modelPath, strict);
     }
     catch (const std::invalid_argument& e)
     {
-      return compass_utils::make_unexpected(e.what());
+      return cras::make_unexpected(e.what());
     }
   }
 

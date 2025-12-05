@@ -7,26 +7,27 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include "tl/expected.hpp"
-#include <GeographicLib/Constants.hpp>
-#include <GeographicLib/MagneticModel.hpp>
-#include <angles/angles.h>
-#include <compass_interfaces/msg/azimuth.hpp>
-#include <compass_utils/string_utils.hpp>
-#include <compass_utils/time_utils.hpp>
 #include <ctime>
 #include <format>
-#include <magnetic_model/magnetic_model.h>
-#include <magnetic_model/magnetic_model_manager.h>
 #include <memory>
+#include <string>
+
+#include <GeographicLib/Constants.hpp>
+#include <GeographicLib/MagneticModel.hpp>
+
+#include <angles/angles.h>
+#include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/string_utils.hpp>
+#include <cras_cpp_common/time_utils.hpp>
+#include <magnetic_model/magnetic_model.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
 #include <rclcpp/time.hpp>
-#include <sensor_msgs/msg/magnetic_field.h>
-#include <sensor_msgs/msg/nav_sat_fix.h>
-#include <string>
+#include <sensor_msgs/msg/magnetic_field.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
 
 namespace magnetic_model
 {
@@ -37,8 +38,6 @@ const char* MagneticModel::WMM2010 = "wmm2010";
 const char* MagneticModel::WMM2015 = "wmm2015v2";
 const char* MagneticModel::WMM2020 = "wmm2020";
 const char* MagneticModel::WMM2025 = "wmm2025";
-
-using Az = compass_interfaces::msg::Azimuth;
 
 struct ModelErrors
 {
@@ -60,13 +59,18 @@ struct MagneticModelPrivate
   ModelErrors errors{};
 
   bool isGazebo {false};  //!< True for the Gazebo model which needs to fix date and zero-out secular variation
+
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr log;
+  rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock;
 };
 
 MagneticModel::MagneticModel(
-  const rclcpp::Node* node, const std::string& name, const std::string& modelPath, const bool strict) :
-  node(node), strict(strict), data(new MagneticModelPrivate{})
-
+  RequiredInterfaces node, const std::string& name, const std::string& modelPath, const bool strict)
+  : strict(strict), data(new MagneticModelPrivate{}), node(node)
 {
+  this->data->log = node.get_node_logging_interface();
+  this->data->clock = node.get_node_clock_interface();
+
   this->data->isGazebo = name == GAZEBO;
   const auto modelName = this->data->isGazebo ? IGRF14 : name;
   try
@@ -151,13 +155,13 @@ MagneticModel::MagneticModel(
     this->data->errors.D_lin = 0;
   }
 
-  RCLCPP_INFO(this->node->get_logger(), "Initialized magnetic model %s.", name.c_str());
+  RCLCPP_INFO(this->data->log->get_logger(), "Initialized magnetic model %s.", name.c_str());
 }
 
 MagneticModel::~MagneticModel() = default;
 bool MagneticModel::isValid(const rclcpp::Time& time) const
 {
-  return this->isValid(compass_utils::getYear(time));
+  return this->isValid(cras::getYear(time));
 }
 
 bool MagneticModel::isValid(const int year) const
@@ -167,7 +171,7 @@ bool MagneticModel::isValid(const int year) const
   return year >= this->data->magneticModel->MinTime() && year < this->data->magneticModel->MaxTime();
 }
 
-tl::expected<MagneticField, std::string> MagneticModel::getMagneticField(
+cras::expected<MagneticField, std::string> MagneticModel::getMagneticField(
   const sensor_msgs::msg::NavSatFix& fixMsg, const rclcpp::Time& stampIn) const
 {
   auto fix = fixMsg;
@@ -180,7 +184,7 @@ tl::expected<MagneticField, std::string> MagneticModel::getMagneticField(
 
   double errorCoef = 1.0;
 
-  const auto year = compass_utils::getYear(stamp);
+  const auto year = cras::getYear(stamp);
   const auto minYear = this->data->magneticModel->MinTime();
   const auto maxYear = this->data->magneticModel->MaxTime();
   if (year < minYear || year > maxYear)
@@ -189,11 +193,11 @@ tl::expected<MagneticField, std::string> MagneticModel::getMagneticField(
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(year));
     if (this->strict)
     {
-      return compass_utils::make_unexpected(err);
+      return cras::make_unexpected(err);
     }
     else
     {
-      RCLCPP_ERROR_THROTTLE(this->node->get_logger(), *this->node->get_clock(), 10000., "%s", err.c_str());
+      RCLCPP_ERROR_THROTTLE(this->data->log->get_logger(), *this->data->clock->get_clock(), 10000., "%s", err.c_str());
       errorCoef *= std::max(1.0, std::max(std::abs(year - minYear), std::abs(year - maxYear)));
     }
   }
@@ -207,11 +211,11 @@ tl::expected<MagneticField, std::string> MagneticModel::getMagneticField(
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(fix.altitude));
     if (this->strict)
     {
-      return compass_utils::make_unexpected(err);
+      return cras::make_unexpected(err);
     }
     else
     {
-      RCLCPP_ERROR_THROTTLE(this->node->get_logger(), *this->node->get_clock(), 10000., "%s", err.c_str());
+      RCLCPP_ERROR_THROTTLE(this->data->log->get_logger(), *this->data->clock->get_clock(), 10000., "%s", err.c_str());
       errorCoef *= std::max(1.0, std::max(std::abs(fix.altitude - minAlt), std::abs(fix.altitude - maxAlt)) / 1000.0);
     }
   }
@@ -239,7 +243,7 @@ tl::expected<MagneticField, std::string> MagneticModel::getMagneticField(
   return result;
 }
 
-tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMagneticFieldComponents(
+cras::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMagneticFieldComponents(
   const sensor_msgs::msg::NavSatFix& fixMsg, const rclcpp::Time& stampIn) const
 {
   auto fix = fixMsg;
@@ -260,18 +264,18 @@ tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMa
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(fix.altitude));
     if (this->strict)
     {
-      return compass_utils::make_unexpected(err);
+      return cras::make_unexpected(err);
     }
     else
     {
-      RCLCPP_ERROR_THROTTLE(this->node->get_logger(), *this->node->get_clock(), 10000., "%s", err.c_str());
+      RCLCPP_ERROR_THROTTLE(this->data->log->get_logger(), *this->data->clock->get_clock(), 10000., "%s", err.c_str());
       errorCoef *= std::max(1.0, std::max(std::abs(fix.altitude - minAlt), std::abs(fix.altitude - maxAlt)) / 1000.0);
     }
   }
 
   const auto field = this->getMagneticField(fix, stamp);
   if (!field.has_value())
-    return compass_utils::make_unexpected(field.error());
+    return cras::make_unexpected(field.error());
 
   auto result = this->getMagneticFieldComponents(*field, stamp);
   if (result.has_value())
@@ -285,15 +289,17 @@ tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMa
   return result;
 }
 
-tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMagneticFieldComponents(
+cras::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMagneticFieldComponents(
   const MagneticField& field, const rclcpp::Time& stampIn) const
 {
+  // *INDENT-OFF*
   auto stamp = stampIn;
   if (this->data->isGazebo)
     stamp = {1516579200, 0};
+  // *INDENT-ON*
 
   double errorCoef = 1.0;
-  const auto year = compass_utils::getYear(stamp);
+  const auto year = cras::getYear(stamp);
   const auto minYear = this->data->magneticModel->MinTime();
   const auto maxYear = this->data->magneticModel->MaxTime();
   if (year < minYear || year > maxYear)
@@ -302,11 +308,11 @@ tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMa
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(year));
     if (this->strict)
     {
-      return compass_utils::make_unexpected(err);
+      return cras::make_unexpected(err);
     }
     else
     {
-      RCLCPP_ERROR_THROTTLE(this->node->get_logger(), *this->node->get_clock(), 10000., "%s", err.c_str());
+      RCLCPP_ERROR_THROTTLE(this->data->log->get_logger(), *this->data->clock->get_clock(), 10000., "%s", err.c_str());
       errorCoef *= std::max(1.0, std::max(std::abs(year - minYear), std::abs(year - maxYear)));
     }
   }
@@ -341,10 +347,10 @@ tl::expected<MagneticFieldComponentProperties, std::string> MagneticModel::getMa
   t.tm_hour = 0;
   t.tm_min = 0;
   t.tm_sec = 0;
-  const auto yearStart = compass_utils::fromStructTm(t);
+  const auto yearStart = cras::fromStructTm(t);
 
   t.tm_year = year + 1 - 1900;
-  const auto nextYearStart = compass_utils::fromStructTm(t);
+  const auto nextYearStart = cras::fromStructTm(t);
 
   double yearFrac {0.0};
   if (yearStart.has_value() && nextYearStart.has_value())

@@ -7,47 +7,53 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <angles/angles.h>
-#include <compass_utils/string_utils.hpp>
-#include <compass_utils/time_utils.hpp>
 #include <cstdlib>
-#include <gtest/gtest.h>
-#include <magnetic_model/magnetic_model.h>
-#include <magnetic_model/magnetic_model_manager.h>
 #include <memory>
 #include <optional>
 #include <string>
 
-TEST(MagneticModel, Construct)  // NOLINT
+#include <gtest/gtest.h>
+
+#include <angles/angles.h>
+#include <cras_cpp_common/string_utils.hpp>
+#include <cras_cpp_common/test_utils.hpp>
+#include <cras_cpp_common/time_utils.hpp>
+#include <magnetic_model/magnetic_model.hpp>
+#include <magnetic_model/magnetic_model_manager.hpp>
+#include <rclcpp/node.hpp>
+
+class MagneticModel : public cras::RclcppTestFixture {};
+
+class MagneticModelManager : public cras::RclcppTestFixture {};
+
+TEST_F(MagneticModel, Construct)  // NOLINT
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
+  auto node = rclcpp::Node("test_node");
 
   ASSERT_NO_THROW(magnetic_model::MagneticModel model(
-    &node, magnetic_model::MagneticModel::WMM2010, TEST_DATA_DIR, true));
+    node, magnetic_model::MagneticModel::WMM2010, TEST_DATA_DIR, true));
 
   ASSERT_NO_THROW(magnetic_model::MagneticModel model(
-    &node, magnetic_model::MagneticModel::WMM2015, TEST_DATA_DIR, true));
+    node, magnetic_model::MagneticModel::WMM2015, TEST_DATA_DIR, true));
 
   ASSERT_NO_THROW(magnetic_model::MagneticModel model(
-    &node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true));
+    node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true));
 
   ASSERT_NO_THROW(magnetic_model::MagneticModel model(
-    &node, magnetic_model::MagneticModel::WMM2025, TEST_DATA_DIR, true));
+    node, magnetic_model::MagneticModel::WMM2025, TEST_DATA_DIR, true));
 
   ASSERT_THROW(magnetic_model::MagneticModel model(
-    &node, "nonexisting", TEST_DATA_DIR, true), std::invalid_argument);
+                 node, "nonexisting", TEST_DATA_DIR, true), std::invalid_argument);
 }
 
-TEST(MagneticModel, GetField)
+TEST_F(MagneticModel, GetField)
 {
-
-  rclcpp::Node node = rclcpp::Node("test_node");
-
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
 
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2024-11-18T13:00:00Z");
   fix.latitude = 51;
   fix.longitude = 10;
   fix.altitude = 200;
@@ -69,54 +75,52 @@ TEST(MagneticModel, GetField)
   EXPECT_NEAR(1.57e-07, result->error.z, 1e-12);
 }
 
-TEST(MagneticModel, GetFieldWrongYearStrict)
+TEST_F(MagneticModel, GetFieldWrongYearStrict)
 {
-
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
 
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2014-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2014-11-18T13:00:00Z");
 
   EXPECT_FALSE(model.getMagneticField(fix, fix.header.stamp).has_value());
   EXPECT_FALSE(model.getMagneticFieldComponents(fix, fix.header.stamp).has_value());
 }
 
-TEST(MagneticModel, GetFieldWrongYearNonStrict)
+TEST_F(MagneticModel, GetFieldWrongYearNonStrict)
 {
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, false);
 
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, false);
-  
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2014-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2014-11-18T13:00:00Z");
 
   EXPECT_TRUE(model.getMagneticField(fix, fix.header.stamp).has_value());
   EXPECT_TRUE(model.getMagneticFieldComponents(fix, fix.header.stamp).has_value());
 }
 
-TEST(MagneticModel, GetFieldWrongAltitude)
+TEST_F(MagneticModel, GetFieldWrongAltitude)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
 
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2014-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2014-11-18T13:00:00Z");
   fix.altitude = 1e6;
 
   EXPECT_FALSE(model.getMagneticField(fix, fix.header.stamp).has_value());
   EXPECT_FALSE(model.getMagneticFieldComponents(fix, fix.header.stamp).has_value());
 }
 
-TEST(MagneticModel, GetFieldComponentsFromField)
+TEST_F(MagneticModel, GetFieldComponentsFromField)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
 
-  const auto stamp = compass_utils::parseTime("2024-11-18T13:00:00Z");
+  const auto stamp = cras::parseTime("2024-11-18T13:00:00Z");
 
   magnetic_model::MagneticField field;
   field.field.header.frame_id = "test";
@@ -144,17 +148,17 @@ TEST(MagneticModel, GetFieldComponentsFromField)
   EXPECT_NEAR(0.007, result->errors.declination, 1e-3);
   EXPECT_NEAR(0.004, result->errors.inclination, 1e-3);
 
-  EXPECT_FALSE(model.getMagneticFieldComponents(field, compass_utils::parseTime("2014-11-18T13:00:00Z")).has_value());
+  EXPECT_FALSE(model.getMagneticFieldComponents(field, cras::parseTime("2014-11-18T13:00:00Z")).has_value());
 }
 
-TEST(MagneticModel, GetFieldComponentsFromFix)
+TEST_F(MagneticModel, GetFieldComponentsFromFix)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::WMM2020, TEST_DATA_DIR, true);
 
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2024-11-18T13:00:00Z");
   fix.latitude = 51;
   fix.longitude = 10;
   fix.altitude = 200;
@@ -176,20 +180,20 @@ TEST(MagneticModel, GetFieldComponentsFromFix)
   EXPECT_NEAR(0.004, result->errors.inclination, 1e-3);
 
   // Use with wrong year
-  EXPECT_FALSE(model.getMagneticFieldComponents(fix, compass_utils::parseTime("2014-11-18T13:00:00Z")).has_value());
+  EXPECT_FALSE(model.getMagneticFieldComponents(fix, cras::parseTime("2014-11-18T13:00:00Z")).has_value());
   // Use with wrong altitude
   fix.altitude = 1e6;
   EXPECT_FALSE(model.getMagneticFieldComponents(fix, fix.header.stamp).has_value());
 }
 
-TEST(MagneticModel, GazeboModel)
+TEST_F(MagneticModel, GazeboModel)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModel model(&node, magnetic_model::MagneticModel::GAZEBO, TEST_DATA_DIR, true);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModel model(node, magnetic_model::MagneticModel::GAZEBO, TEST_DATA_DIR, true);
 
   sensor_msgs::msg::NavSatFix fix;
   fix.header.frame_id = "test";
-  fix.header.stamp = compass_utils::parseTime("2024-11-18T13:00:00Z");
+  fix.header.stamp = cras::parseTime("2024-11-18T13:00:00Z");
   fix.latitude = 50;
   fix.longitude = 10;
   fix.altitude = 200;
@@ -209,40 +213,40 @@ TEST(MagneticModel, GazeboModel)
   EXPECT_NEAR(0, result->errors.inclination, 1e-3);
 }
 
-TEST(MagneticModelManager, GetBestModelName)
+TEST_F(MagneticModelManager, GetBestModelName)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModelManager manager(&node, TEST_DATA_DIR);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModelManager manager(node, TEST_DATA_DIR);
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2025,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2029-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2029-11-18T13:00:00Z")));
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2020,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2024-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2024-11-18T13:00:00Z")));
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2015,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2019-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2019-11-18T13:00:00Z")));
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2010,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2014-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2014-11-18T13:00:00Z")));
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::IGRF14,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2004-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2004-11-18T13:00:00Z")));
 
   EXPECT_EQ(
     magnetic_model::MagneticModel::WMM2025,
-    manager.getBestMagneticModelName(compass_utils::parseTime("2034-11-18T13:00:00Z")));
+    manager.getBestMagneticModelName(cras::parseTime("2034-11-18T13:00:00Z")));
 }
 
-TEST(MagneticModelManager, GetModelByName)
+TEST_F(MagneticModelManager, GetModelByName)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModelManager manager(&node, TEST_DATA_DIR);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModelManager manager(node, TEST_DATA_DIR);
 
   ASSERT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
   ASSERT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, false).has_value());
@@ -256,10 +260,10 @@ TEST(MagneticModelManager, GetModelByName)
   EXPECT_FALSE(model->isValid(2025));
 }
 
-TEST(MagneticModelManager, SetModelPath)
+TEST_F(MagneticModelManager, SetModelPath)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModelManager manager(&node, TEST_DATA_DIR);
+  auto node = rclcpp::Node("test_node");
+  magnetic_model::MagneticModelManager manager(node, TEST_DATA_DIR);
 
   EXPECT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
   EXPECT_EQ(TEST_DATA_DIR, manager.getModelPath());
@@ -290,33 +294,31 @@ TEST(MagneticModelManager, SetModelPath)
   EXPECT_FALSE(manager.getModelPath().empty());
 }
 
-TEST(MagneticModelManager, GetModelByTime)
+TEST_F(MagneticModelManager, GetModelByTime)
 {
-  rclcpp::Node node = rclcpp::Node("test_node");
-  magnetic_model::MagneticModelManager manager(&node, TEST_DATA_DIR);
+  auto node = rclcpp::Node("test_node");
+  const magnetic_model::MagneticModelManager manager(node, TEST_DATA_DIR);
 
-  ASSERT_TRUE(manager.getMagneticModel(compass_utils::parseTime("2024-11-18T13:00:00Z"), true).has_value());
-  ASSERT_TRUE(manager.getMagneticModel(compass_utils::parseTime("2014-11-18T13:00:00Z"), true).has_value());
+  ASSERT_TRUE(manager.getMagneticModel(cras::parseTime("2024-11-18T13:00:00Z"), true).has_value());
+  ASSERT_TRUE(manager.getMagneticModel(cras::parseTime("2014-11-18T13:00:00Z"), true).has_value());
   EXPECT_NE(
-    *manager.getMagneticModel(compass_utils::parseTime("2024-11-18T13:00:00Z"), true),
-    *manager.getMagneticModel(compass_utils::parseTime("2014-11-18T13:00:00Z"), true));
+    *manager.getMagneticModel(cras::parseTime("2024-11-18T13:00:00Z"), true),
+    *manager.getMagneticModel(cras::parseTime("2014-11-18T13:00:00Z"), true));
 
-  auto model = *manager.getMagneticModel(compass_utils::parseTime("2024-11-18T13:00:00Z"), true);
+  const auto model = *manager.getMagneticModel(cras::parseTime("2024-11-18T13:00:00Z"), true);
   EXPECT_TRUE(model->isValid(2024));
   EXPECT_TRUE(model->isValid(2020));
   EXPECT_FALSE(model->isValid(2025));
 
-  EXPECT_TRUE(manager.getMagneticModel(compass_utils::parseTime("2004-11-18T13:00:00Z"), true).has_value());
-  EXPECT_TRUE(manager.getMagneticModel(compass_utils::parseTime("2004-11-18T13:00:00Z"), false).has_value());
+  EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("2004-11-18T13:00:00Z"), true).has_value());
+  EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("2004-11-18T13:00:00Z"), false).has_value());
 
-  EXPECT_TRUE(manager.getMagneticModel(compass_utils::parseTime("1970-11-18T13:00:00Z"), true).has_value());
-  EXPECT_TRUE(manager.getMagneticModel(compass_utils::parseTime("1970-11-18T13:00:00Z"), false).has_value());
+  EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("1970-11-18T13:00:00Z"), true).has_value());
+  EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("1970-11-18T13:00:00Z"), false).has_value());
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-  rclcpp::shutdown();
 }

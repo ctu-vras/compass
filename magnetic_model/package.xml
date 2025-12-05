@@ -1,46 +1,40 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <!-- SPDX-License-Identifier: BSD-3-Clause -->
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>magnetic_model</name>
   <version>2.0.3</version>
   <description>World Magnetic Model ROS API.</description>
 
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>
-  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
 
   <license file="LICENSE">BSD</license>
   <license file="data/magnetic/LICENSE">Public Domain</license>
 
   <url type="repository">https://github.com/ctu-vras/compass</url>
   <url type="bugtracker">https://github.com/ctu-vras/compass/issues</url>
-  <url type="website">https://wiki.ros.org/magnetic_model</url>
+  <url type="website">https://index.ros.org/p/magnetic_model</url>
+
+  <author email="peckama2@fel.cvut.cz">Martin Pecka</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>angles</build_depend>
-  <build_depend>geographiclib</build_depend>
-  <build_depend>libexpected-dev</build_depend>
-
-  <build_export_depend>libexpected-dev</build_export_depend>
-
-  <exec_depend>angles</exec_depend>
-  <exec_depend>geographiclib</exec_depend>
-
-  <depend>compass_interfaces</depend>
-  <depend>compass_utils</depend>
+  <depend>cras_cpp_common</depend>
   <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
 
-  <test_depend>roslint</test_depend>
+  <build_depend>angles</build_depend>
+  <build_depend>geographiclib</build_depend>
+
+  <exec_depend>angles</exec_depend>
+  <exec_depend>geographiclib</exec_depend>
+
   <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <test_depend>cras_lint</test_depend>
 
   <export>
-    <rosdoc config="rosdoc.yaml" />
     <build_type>ament_cmake</build_type>
   </export>
 </package>

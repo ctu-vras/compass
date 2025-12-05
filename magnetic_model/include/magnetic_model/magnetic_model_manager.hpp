@@ -9,14 +9,16 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <magnetic_model/magnetic_model.h>
 #include <memory>
 #include <optional>
-#include <rclcpp/time.hpp>
-#include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
 #include <string>
-#include "tl/expected.hpp"
+
+#include <cras_cpp_common/expected.hpp>
+#include <magnetic_model/magnetic_model.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/time.hpp>
 
 namespace magnetic_model
 {
@@ -29,17 +31,24 @@ struct MagneticModelManagerPrivate;
 class MagneticModelManager
 {
 public:
+  using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
+  using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
+
+  using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
+    NodeClockInterface,
+    NodeLoggingInterface
+  >;
 
   /**
    * \brief Create magnetic model manager.
    *
-   * \param[in] log The logger.
+   * \param[in] node The node to use.
    * \param[in] modelPath Path to the folder with stored models. If nullopt, the default data distributed with this
    *                      package will be used. If empty string, a default system location will be used. The default
    *                      system location is determined by GeographicLib and can be influenced by setting environment
    *                      variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
    */
-  explicit MagneticModelManager(const rclcpp::Node* node, const std::optional<std::string>& modelPath = {});
+  explicit MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& modelPath = {});
   virtual ~MagneticModelManager();
 
   /**
@@ -70,7 +79,7 @@ public:
    * \param[in] strict Whether the returned model should fail if data outside its validity range are queried.
    * \return The magnetic model or error if there is no suitable model.
    */
-  virtual tl::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
+  virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
     const rclcpp::Time& stamp, bool strict) const;
 
   /**
@@ -79,13 +88,13 @@ public:
    * \param[in] strict Whether the returned model should fail if data outside its validity range are queried.
    * \return The magnetic model or error if it cannot be found.
    */
-  virtual tl::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
+  virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
     const std::string& name, bool strict) const;
 
 protected:
   //! \brief PIMPL data
   std::unique_ptr<MagneticModelManagerPrivate> data;
-  const rclcpp::Node* node;
+  RequiredInterfaces node;
 };
 
 }

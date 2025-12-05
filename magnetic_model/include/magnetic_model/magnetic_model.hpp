@@ -9,16 +9,17 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <geometry_msgs/msg/vector3.hpp>
 #include <memory>
+#include <string>
+
+#include <cras_cpp_common/expected.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
+#include <rclcpp/node_interfaces/node_clock_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
 #include <rclcpp/time.hpp>
-#include <rclcpp/clock.hpp>
-#include <rclcpp/logger.hpp>
-#include "rclcpp/node.hpp"
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
-#include <string>
-#include <tl/expected.hpp>
 
 namespace magnetic_model
 {
@@ -65,6 +66,14 @@ struct MagneticModelPrivate;
 class MagneticModel
 {
 public:
+  using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
+  using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
+
+  using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
+    NodeClockInterface,
+    NodeLoggingInterface
+  >;
+
   static const char* GAZEBO;  //!< Gazebo model name
   static const char* IGRF14;  //!< IGRF-14 model name
   static const char* WMM2010;  //!< WMM 2010 model name
@@ -75,12 +84,12 @@ public:
   /**
    * \brief Create the magnetic model.
    *
-   * \param[in] log The logger.
+   * \param[in] node The node to use.
    * \param[in] name Name of the model (e.g. "wmm2020").
    * \param[in] modelPath Path to the folder with stored models. If empty, a default system location will be used.
    * \param[in] strict Whether to fail if the magnetic model is used outside its natural validity bounds.
    */
-  MagneticModel(const rclcpp::Node* node, const std::string& name, const std::string& modelPath, bool strict);
+  MagneticModel(RequiredInterfaces node, const std::string& name, const std::string& modelPath, bool strict);
   virtual ~MagneticModel();
 
   /**
@@ -103,7 +112,7 @@ public:
    * \param[in] stampIn The time for which magnetic field is queried.
    * \return The magnetic field.
    */
-  virtual tl::expected<MagneticField, std::string> getMagneticField(
+  virtual cras::expected<MagneticField, std::string> getMagneticField(
     const sensor_msgs::msg::NavSatFix& fixMsg, const rclcpp::Time& stampIn) const;
 
   /**
@@ -112,7 +121,7 @@ public:
    * \param[in] stampIn The time for which magnetic field components are queried.
    * \return The magnetic field components.
    */
-  virtual tl::expected<MagneticFieldComponentProperties, std::string> getMagneticFieldComponents(
+  virtual cras::expected<MagneticFieldComponentProperties, std::string> getMagneticFieldComponents(
     const sensor_msgs::msg::NavSatFix& fixMsg, const rclcpp::Time& stampIn) const;
 
   /**
@@ -121,7 +130,7 @@ public:
    * \param[in] stampIn The time for which magnetic field components are queried.
    * \return The magnetic field components.
    */
-  virtual tl::expected<MagneticFieldComponentProperties, std::string> getMagneticFieldComponents(
+  virtual cras::expected<MagneticFieldComponentProperties, std::string> getMagneticFieldComponents(
     const MagneticField& field, const rclcpp::Time& stampIn) const;
 
 protected:
@@ -130,7 +139,7 @@ protected:
 
   //! \brief PIMPL data
   std::unique_ptr<MagneticModelPrivate> data;
-  const rclcpp::Node* node;
+  RequiredInterfaces node;
 };
 
 }
