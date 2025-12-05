@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-FileCopyrightText: Czech Technical University in Prague
+
+compass_conversions:
+  - changed-files:
+      - any-glob-to-any-file: compass_conversions/**
+
+compass_interfaces:
+  - changed-files:
+      - any-glob-to-any-file: compass_interfaces/**
+
+magnetic_model:
+  - changed-files:
+      - any-glob-to-any-file: magnetic_model/**
+
+magnetometer_compass:
+  - changed-files:
+      - any-glob-to-any-file: magnetometer_compass/**
+
+magnetometer_pipeline:
+  - changed-files:
+      - any-glob-to-any-file: magnetometer_pipeline/**
+
+CI:
+  - changed-files:
+      - any-glob-to-any-file: .github/**
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
