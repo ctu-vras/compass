@@ -15,7 +15,11 @@ This collection of packages provides support for working with azimuths in ROS.
 
 ## Installation
 
+![ROS 1 compatible](https://img.shields.io/badge/ROS-1-blue) ![Melodic](https://img.shields.io/badge/melodic-green) ![Noetic](https://img.shields.io/badge/noetic-green)
+
 Code on `master` branch is for ROS 1 and it has binary releases.
+
+![ROS 2 compatible](https://img.shields.io/badge/ROS-2-blue) ![Jazzy](https://img.shields.io/badge/jazzy-green) ![Kilted](https://img.shields.io/badge/kilted-green) ![Rolling](https://img.shields.io/badge/rolling-green)
 
 Code on `ros2` branch is for ROS 2 Jazzy and Kilted and does not yet have binary releases.
 
