@@ -44,7 +44,12 @@ namespace compass_conversions
  * geometry_msgs::msg::QuaternionStamped, sensor_msgs::msg::Imu.
  */
 class UniversalAzimuthSubscriber
-  : public message_filters::SimpleFilter<compass_interfaces::msg::Azimuth>, public message_filters::SubscriberBase<>
+  : public message_filters::SimpleFilter<compass_interfaces::msg::Azimuth>,
+#if MESSAGE_FILTERS_VERSION_SUBSCRIBER_BASE_IS_TEMPLATE
+  public message_filters::SubscriberBase<>
+#else
+  public message_filters::SubscriberBase
+#endif
 {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
