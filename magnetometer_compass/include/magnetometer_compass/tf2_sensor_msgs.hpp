@@ -32,7 +32,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * \file
+ * \brief Shim for adding support for transforming IMU messages via tf2::convert(). Since tf2_sensor_msgs 0.44.0, this
+ *        shim is no longer needed and we just redirect to upstream implementation.
+ */
+
 // TODO(lyrical): Use tf2_sensor_msgs/tf2_sensor_msgs.hpp when https://github.com/ros2/geometry2/pull/813 is backported
+
+#if TF2_SENSOR_MSGS_HAS_IMU
+
+#include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
+
+#else
 
 #include <string>
 
@@ -196,3 +208,4 @@ inline void fromMsg(const sensor_msgs::msg::MagneticField& msg, sensor_msgs::msg
 }
 
 }  // namespace tf2
+#endif

@@ -22,6 +22,7 @@ find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 
@@ -35,19 +36,24 @@ ament_export_dependencies(
   tf2_ros
 )
 
-# LIBRARY 0 - do not use in outside projects - this library is scheduled for removal
+# LIBRARY 0 - do not use in outside projects
 add_library(_tf2_sensor_msgs INTERFACE)
 target_sources(_tf2_sensor_msgs INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/tf2_sensor_msgs.hpp>)
-target_link_libraries(_tf2_sensor_msgs INTERFACE
-  ${sensor_msgs_TARGETS}
-  tf2::tf2
-  tf2_ros::tf2_ros
-  Eigen3::Eigen
-)
 target_include_directories(_tf2_sensor_msgs INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
 )
+if(tf2_sensor_msgs_VERSION VERSION_GREATER_EQUAL 0.44.0)
+  target_link_libraries(_tf2_sensor_msgs INTERFACE tf2_sensor_msgs::tf2_sensor_msgs)
+  target_compile_definitions(_tf2_sensor_msgs INTERFACE TF2_SENSOR_MSGS_HAS_IMU=1)
+else()
+  target_link_libraries(_tf2_sensor_msgs INTERFACE
+    ${sensor_msgs_TARGETS}
+    tf2::tf2
+    tf2_ros::tf2_ros
+    Eigen3::Eigen
+  )
+endif()
 
 # LIBRARY 1
 add_library(${PROJECT_NAME} SHARED
