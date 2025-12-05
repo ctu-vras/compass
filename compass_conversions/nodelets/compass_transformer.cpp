@@ -29,7 +29,7 @@
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
-#include <tf2/exceptions.h>
+#include <tf2/exceptions.hpp>
 #include <tf2_ros/create_timer_ros.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>

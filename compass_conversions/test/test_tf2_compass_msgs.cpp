@@ -19,7 +19,7 @@
 #include <cras_cpp_common/string_utils.hpp>
 #include <cras_cpp_common/time_utils.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <tf2/convert.h>
+#include <tf2/convert.hpp>
 
 using Az = compass_interfaces::msg::Azimuth;
 
