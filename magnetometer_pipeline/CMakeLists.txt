@@ -50,9 +50,9 @@ add_library(magnetometer_bias_remover_nodelet SHARED
   nodelets/magnetometer_bias_remover_nodelet.cpp
 )
 target_link_libraries(magnetometer_bias_remover_nodelet
-  PRIVATE magnetometer_bias_remover_filter
-  PRIVATE ${sensor_msgs_TARGETS} cras_cpp_common::cras_cpp_common message_filters::message_filters rclcpp::rclcpp
-  PRIVATE rclcpp_components::component)
+  PUBLIC magnetometer_bias_remover_filter
+  PUBLIC ${sensor_msgs_TARGETS} message_filters::message_filters rclcpp::rclcpp
+  PRIVATE cras_cpp_common::cras_cpp_common rclcpp_components::component)
 target_include_directories(magnetometer_bias_remover_nodelet PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 rclcpp_components_register_node(magnetometer_bias_remover_nodelet

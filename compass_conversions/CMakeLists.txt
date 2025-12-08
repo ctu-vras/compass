@@ -117,15 +117,19 @@ add_library(compass_transformer_nodelet_lib SHARED
   nodelets/compass_transformer.cpp
 )
 target_link_libraries(compass_transformer_nodelet_lib
-  PRIVATE compass_topic_names compass_converter compass_message_filter tf2_compass_msgs _message_filters
-  PRIVATE ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
-  PRIVATE cras_cpp_common::cras_cpp_common rclcpp::rclcpp rclcpp_components::component tf2_ros::tf2_ros)
+  PUBLIC compass_topic_names compass_converter compass_message_filter tf2_compass_msgs _message_filters
+  PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
+  PUBLIC rclcpp::rclcpp tf2_ros::tf2_ros
+  PRIVATE cras_cpp_common::cras_cpp_common  rclcpp_components::component)
 target_include_directories(compass_transformer_nodelet_lib PUBLIC
   <BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 rclcpp_components_register_node(compass_transformer_nodelet_lib
   PLUGIN "compass_conversions::CompassTransformerNodelet" EXECUTABLE compass_transformer)
 
 pluginlib_export_plugin_description_file(rclcpp plugins.xml)
+
+install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
 
 # All shared libraries exported by the project. Do not add component nodes here (they should not be exported).
 # All PUBLIC and INTERFACE dependencies of these libraries have to be <depend> and they have to be covered by
