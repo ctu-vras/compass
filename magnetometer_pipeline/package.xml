@@ -19,6 +19,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <buildtool_depend>ament_cmake_gen_version_h</buildtool_depend>
 
   <depend>cras_cpp_common</depend>
   <depend>message_filters</depend>

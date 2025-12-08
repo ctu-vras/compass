@@ -6,7 +6,6 @@ project(magnetic_model)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(angles REQUIRED)
@@ -30,28 +29,23 @@ add_library(${PROJECT_NAME} SHARED
   src/magnetic_model_manager.cpp
   src/magnetic_model.cpp
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${geometry_msgs_TARGETS}
-  ${sensor_msgs_TARGETS}
-  cras_cpp_common::cras_expected
-  rclcpp::rclcpp
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  ament_index_cpp::ament_index_cpp
-  angles::angles
-  cras_cpp_common::cras_string_utils
-  cras_cpp_common::cras_time_utils
-  GeographicLib
-)
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS}
+  PUBLIC cras_cpp_common::cras_expected rclcpp::rclcpp
+  PRIVATE ament_index_cpp::ament_index_cpp angles::angles cras_cpp_common::cras_cpp_common GeographicLib)
 target_include_directories(${PROJECT_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
-)
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY share/data DESTINATION share/${PROJECT_NAME})
 
-install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
+add_library(${PROJECT_NAME}_version INTERFACE)
+ament_generate_version_header(${PROJECT_NAME}_version)
+
+# Install exported libs
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_version
+  EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
