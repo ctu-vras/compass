@@ -5,6 +5,11 @@
 Changelog for package magnetic_model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed build with GCC 11
+* Contributors: Martin Pecka
+
 3.0.1 (2026-01-26)
 ------------------
 

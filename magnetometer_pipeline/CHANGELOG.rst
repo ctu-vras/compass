@@ -5,6 +5,9 @@
 Changelog for package magnetometer_pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.1 (2026-01-26)
 ------------------
 

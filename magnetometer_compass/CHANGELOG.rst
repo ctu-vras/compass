@@ -5,6 +5,11 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed build with GCC 11
+* Contributors: Martin Pecka
+
 3.0.1 (2026-01-26)
 ------------------
 * Fixed detection of IMU support in tf2_sensor_msgs
