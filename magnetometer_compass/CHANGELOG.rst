@@ -5,8 +5,8 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2026-01-26)
+------------------
 * Use upstream tf2_sensor_msgs if it can already transform IMU messages.
 * Added support for out_frame_id to allow overwriting frame_id of transformed messages.
 * Added possibility to use wall time for declination computations.

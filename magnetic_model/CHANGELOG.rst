@@ -5,8 +5,8 @@
 Changelog for package magnetic_model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2026-01-26)
+------------------
 * Added IGRF-14 and GAZEBO magnetic models.
 * ROS 2 port.
 * Contributors: Adam Herold, Martin Pecka
