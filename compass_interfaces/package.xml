@@ -4,7 +4,7 @@
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 <package format="3">
   <name>compass_interfaces</name>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <description>Messages related to compass</description>
 
   <maintainer email="peckama2@fel.cvut.cz">Martin Pecka</maintainer>

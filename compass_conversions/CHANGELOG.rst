@@ -5,8 +5,8 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.2 (2026-01-26)
+------------------
 * Fixed build with GCC 11
 * Contributors: Martin Pecka
 
