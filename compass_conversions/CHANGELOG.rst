@@ -5,6 +5,11 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed deprecations on Rolling
+* Contributors: Martin Pecka
+
 3.0.0 (2026-01-26)
 ------------------
 * ROS 2 port.

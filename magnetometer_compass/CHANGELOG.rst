@@ -5,6 +5,11 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed detection of IMU support in tf2_sensor_msgs
+* Contributors: Martin Pecka
+
 3.0.0 (2026-01-26)
 ------------------
 * Use upstream tf2_sensor_msgs if it can already transform IMU messages.
