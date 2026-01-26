@@ -5,8 +5,8 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.1 (2026-01-26)
+------------------
 * Fixed deprecations on Rolling
 * Contributors: Martin Pecka
 
