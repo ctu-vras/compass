@@ -5,6 +5,11 @@
 Changelog for package magnetometer_pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ROS 2 port.
+* Contributors: Adam Herold, Martin Pecka, helhest
+
 2.0.3 (2024-12-20)
 ------------------
 

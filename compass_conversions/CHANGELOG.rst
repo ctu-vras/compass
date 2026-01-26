@@ -5,6 +5,11 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* ROS 2 port.
+* Contributors: Adam Herold, Martin Pecka
+
 2.0.3 (2024-12-20)
 ------------------
 

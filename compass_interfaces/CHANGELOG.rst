@@ -1,9 +1,14 @@
 .. SPDX-License-Identifier: BSD-3-Clause
 .. SPDX-FileCopyrightText: Czech Technical University in Prague
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package compass_interfaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Forthcoming
+-----------
+* ROS 2 port.
+* Contributors: Adam Herold, Martin Pecka
 
 2.0.3 (2024-12-20)
 ------------------
