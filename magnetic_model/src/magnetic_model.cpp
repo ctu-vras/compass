@@ -8,7 +8,6 @@
  */
 
 #include <ctime>
-#include <format>
 #include <memory>
 #include <string>
 
@@ -17,6 +16,7 @@
 
 #include <angles/angles.h>
 #include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/format.hpp>
 #include <cras_cpp_common/string_utils.hpp>
 #include <cras_cpp_common/time_utils.hpp>
 #include <magnetic_model/magnetic_model.hpp>
@@ -79,7 +79,7 @@ MagneticModel::MagneticModel(
   }
   catch (const GeographicLib::GeographicErr& e)
   {
-    throw std::invalid_argument(std::format(
+    throw std::invalid_argument(cras::format(
       "Could not create magnetic field model {} because of the following error: {}", name.c_str(), e.what()));
   }
 
@@ -189,7 +189,7 @@ cras::expected<MagneticField, std::string> MagneticModel::getMagneticField(
   const auto maxYear = this->data->magneticModel->MaxTime();
   if (year < minYear || year > maxYear)
   {
-    const auto err = std::format("Using magnetic field model {} for an invalid year {}!",
+    const auto err = cras::format("Using magnetic field model {} for an invalid year {}!",
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(year));
     if (this->strict)
     {
@@ -206,7 +206,7 @@ cras::expected<MagneticField, std::string> MagneticModel::getMagneticField(
   const auto maxAlt = this->data->magneticModel->MaxHeight();
   if (fix.altitude < minAlt || fix.altitude > maxAlt)
   {
-    const auto err = std::format(
+    const auto err = cras::format(
       "Using magnetic field model {} in altitude {} m which is outside the model range.",
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(fix.altitude));
     if (this->strict)
@@ -259,7 +259,7 @@ cras::expected<MagneticFieldComponentProperties, std::string> MagneticModel::get
   const auto maxAlt = this->data->magneticModel->MaxHeight();
   if (fix.altitude < minAlt || fix.altitude > maxAlt)
   {
-    const auto err = std::format(
+    const auto err = cras::format(
       "Using magnetic field model {} in altitude {} m which is outside the model range.",
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(fix.altitude));
     if (this->strict)
@@ -304,7 +304,7 @@ cras::expected<MagneticFieldComponentProperties, std::string> MagneticModel::get
   const auto maxYear = this->data->magneticModel->MaxTime();
   if (year < minYear || year > maxYear)
   {
-    const auto err = std::format("Using magnetic field model {} for an invalid year {}!",
+    const auto err = cras::format("Using magnetic field model {} for an invalid year {}!",
       this->data->magneticModel->MagneticModelName().c_str(), std::to_string(year));
     if (this->strict)
     {

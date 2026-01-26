@@ -26,7 +26,7 @@ target_include_directories(${PROJECT_NAME}_string_utils PUBLIC
 )
 target_link_libraries(${PROJECT_NAME}_string_utils
   PUBLIC "${cpp_typesupport_target}"
-  PRIVATE cras_cpp_common::cras_string_utils)
+  PRIVATE cras_cpp_common::cras_format cras_cpp_common::cras_string_utils)
 
 install(DIRECTORY include/ DESTINATION include)
 

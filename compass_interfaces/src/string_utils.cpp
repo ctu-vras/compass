@@ -7,11 +7,11 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <format>
 #include <string>
 
 #include <compass_interfaces/msg/azimuth.hpp>
 #include <compass_interfaces/string_utils.hpp>
+#include <cras_cpp_common/format.hpp>
 #include <cras_cpp_common/string_utils.hpp>
 
 namespace compass_interfaces
@@ -26,7 +26,7 @@ std::string unitToString(const msg::Azimuth::_unit_type unit)
     case compass_interfaces::msg::Azimuth::UNIT_DEG:
       return "deg";
     default:
-      throw std::runtime_error(std::format("Invalid compass_interfaces::msg::Azimuth::unit {}", std::to_string(unit)));
+      throw std::runtime_error(cras::format("Invalid compass_interfaces::msg::Azimuth::unit {}", std::to_string(unit)));
   }
 }
 
@@ -38,7 +38,7 @@ msg::Azimuth::_unit_type parseUnit(const std::string& unitStr)
   else if (unit == "deg")
     return compass_interfaces::msg::Azimuth::UNIT_DEG;
   else
-    throw std::runtime_error(std::format("Invalid compass_interfaces::msg::Azimuth::unit '{}'", unitStr.c_str()));
+    throw std::runtime_error(cras::format("Invalid compass_interfaces::msg::Azimuth::unit '{}'", unitStr.c_str()));
 }
 
 std::string orientationToString(const msg::Azimuth::_orientation_type orientation)
@@ -51,7 +51,7 @@ std::string orientationToString(const msg::Azimuth::_orientation_type orientatio
       return "NED";
     default:
       throw std::runtime_error(
-        std::format("Invalid compass_interfaces::msg::Azimuth::orientation {}", std::to_string(orientation)));
+        cras::format("Invalid compass_interfaces::msg::Azimuth::orientation {}", std::to_string(orientation)));
   }
 }
 
@@ -64,7 +64,7 @@ msg::Azimuth::_orientation_type parseOrientation(const std::string& orientationS
     return compass_interfaces::msg::Azimuth::ORIENTATION_NED;
   else
     throw std::runtime_error(
-      std::format("Invalid compass_interfaces::msg::Azimuth::orientation '{}'", orientationStr.c_str()));
+      cras::format("Invalid compass_interfaces::msg::Azimuth::orientation '{}'", orientationStr.c_str()));
 }
 
 std::string referenceToString(const msg::Azimuth::_reference_type reference)
@@ -79,7 +79,7 @@ std::string referenceToString(const msg::Azimuth::_reference_type reference)
       return "UTM";
     default:
       throw std::runtime_error(
-        std::format("Invalid compass_interfaces::msg::Azimuth::reference {}", std::to_string(reference)));
+        cras::format("Invalid compass_interfaces::msg::Azimuth::reference {}", std::to_string(reference)));
   }
 }
 
@@ -94,7 +94,7 @@ msg::Azimuth::_reference_type parseReference(const std::string& referenceStr)
     return compass_interfaces::msg::Azimuth::REFERENCE_UTM;
   else
     throw std::runtime_error(
-      std::format("Invalid compass_interfaces::msg::Azimuth::reference '{}'", referenceStr.c_str()));
+      cras::format("Invalid compass_interfaces::msg::Azimuth::reference '{}'", referenceStr.c_str()));
 }
 
 }

@@ -7,7 +7,6 @@
  * \author Martin Pecka, Adam Herold (ROS2 transcription)
  */
 
-#include <format>
 #include <map>
 #include <memory>
 #include <optional>
@@ -19,6 +18,7 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/format.hpp>
 #include <cras_cpp_common/string_utils.hpp>
 #include <cras_cpp_common/time_utils.hpp>
 #include <magnetic_model/magnetic_model.hpp>
@@ -113,7 +113,7 @@ cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager
   if (!model.has_value())
     return cras::make_unexpected(model.error());
   if (strict && !model.value()->isValid(stamp))
-    return cras::make_unexpected(std::format(
+    return cras::make_unexpected(cras::format(
       "The best magnetic model {} is not valid at time {}.", name, cras::to_pretty_string(stamp)));
   return *model;
 }
