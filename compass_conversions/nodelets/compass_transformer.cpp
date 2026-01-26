@@ -68,7 +68,7 @@ std::string outputTypeToString(const OutputType type)
     case OutputType::Quaternion:
       return "quaternion";
     default:
-      throw std::runtime_error(std::format("Unknown output type: {}", std::to_string((static_cast<int>(type)))));
+      throw std::runtime_error(cras::format("Unknown output type: {}", std::to_string((static_cast<int>(type)))));
   }
 }
 

@@ -24,6 +24,7 @@
 #include <compass_conversions/topic_names.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
 #include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/format.hpp>
 #include <cras_cpp_common/string_utils.hpp>
 #include <cras_cpp_common/tf2_utils.hpp>
 #include <cras_cpp_common/time_utils.hpp>
@@ -208,7 +209,7 @@ cras::expected<double, std::string> CompassConverter::computeMagneticDeclination
 
     const auto model = this->data->magneticModelManager->getMagneticModel(modelName, this->strict);
     if (!model.has_value())
-      return cras::make_unexpected(std::format(
+      return cras::make_unexpected(cras::format(
         "Could not create magnetic field model {} for year {} because of the following error: {}",
         modelName, std::to_string(year), model.error()));
     this->data->magneticModels[year] = *model;
@@ -257,7 +258,7 @@ cras::expected<std::pair<double, int>, std::string> CompassConverter::computeUTM
   const sensor_msgs::msg::NavSatFix& fix, const std::optional<int>& utmZone) const
 {
   if (utmZone.has_value() && (*utmZone < GeographicLib::UTMUPS::MINZONE || *utmZone > GeographicLib::UTMUPS::MAXZONE))
-    return cras::make_unexpected(std::format("Invalid UTM zone: {}", std::to_string(*utmZone)));
+    return cras::make_unexpected(cras::format("Invalid UTM zone: {}", std::to_string(*utmZone)));
 
   try
   {
@@ -273,7 +274,7 @@ cras::expected<std::pair<double, int>, std::string> CompassConverter::computeUTM
   }
   catch (const GeographicLib::GeographicErr& e)
   {
-    return cras::make_unexpected(std::format("Could not get UTM grid convergence: {}", e.what()));
+    return cras::make_unexpected(cras::format("Could not get UTM grid convergence: {}", e.what()));
   }
 }
 
@@ -308,7 +309,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
 
       if (!magneticDeclination.has_value())
       {
-        return cras::make_unexpected(std::format(
+        return cras::make_unexpected(cras::format(
           "Cannot convert magnetic azimuth to true without knowing magnetic declination. Error: {}",
           magneticDeclination.error()));
       }
@@ -319,7 +320,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
         const auto convergence = this->getUTMGridConvergence();
         if (!convergence.has_value())
         {
-          return cras::make_unexpected(std::format(
+          return cras::make_unexpected(cras::format(
             "Cannot convert true azimuth to UTM without knowing UTM grid convergence. Error: {}", convergence.error()));
         }
         result.azimuth -= *convergence;
@@ -332,7 +333,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
         const auto magneticDeclination = this->getMagneticDeclination(azimuth.header.stamp);
         if (!magneticDeclination.has_value())
         {
-          return cras::make_unexpected(std::format(
+          return cras::make_unexpected(cras::format(
             "Cannot convert true azimuth to magnetic without knowing magnetic declination. Error: {}",
             magneticDeclination.error()));
         }
@@ -343,7 +344,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
         const auto convergence = this->getUTMGridConvergence();
         if (!convergence.has_value())
         {
-          return cras::make_unexpected(std::format(
+          return cras::make_unexpected(cras::format(
             "Cannot convert true azimuth to UTM without knowing UTM grid convergence. Error: {}", convergence.error()));
         }
         result.azimuth -= *convergence;
@@ -354,7 +355,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
       const auto convergence = this->getUTMGridConvergence();
       if (!convergence.has_value())
       {
-        return cras::make_unexpected(std::format(
+        return cras::make_unexpected(cras::format(
           "Cannot convert UTM azimuth to true without knowing UTM grid convergence. Error: {}", convergence.error()));
       }
       result.azimuth += *convergence;
@@ -364,7 +365,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> CompassConverter::
         const auto magneticDeclination = this->getMagneticDeclination(azimuth.header.stamp);
         if (!magneticDeclination.has_value())
         {
-          return cras::make_unexpected(std::format(
+          return cras::make_unexpected(cras::format(
             "Cannot convert true azimuth to magnetic without knowing magnetic declination. Error: {}",
             magneticDeclination.error()));
         }
@@ -434,7 +435,7 @@ cras::expected<geometry_msgs::msg::PoseWithCovarianceStamped, std::string> Compa
 {
   const auto maybeQuat = this->convertToQuaternion(azimuth);
   if (!maybeQuat.has_value())
-    return cras::make_unexpected(std::format("Could not convert azimuth to pose: {}", maybeQuat.error()));
+    return cras::make_unexpected(cras::format("Could not convert azimuth to pose: {}", maybeQuat.error()));
 
   geometry_msgs::msg::PoseWithCovarianceStamped pose;
   pose.header = azimuth.header;
@@ -454,7 +455,7 @@ cras::expected<sensor_msgs::msg::Imu, std::string> CompassConverter::convertToIm
 {
   const auto maybeQuat = this->convertToQuaternion(azimuth);
   if (!maybeQuat.has_value())
-    return cras::make_unexpected(std::format("Could not convert azimuth to pose: {}", maybeQuat.error()));
+    return cras::make_unexpected(cras::format("Could not convert azimuth to pose: {}", maybeQuat.error()));
 
   sensor_msgs::msg::Imu imu;
   imu.header = azimuth.header;

@@ -15,6 +15,7 @@
 #include <angles/angles.h>
 #include <compass_interfaces/msg/azimuth.hpp>
 #include <cras_cpp_common/expected.hpp>
+#include <cras_cpp_common/format.hpp>
 #include <cras_cpp_common/tf2_utils.hpp>
 #include <magnetometer_compass/magnetometer_compass.hpp>
 #include <magnetometer_compass/tf2_sensor_msgs.hpp>
@@ -100,7 +101,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> MagnetometerCompas
   }
   catch (const tf2::TransformException& e)
   {
-    return cras::make_unexpected(std::format(
+    return cras::make_unexpected(cras::format(
       "Could not transform IMU data to frame {} because: {}", this->data->frame.c_str(), e.what()));
   }
 
@@ -111,7 +112,7 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> MagnetometerCompas
   }
   catch (const tf2::TransformException& e)
   {
-    return cras::make_unexpected(std::format(
+    return cras::make_unexpected(cras::format(
       "Could not transform magnetometer to frame {} because: {}", this->data->frame.c_str(), e.what()));
   }
 
