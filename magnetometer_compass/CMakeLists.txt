@@ -36,19 +36,22 @@ ament_export_dependencies(
   tf2_ros
 )
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+try_compile(TF2_SENSOR_MSGS_HAS_IMU
+  ${CMAKE_BINARY_DIR}/has_imu ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_sensor_msgs_has_imu.cpp
+  CXX_STANDARD 20 LINK_LIBRARIES tf2_sensor_msgs::tf2_sensor_msgs)
+
 # LIBRARY 0 - do not use in outside projects
 add_library(_tf2_sensor_msgs INTERFACE)
 target_sources(_tf2_sensor_msgs INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/tf2_sensor_msgs.hpp>)
 target_include_directories(_tf2_sensor_msgs INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
-if(tf2_sensor_msgs_VERSION VERSION_GREATER_EQUAL 0.44.0)
-  target_link_libraries(_tf2_sensor_msgs INTERFACE tf2_sensor_msgs::tf2_sensor_msgs)
+target_link_libraries(_tf2_sensor_msgs
+  INTERFACE ${sensor_msgs_TARGETS}
+  INTERFACE Eigen3::Eigen tf2::tf2 tf2_ros::tf2_ros tf2_sensor_msgs::tf2_sensor_msgs)
+if(TF2_SENSOR_MSGS_HAS_IMU)
   target_compile_definitions(_tf2_sensor_msgs INTERFACE TF2_SENSOR_MSGS_HAS_IMU=1)
-else()
-  target_link_libraries(_tf2_sensor_msgs
-    INTERFACE ${sensor_msgs_TARGETS}
-    INTERFACE Eigen3::Eigen tf2::tf2 tf2_ros::tf2_ros)
 endif()
 
 # LIBRARY 1
