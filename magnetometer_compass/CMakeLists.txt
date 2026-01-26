@@ -36,10 +36,11 @@ ament_export_dependencies(
   tf2_ros
 )
 
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
 try_compile(TF2_SENSOR_MSGS_HAS_IMU
   ${CMAKE_BINARY_DIR}/has_imu ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_sensor_msgs_has_imu.cpp
   CXX_STANDARD 20 LINK_LIBRARIES tf2_sensor_msgs::tf2_sensor_msgs)
+message(STATUS "TF2_SENSOR_MSGS_HAS_IMU=${TF2_SENSOR_MSGS_HAS_IMU}")
 
 # LIBRARY 0 - do not use in outside projects
 add_library(_tf2_sensor_msgs INTERFACE)

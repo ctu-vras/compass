@@ -28,6 +28,7 @@ jobs:
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache # Directory for ccache (and how we enable ccache in industrial_ci)
       UPSTREAM_WORKSPACE: .github/ci.ros2.rosinstall
+      VERBOSE_OUTPUT: true
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
