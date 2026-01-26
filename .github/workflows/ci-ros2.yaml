@@ -26,11 +26,11 @@ jobs:
         os: ["ubuntu-24.04", "ubuntu-24.04-arm"]
     name: "${{ matrix.env.ROS_DISTRO }}-${{ matrix.os }}"
     env:
-      CCACHE_DIR: ${{ github.workspace }}/.ccache # Directory for ccache (and how we enable ccache in industrial_ci)
-      UPSTREAM_WORKSPACE: .github/ci.ros2.rosinstall
-      VERBOSE_OUTPUT: true
-    runs-on: ${{ matrix.os }}
-    steps:
+      CCACHE_DIR: &ccache ${{ github.workspace }}/.ccache # Directory for ccache (and how we enable ccache in industrial_ci)
+      UPSTREAM_WORKSPACE: &upstream .github/ci.ros2.rosinstall
+      VERBOSE_OUTPUT: &verbose true
+    runs-on: &runs-on ${{ matrix.os }}
+    steps: &steps
       - uses: actions/checkout@v4
       # This step will fetch/store the directory used by ccache before/after the ci run
       - name: Cache ccache
@@ -47,3 +47,21 @@ jobs:
       # Run industrial_ci
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
+  # We also do a best effort test with GCC 11 (which is on RHEL 9 on ROS buildfarm)
+  industrial_ci_gcc_11:
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - { ROS_DISTRO: kilted, ROS_REPO: testing, DOCKER_IMAGE: "ghcr.io/sloretz/ros:kilted-perception", ALLOW_FAIL: yes }
+        os: [ "ubuntu-24.04", "ubuntu-24.04-arm" ]
+    name: "${{ matrix.env.ROS_DISTRO }}-${{ matrix.os }}-gcc11"
+    env:
+      CCACHE_DIR: *ccache
+      UPSTREAM_WORKSPACE: *upstream
+      VERBOSE_OUTPUT: *verbose
+      ADDITIONAL_DEBS: "g++-11"
+      CC: "gcc-11"
+      CXX: "g++-11"
+    runs-on: *runs-on
+    steps: *steps
