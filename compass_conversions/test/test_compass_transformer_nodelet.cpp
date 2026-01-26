@@ -29,8 +29,8 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/create_timer_ros.h>
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/create_timer_ros.hpp>
 
 using Az = compass_interfaces::msg::Azimuth;
 using namespace std::chrono_literals;
