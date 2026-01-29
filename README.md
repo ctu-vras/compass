@@ -43,7 +43,7 @@ Humble, Iron and older ROS 2 distros are not supported.
 
 ## Definitions
 
-**ENU** frame is the [standard orientation used in ROS](https://www.ros.org/reps/rep-0103.html). The abbreviation means
+**ENU** frame is the [standard orientation used in ROS](https://reps.openrobotics.org/rep-0103/). The abbreviation means
 East-North-Up and corresponds to the meaning of vector components X, Y and Z. A zero azimuth points towards East and it
 increases counter-clockwise.
 
@@ -70,9 +70,9 @@ time-dependent and they are approximated by the
 The difference between true North and grid North is called **grid convergence**. Its values are only location-dependent
 and do not differ in time. The values also depend on the chosen UTM zone.
 
-Although [ROS specifies that all angular values should be expressed in radians](https://www.ros.org/reps/rep-0103.html),
+Although [ROS specifies that all angular values should be expressed in radians](https://reps.openrobotics.org/rep-0103/),
 the usage of degrees in geography is so common that
-[Azimuth](https://docs.ros.org/en/api/compass_interfaces/html/msg/Azimuth.html) messages support both radians and degrees.
+[Azimuth](https://docs.ros.org/en/rolling/p/compass_interfaces/msg/Azimuth.html) messages support both radians and degrees.
 
 For more information, see https://www.drillingformulas.com/magnetic-declination-and-grid-convergent-and-their-applications-in-directional-drilling/
 or https://en.wikipedia.org/wiki/Azimuth .
