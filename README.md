@@ -3,7 +3,14 @@
 
 # Compass stack
 
+![ROS Package Index](https://img.shields.io/ros/v/noetic/compass)
+![ROS Package Index](https://img.shields.io/ros/v/jazzy/compass)
+![ROS Package Index](https://img.shields.io/ros/v/kilted/compass)
+![ROS Package Index](https://img.shields.io/ros/v/rolling/compass)
+
 This collection of packages provides support for working with azimuths in ROS.
+
+See [ros2 branch](tree/ros2) for ROS 2 version of this package.
 
 ## Packages
 
