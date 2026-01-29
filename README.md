@@ -5,6 +5,9 @@
 
 This collection of packages provides support for working with azimuths in ROS.
 
+> [!NOTE]
+> This is ROS 1 version of the project. See the [ros2 branch](../../tree/ros2) for ROS 2 version.
+
 ## Packages
 
 - [compass_msgs](compass_msgs): The message definitions.
