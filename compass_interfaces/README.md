@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: BSD-3-Clause -->
 <!-- SPDX-FileCopyrightText: Czech Technical University in Prague -->
 
-# compass\_msgs
+# compass\_interfaces
 
 Messages for use with a compass.
 
 ## Azimuth
 
-[Azimuth](https://docs.ros.org/en/api/compass_interfaces/html/msg/Azimuth.html) message carries information about an azimuth.
+[Azimuth](https://docs.ros.org/en/rolling/p/compass_interfaces/msg/Azimuth.html) message carries information about an azimuth.
 As there are multiple possibilities related to the azimuth meaning, it has 3 metadata fields that exactly specify the
 meaning of each message:
 
