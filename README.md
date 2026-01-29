@@ -15,15 +15,31 @@ This collection of packages provides support for working with azimuths in ROS.
 
 ## Installation
 
-![ROS 1 compatible](https://img.shields.io/badge/ROS-1-blue) ![Melodic](https://img.shields.io/badge/melodic-green) ![Noetic](https://img.shields.io/badge/noetic-green)
+Install from commandline:
 
-Code on `master` branch is for ROS 1 and it has binary releases.
+```bash
+sudo apt install ros-${ROS_DISTRO}-magnetometer-compass
+```
 
-![ROS 2 compatible](https://img.shields.io/badge/ROS-2-blue) ![Jazzy](https://img.shields.io/badge/jazzy-green) ![Kilted](https://img.shields.io/badge/kilted-green) ![Rolling](https://img.shields.io/badge/rolling-green)
+Or declare dependency in package.xml and let rosdep install:
 
-Code on `ros2` branch is for ROS 2 Jazzy and Kilted and does not yet have binary releases.
+```xml
+<exec_depend>magnetometer_compass</exec_depend>
+```
 
-To build this package on ROS 2, you'll need additional packages in your workspace: [rosinstall file](.github/ci.ros2.rosinstall).
+Code on [master branch](/github/ctu-vras/tree/master) is for ROS 1 and it has binary releases for Noetic. It can be built from source on Melodic.
+
+![ROS 1 compatible](https://img.shields.io/badge/ROS-1-blue)
+![Melodic](https://img.shields.io/badge/ros%20|%20melodic-src-green)
+[![Noetic](https://img.shields.io/ros/v/noetic/compass)](https://index.ros.org/r/compass/#noetic)
+
+Code on [ros2 branch](/github/ctu-vras/tree/ros2) is for ROS 2 Jazzy, Kilted and Rolling and has binary releases for all these distros.
+Humble, Iron and older ROS 2 distros are not supported.
+
+![ROS 2 compatible](https://img.shields.io/badge/ROS-2-blue)
+[![Jazzy](https://img.shields.io/ros/v/jazzy/compass)](https://index.ros.org/r/compass/#jazzy)
+[![Kilted](https://img.shields.io/ros/v/kilted/compass)](https://index.ros.org/r/compass/#kilted)
+[![Rolling](https://img.shields.io/ros/v/rolling/compass)](https://index.ros.org/r/compass/#rolling)
 
 ## Definitions
 
