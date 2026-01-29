@@ -3,14 +3,7 @@
 
 # Compass stack
 
-![ROS Package Index](https://img.shields.io/ros/v/noetic/compass)
-![ROS Package Index](https://img.shields.io/ros/v/jazzy/compass)
-![ROS Package Index](https://img.shields.io/ros/v/kilted/compass)
-![ROS Package Index](https://img.shields.io/ros/v/rolling/compass)
-
 This collection of packages provides support for working with azimuths in ROS.
-
-See [ros2 branch](tree/ros2) for ROS 2 version of this package.
 
 ## Packages
 
@@ -19,6 +12,34 @@ See [ros2 branch](tree/ros2) for ROS 2 version of this package.
 - [magnetic_model](magnetic_model): ROS bindings for World Magnetic Model.
 - [magnetometer_compass](magnetometer_compass): Support and ROS nodes for extracting azimuths from 3-axis magnetometers.
 - [magnetometer_pipeline](magnetometer_pipeline): Calibration and removing of magnetometer bias.
+
+## Installation
+
+Install from commandline:
+
+```bash
+sudo apt install ros-${ROS_DISTRO}-magnetometer-compass
+```
+
+Or declare dependency in package.xml and let rosdep install:
+
+```xml
+<exec_depend>magnetometer_compass</exec_depend>
+```
+
+Code on [master branch](/github/ctu-vras/tree/master) is for ROS 1 and it has binary releases for Noetic. It can be built from source on Melodic.
+
+![ROS 1 compatible](https://img.shields.io/badge/ROS-1-blue)
+![Melodic](https://img.shields.io/badge/ros%20|%20melodic-src-green)
+[![Noetic](https://img.shields.io/ros/v/noetic/compass)](https://index.ros.org/r/compass/#noetic)
+
+Code on [ros2 branch](/github/ctu-vras/tree/ros2) is for ROS 2 Jazzy, Kilted and Rolling and has binary releases for all these distros.
+Humble, Iron and older ROS 2 distros are not supported.
+
+![ROS 2 compatible](https://img.shields.io/badge/ROS-2-blue)
+[![Jazzy](https://img.shields.io/ros/v/jazzy/compass)](https://index.ros.org/r/compass/#jazzy)
+[![Kilted](https://img.shields.io/ros/v/kilted/compass)](https://index.ros.org/r/compass/#kilted)
+[![Rolling](https://img.shields.io/ros/v/rolling/compass)](https://index.ros.org/r/compass/#rolling)
 
 ## Definitions
 
