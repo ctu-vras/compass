@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Czech Technical University in Prague
 
 cmake_minimum_required(VERSION 3.20)
-project(magnetic_model)
+project(magnetic_model CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
