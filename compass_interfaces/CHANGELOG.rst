@@ -5,8 +5,8 @@
 Changelog for package compass_interfaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.3 (2026-04-27)
+------------------
 * Fixed outdated references
 * Docs: Added build status to repo readmes.
 * Contributors: Martin Pecka
