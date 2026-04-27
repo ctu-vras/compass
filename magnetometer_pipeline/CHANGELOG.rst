@@ -5,6 +5,12 @@
 Changelog for package magnetometer_pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed build on Rolling
+* Docs: Added build status to repo readmes.
+* Contributors: Martin Pecka
+
 3.0.2 (2026-01-26)
 ------------------
 
