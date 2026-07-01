@@ -39,6 +39,7 @@ Humble, Iron and older ROS 2 distros are not supported.
 ![ROS 2 compatible](https://img.shields.io/badge/ROS-2-blue)
 [![Jazzy](https://img.shields.io/ros/v/jazzy/compass)](https://index.ros.org/r/compass/#jazzy)
 [![Kilted](https://img.shields.io/ros/v/kilted/compass)](https://index.ros.org/r/compass/#kilted)
+[![Lyrical](https://img.shields.io/ros/v/lyrical/compass)](https://index.ros.org/r/compass/#lyrical)
 [![Rolling](https://img.shields.io/ros/v/rolling/compass)](https://index.ros.org/r/compass/#rolling)
 
 ## Definitions
