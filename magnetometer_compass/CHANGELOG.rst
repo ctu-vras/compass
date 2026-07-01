@@ -5,6 +5,9 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.3 (2026-04-27)
 ------------------
 * Fixed build on Rolling

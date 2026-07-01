@@ -5,6 +5,11 @@
 Changelog for package magnetic_model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed compatibility with Rolling.
+* Contributors: Martin Pecka
+
 3.0.3 (2026-04-27)
 ------------------
 * Fixed build on Rolling
