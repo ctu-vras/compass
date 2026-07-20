@@ -176,8 +176,7 @@ TEST(TopicNames, ParseTopicFromConnectionHeader)  // NOLINT
   EXPECT_EQ(std::make_tuple(rad, ned, utm), compass_conversions::parseAzimuthTopicName(header));
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

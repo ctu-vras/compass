@@ -10,6 +10,4 @@
 #include <message_filters/subscriber.hpp>
 
 // DeprecatedTemplateParameter struct was added in the exact same commit that added the interfaces constructors.
-struct Test : public message_filters::DeprecatedTemplateParameter
-{
-};
+struct Test : public message_filters::DeprecatedTemplateParameter {};

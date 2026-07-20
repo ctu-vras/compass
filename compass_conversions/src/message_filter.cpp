@@ -36,8 +36,8 @@
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 
-namespace compass_conversions
-{
+namespace compass_conversions {
+
 using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
@@ -45,39 +45,44 @@ using Quat = geometry_msgs::msg::QuaternionStamped;
 using Ser = rclcpp::SerializedMessage;
 
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
-UniversalAzimuthSubscriber::UniversalAzimuthSubscriber(RequiredInterfaces node,
-  const std::string& topic, const rclcpp::QoS& qos, rclcpp::SubscriptionOptions subscribeOptions) :
-#else
-UniversalAzimuthSubscriber::UniversalAzimuthSubscriber(rclcpp::Node* node, const std::string& topic,
-  const rmw_qos_profile_t qos, rclcpp::SubscriptionOptions subscribeOptions) :
-#endif
-  azSub(message_filters::Subscriber<Az>()),
-  poseSub(message_filters::Subscriber<Pose>()),
-  quatSub(message_filters::Subscriber<Quat>()),
-  imuSub(message_filters::Subscriber<Imu>()),
-  serSub(message_filters::Subscriber<Ser>()),
-  node(node), converter(node, true), topic(topic), qos(qos), options(subscribeOptions)
-{
+UniversalAzimuthSubscriber::UniversalAzimuthSubscriber(
+    RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos,
+    rclcpp::SubscriptionOptions subscribeOptions)
+    : azSub(message_filters::Subscriber<Az>()), poseSub(message_filters::Subscriber<Pose>()),
+      quatSub(message_filters::Subscriber<Quat>()), imuSub(message_filters::Subscriber<Imu>()),
+      serSub(message_filters::Subscriber<Ser>()), node(node), converter(node, true), topic(topic),
+      options(subscribeOptions), qos(qos) {
   UniversalAzimuthSubscriber::subscribe(node, topic, qos, subscribeOptions);
 }
+#else
+UniversalAzimuthSubscriber::UniversalAzimuthSubscriber(
+    rclcpp::Node* node, const std::string& topic, const rmw_qos_profile_t qos,
+    rclcpp::SubscriptionOptions subscribeOptions)
+    : azSub(message_filters::Subscriber<Az>()), poseSub(message_filters::Subscriber<Pose>()),
+      quatSub(message_filters::Subscriber<Quat>()), imuSub(message_filters::Subscriber<Imu>()),
+      serSub(message_filters::Subscriber<Ser>()), node(node), converter(node, true), topic(topic),
+      options(subscribeOptions), qos(qos) {
+  UniversalAzimuthSubscriber::subscribe(node, topic, qos, subscribeOptions);
+}
+#endif
 
-UniversalAzimuthSubscriber::~UniversalAzimuthSubscriber()
-{
+UniversalAzimuthSubscriber::~UniversalAzimuthSubscriber() {
   UniversalAzimuthSubscriber::unsubscribe();
 }
 
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
-void UniversalAzimuthSubscriber::subscribe(RequiredInterfaces node, const std::string& topic,
-  const rclcpp::QoS& qos, rclcpp::SubscriptionOptions subscribeOptions)
+void UniversalAzimuthSubscriber::subscribe(
+    RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos,
+    rclcpp::SubscriptionOptions subscribeOptions)
 #else
-void UniversalAzimuthSubscriber::subscribe(rclcpp::Node* node, const std::string& topic, const rmw_qos_profile_t qos,
+void UniversalAzimuthSubscriber::subscribe(
+    rclcpp::Node* node, const std::string& topic, const rmw_qos_profile_t qos,
     const rclcpp::SubscriptionOptions subscribeOptions)
 #endif
 {
   this->unsubscribe();
 
-  if (!topic.empty())
-  {
+  if (!topic.empty()) {
     this->node = node;
     this->topic = topic;
     this->qos = qos;
@@ -100,18 +105,17 @@ void UniversalAzimuthSubscriber::subscribe(rclcpp::Node* node, const std::string
       std::function<void(const SerializedEventType&)>(std::bind_front(&UniversalAzimuthSubscriber::serCb, this)));
 
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_INFO(log->get_logger(), "Listening for azimuth at topics %s, %s, %s, %s.\n",
+    RCLCPP_INFO(
+      log->get_logger(), "Listening for azimuth at topics %s, %s, %s, %s.\n",
       topic.c_str(), (topic + "/pose").c_str(), (topic + "/quat").c_str(), (topic + "/imu").c_str());
   }
 }
 
-void UniversalAzimuthSubscriber::subscribe()
-{
+void UniversalAzimuthSubscriber::subscribe() {
   this->subscribe(this->node, this->topic, this->qos, this->options);
 }
 
-void UniversalAzimuthSubscriber::unsubscribe()
-{
+void UniversalAzimuthSubscriber::unsubscribe() {
   this->azSub.unsubscribe();
   this->poseSub.unsubscribe();
   this->quatSub.unsubscribe();
@@ -119,16 +123,15 @@ void UniversalAzimuthSubscriber::unsubscribe()
   this->serSub.unsubscribe();
 }
 
-void UniversalAzimuthSubscriber::setInputDefaults(const std::optional<Orientation>& orientation,
-  const std::optional<Reference>& reference, const std::optional<Variance>& variance)
-{
+void UniversalAzimuthSubscriber::setInputDefaults(
+    const std::optional<Orientation>& orientation, const std::optional<Reference>& reference,
+    const std::optional<Variance>& variance) {
   this->inputOrientation = orientation;
   this->inputReference = reference;
   this->inputVariance = variance;
 }
 
-void UniversalAzimuthSubscriber::configFromParams()
-{
+void UniversalAzimuthSubscriber::configFromParams() {
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
   const auto params = this->node.get_node_parameters_interface();
 #else
@@ -136,37 +139,38 @@ void UniversalAzimuthSubscriber::configFromParams()
 #endif
 
   std::optional<Orientation> inputOrientation;
-  if (params->has_parameter("input_orientation") && !params->get_parameter("input_orientation").as_string().empty())
+  if (params->has_parameter("input_orientation") && !params->get_parameter("input_orientation").as_string().empty()) {
     inputOrientation = compass_interfaces::parseOrientation(params->get_parameter("input_orientation").as_string());
+  }
 
   std::optional<Reference> inputReference;
-  if (params->has_parameter("input_reference") && !params->get_parameter("input_reference").as_string().empty())
+  if (params->has_parameter("input_reference") && !params->get_parameter("input_reference").as_string().empty()) {
     inputReference = compass_interfaces::parseReference(params->get_parameter("input_reference").as_string());
+  }
 
   std::optional<Variance> inputVariance;
-  if (params->has_parameter("input_variance") && params->get_parameter("input_variance").as_double() != -1.)
+  if (params->has_parameter("input_variance") && params->get_parameter("input_variance").as_double() != -1.) {
     inputVariance = params->get_parameter("input_variance").as_double();
+  }
 
   this->setInputDefaults(inputOrientation, inputReference, inputVariance);
 }
 
-std::string UniversalAzimuthSubscriber::getTopic() const
-{
+std::string UniversalAzimuthSubscriber::getTopic() const {
   return this->topic;
 }
 
-void UniversalAzimuthSubscriber::azCb(const AzimuthEventType& event)
-{
+void UniversalAzimuthSubscriber::azCb(const AzimuthEventType& event) {
   const auto& msg = event.getConstMessage();
   const auto stamp = event.getReceiptTime();
 
   const auto maybeAzimuth = this->converter.convertAzimuth(*msg, Az::UNIT_RAD, msg->orientation, msg->reference);
 
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
       "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
     return;
   }
@@ -175,20 +179,19 @@ void UniversalAzimuthSubscriber::azCb(const AzimuthEventType& event)
     std::make_shared<Az const>(*maybeAzimuth), stamp, false, message_filters::DefaultMessageCreator<Az>()));
 }
 
-void UniversalAzimuthSubscriber::poseCb(const PoseEventType& event)
-{
+void UniversalAzimuthSubscriber::poseCb(const PoseEventType& event) {
   const auto stamp = event.getReceiptTime();
   const auto topics = rclcpp::node_interfaces::get_node_topics_interface(this->node);
 
   const auto poseTopic = topics->resolve_topic_name(this->poseSub.getTopic());
-  const auto maybeAzimuth = this->converter.convertPoseMsgEvent(poseTopic, event,
-    Az::UNIT_RAD, this->inputOrientation, this->inputReference);
+  const auto maybeAzimuth = this->converter.convertPoseMsgEvent(
+    poseTopic, event, Az::UNIT_RAD, this->inputOrientation, this->inputReference);
 
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
       "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
     return;
   }
@@ -196,19 +199,18 @@ void UniversalAzimuthSubscriber::poseCb(const PoseEventType& event)
     std::make_shared<Az const>(*maybeAzimuth), stamp, false, message_filters::DefaultMessageCreator<Az>()));
 }
 
-void UniversalAzimuthSubscriber::quatCb(const QuatEventType& event)
-{
+void UniversalAzimuthSubscriber::quatCb(const QuatEventType& event) {
   const auto stamp = event.getReceiptTime();
   const auto topics = rclcpp::node_interfaces::get_node_topics_interface(this->node);
   const auto quatTopic = topics->resolve_topic_name(this->quatSub.getTopic());
   const auto maybeAzimuth = this->converter.convertQuaternionMsgEvent(
     quatTopic, event, this->inputVariance.value_or(0.0), Az::UNIT_RAD, this->inputOrientation, this->inputReference);
 
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
       "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
     return;
   }
@@ -216,37 +218,35 @@ void UniversalAzimuthSubscriber::quatCb(const QuatEventType& event)
     std::make_shared<Az const>(*maybeAzimuth), stamp, false, message_filters::DefaultMessageCreator<Az>()));
 }
 
-void UniversalAzimuthSubscriber::imuCb(const ImuEventType& event)
-{
+void UniversalAzimuthSubscriber::imuCb(const ImuEventType& event) {
   const auto stamp = event.getReceiptTime();
   const auto topics = rclcpp::node_interfaces::get_node_topics_interface(this->node);
   const auto imuTopic = topics->resolve_topic_name(this->imuSub.getTopic());
-  const auto maybeAzimuth = this->converter.convertImuMsgEvent(imuTopic, event,
-    Az::UNIT_RAD, this->inputOrientation, this->inputReference);
+  const auto maybeAzimuth = this->converter.convertImuMsgEvent(
+    imuTopic, event, Az::UNIT_RAD, this->inputOrientation, this->inputReference);
 
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
-     "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
+      "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
     return;
   }
   this->signalMessage(message_filters::MessageEvent<Az const>(
     std::make_shared<Az const>(*maybeAzimuth), stamp, false, message_filters::DefaultMessageCreator<Az>()));
 }
 
-void UniversalAzimuthSubscriber::serCb(const SerializedEventType& event)
-{
+void UniversalAzimuthSubscriber::serCb(const SerializedEventType& event) {
   const auto stamp = event.getReceiptTime();
-  const auto maybeAzimuth = this->converter.convertSerializedMsgEvent(this->topic, event,
-    Az::UNIT_RAD, this->inputVariance.value_or(0.0), this->inputOrientation, this->inputReference);
+  const auto maybeAzimuth = this->converter.convertSerializedMsgEvent(
+    this->topic, event, Az::UNIT_RAD, this->inputVariance.value_or(0.0), this->inputOrientation, this->inputReference);
 
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
       "Error converting message to Azimuth: %s", maybeAzimuth.error().c_str());
     return;
   }
@@ -256,17 +256,16 @@ void UniversalAzimuthSubscriber::serCb(const SerializedEventType& event)
 
 CompassFilter::~CompassFilter() = default;
 
-void CompassFilter::cbAzimuth(const AzimuthEventType& azimuthEvent)
-{
+void CompassFilter::cbAzimuth(const AzimuthEventType& azimuthEvent) {
   const auto& msg = azimuthEvent.getConstMessage();
 
   const auto output = this->converter->convertAzimuth(
     *msg, this->unit, this->orientation, this->reference.value_or(msg->reference));
-  if (!output.has_value())
-  {
+  if (!output.has_value()) {
     const auto clock = rclcpp::node_interfaces::get_node_clock_interface(this->node);
     const auto log = rclcpp::node_interfaces::get_node_logging_interface(this->node);
-    RCLCPP_ERROR_THROTTLE(log->get_logger(), *clock->get_clock(), 10000.,
+    RCLCPP_ERROR_THROTTLE(
+      log->get_logger(), *clock->get_clock(), 10000.,
       "Azimuth conversion failed%s: %s", fixReceived ? "" : " (no fix message received yet)", output.error().c_str());
     return;
   }
@@ -276,15 +275,13 @@ void CompassFilter::cbAzimuth(const AzimuthEventType& azimuthEvent)
     azimuthEvent.getReceiptTime(), false, message_filters::DefaultMessageCreator<Az>()));
 }
 
-void CompassFilter::cbFix(const FixEventType& fixEvent)
-{
+void CompassFilter::cbFix(const FixEventType& fixEvent) {
   this->fixReceived = true;
   this->converter->setNavSatPos(*fixEvent.getConstMessage());
 }
 
-void CompassFilter::cbUTMZone(const UTMZoneEventType& utmZoneEvent)
-{
+void CompassFilter::cbUTMZone(const UTMZoneEventType& utmZoneEvent) {
   this->converter->forceUTMZone(utmZoneEvent.getConstMessage()->data);
 }
 
-}
+}  // namespace compass_conversions

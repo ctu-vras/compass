@@ -36,15 +36,13 @@ using Az = compass_interfaces::msg::Azimuth;
 using namespace std::chrono_literals;
 
 std::shared_ptr<compass_conversions::CompassTransformerNodelet> createNodelet(
-  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
-{
+    rclcpp::NodeOptions node_options = rclcpp::NodeOptions()) {
   return std::make_shared<compass_conversions::CompassTransformerNodelet>(node_options);
 }
 
 class CompassTransformerNodelet : public cras::RclcppTestFixture {};
 
-TEST_F(CompassTransformerNodelet, BasicConversion)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, BasicConversion) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -59,10 +57,10 @@ TEST_F(CompassTransformerNodelet, BasicConversion)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -74,11 +72,11 @@ TEST_F(CompassTransformerNodelet, BasicConversion)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -95,8 +93,7 @@ TEST_F(CompassTransformerNodelet, BasicConversion)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -110,8 +107,7 @@ TEST_F(CompassTransformerNodelet, BasicConversion)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, TfConversion) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "deg");
   node_options.append_parameter_override("target_orientation", "ned");
@@ -148,10 +144,10 @@ TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -163,11 +159,11 @@ TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -184,8 +180,7 @@ TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -200,8 +195,7 @@ TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, TfConversionFail)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, TfConversionFail) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "deg");
   node_options.append_parameter_override("target_orientation", "ned");
@@ -238,10 +232,10 @@ TEST_F(CompassTransformerNodelet, TfConversionFail)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -253,11 +247,11 @@ TEST_F(CompassTransformerNodelet, TfConversionFail)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-  ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -284,8 +278,7 @@ TEST_F(CompassTransformerNodelet, TfConversionFail)  // NOLINT
   ASSERT_FALSE(lastAz.has_value());
 }
 
-TEST_F(CompassTransformerNodelet, FixMissing)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, FixMissing) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_reference", "utm");
 
@@ -298,10 +291,10 @@ TEST_F(CompassTransformerNodelet, FixMissing)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -313,11 +306,11 @@ TEST_F(CompassTransformerNodelet, FixMissing)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -334,15 +327,13 @@ TEST_F(CompassTransformerNodelet, FixMissing)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_FALSE(lastAz.has_value());
 }
 
-TEST_F(CompassTransformerNodelet, FixFromParams)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, FixFromParams) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_reference", "geographic");
   node_options.append_parameter_override("initial_lat", 51.0);
@@ -358,10 +349,10 @@ TEST_F(CompassTransformerNodelet, FixFromParams)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -373,11 +364,11 @@ TEST_F(CompassTransformerNodelet, FixFromParams)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -394,8 +385,7 @@ TEST_F(CompassTransformerNodelet, FixFromParams)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -409,8 +399,7 @@ TEST_F(CompassTransformerNodelet, FixFromParams)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, FixFromMsg) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_reference", "geographic");
 
@@ -423,10 +412,10 @@ TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -439,12 +428,12 @@ TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 &&
-    (azimuthPub->get_subscription_count() == 0 || fixPub->get_subscription_count() == 0 ||
-      azimuthSub->get_publisher_count() == 0); ++i)
+       (azimuthPub->get_subscription_count() == 0 || fixPub->get_subscription_count() == 0 ||
+        azimuthSub->get_publisher_count() == 0); ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for fix and azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for fix and azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -462,8 +451,7 @@ TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
   fixPub->publish(fix);
 
   // Wait until the fix message is received
-  for (size_t i = 0; i < 10; ++i)
-  {
+  for (size_t i = 0; i < 10; ++i) {
     executor.spin_all(10ms);
   }
 
@@ -478,8 +466,7 @@ TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -493,8 +480,7 @@ TEST_F(CompassTransformerNodelet, FixFromMsg)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubImuNameDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubImuNameDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -510,10 +496,10 @@ TEST_F(CompassTransformerNodelet, SubImuNameDetect)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -526,11 +512,11 @@ TEST_F(CompassTransformerNodelet, SubImuNameDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -546,8 +532,7 @@ TEST_F(CompassTransformerNodelet, SubImuNameDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 1000 && !lastAz.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 1000 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -561,8 +546,7 @@ TEST_F(CompassTransformerNodelet, SubImuNameDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubImuNoDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubImuNoDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -579,10 +563,10 @@ TEST_F(CompassTransformerNodelet, SubImuNoDetect)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -594,11 +578,11 @@ TEST_F(CompassTransformerNodelet, SubImuNoDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -614,8 +598,7 @@ TEST_F(CompassTransformerNodelet, SubImuNoDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -629,8 +612,7 @@ TEST_F(CompassTransformerNodelet, SubImuNoDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubPoseNameDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubPoseNameDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -646,10 +628,10 @@ TEST_F(CompassTransformerNodelet, SubPoseNameDetect)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -662,11 +644,11 @@ TEST_F(CompassTransformerNodelet, SubPoseNameDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -682,8 +664,7 @@ TEST_F(CompassTransformerNodelet, SubPoseNameDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -697,8 +678,7 @@ TEST_F(CompassTransformerNodelet, SubPoseNameDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubPoseNoDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubPoseNoDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -715,10 +695,10 @@ TEST_F(CompassTransformerNodelet, SubPoseNoDetect)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -731,11 +711,11 @@ TEST_F(CompassTransformerNodelet, SubPoseNoDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -751,8 +731,7 @@ TEST_F(CompassTransformerNodelet, SubPoseNoDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -766,8 +745,7 @@ TEST_F(CompassTransformerNodelet, SubPoseNoDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubQuatNameDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubQuatNameDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -784,10 +762,10 @@ TEST_F(CompassTransformerNodelet, SubQuatNameDetect)  // NOLINT
   executor.add_node(node);
 
   std::optional<Az> lastAz;
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -800,11 +778,11 @@ TEST_F(CompassTransformerNodelet, SubQuatNameDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -819,8 +797,7 @@ TEST_F(CompassTransformerNodelet, SubQuatNameDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -834,8 +811,7 @@ TEST_F(CompassTransformerNodelet, SubQuatNameDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, SubQuatNoDetect)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, SubQuatNoDetect) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -854,10 +830,10 @@ TEST_F(CompassTransformerNodelet, SubQuatNoDetect)  // NOLINT
 
   std::optional<Az> lastAz;
 
-  auto cb = [&lastAz](const Az::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const Az::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -869,11 +845,11 @@ TEST_F(CompassTransformerNodelet, SubQuatNoDetect)  // NOLINT
   auto azimuthSub = node->create_subscription<Az>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -888,8 +864,7 @@ TEST_F(CompassTransformerNodelet, SubQuatNoDetect)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -903,8 +878,7 @@ TEST_F(CompassTransformerNodelet, SubQuatNoDetect)  // NOLINT
   EXPECT_EQ(4.0, lastAz->variance);
 }
 
-TEST_F(CompassTransformerNodelet, PubImu)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubImu) {  // NOLINT
   rclcpp::NodeOptions node_options;
 
   node_options.append_parameter_override("target_unit", "rad");
@@ -921,10 +895,10 @@ TEST_F(CompassTransformerNodelet, PubImu)  // NOLINT
   executor.add_node(node);
 
   std::optional<sensor_msgs::msg::Imu> lastAz;
-  auto cb = [&lastAz](const sensor_msgs::msg::Imu::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const sensor_msgs::msg::Imu::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -936,11 +910,11 @@ TEST_F(CompassTransformerNodelet, PubImu)  // NOLINT
   auto azimuthSub = node->create_subscription<sensor_msgs::msg::Imu>("azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -957,8 +931,7 @@ TEST_F(CompassTransformerNodelet, PubImu)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -969,8 +942,7 @@ TEST_F(CompassTransformerNodelet, PubImu)  // NOLINT
   EXPECT_EQ(4.0, lastAz->orientation_covariance[2 * 3 + 2]);
 }
 
-TEST_F(CompassTransformerNodelet, PubImuSuffix)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubImuSuffix) {  // NOLINT
   rclcpp::NodeOptions node_options;
 
   node_options.append_parameter_override("target_unit", "rad");
@@ -988,10 +960,10 @@ TEST_F(CompassTransformerNodelet, PubImuSuffix)  // NOLINT
   executor.add_node(node);
 
   std::optional<sensor_msgs::msg::Imu> lastAz;
-  auto cb = [&lastAz](const sensor_msgs::msg::Imu::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const sensor_msgs::msg::Imu::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -1004,11 +976,11 @@ TEST_F(CompassTransformerNodelet, PubImuSuffix)  // NOLINT
     "azimuth_out/mag/enu/imu", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1025,8 +997,7 @@ TEST_F(CompassTransformerNodelet, PubImuSuffix)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1037,8 +1008,7 @@ TEST_F(CompassTransformerNodelet, PubImuSuffix)  // NOLINT
   EXPECT_EQ(4.0, lastAz->orientation_covariance[2 * 3 + 2]);
 }
 
-TEST_F(CompassTransformerNodelet, PubPose)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubPose) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -1054,10 +1024,10 @@ TEST_F(CompassTransformerNodelet, PubPose)  // NOLINT
   executor.add_node(node);
 
   std::optional<geometry_msgs::msg::PoseWithCovarianceStamped> lastAz;
-  auto cb = [&lastAz](const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -1070,11 +1040,11 @@ TEST_F(CompassTransformerNodelet, PubPose)  // NOLINT
     "azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1091,8 +1061,7 @@ TEST_F(CompassTransformerNodelet, PubPose)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1103,8 +1072,7 @@ TEST_F(CompassTransformerNodelet, PubPose)  // NOLINT
   EXPECT_EQ(4.0, lastAz->pose.covariance[5 * 6 + 5]);
 }
 
-TEST_F(CompassTransformerNodelet, PubPoseSuffix)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubPoseSuffix) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -1121,10 +1089,10 @@ TEST_F(CompassTransformerNodelet, PubPoseSuffix)  // NOLINT
   executor.add_node(node);
 
   std::optional<geometry_msgs::msg::PoseWithCovarianceStamped> lastAz;
-  auto cb = [&lastAz](const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const geometry_msgs::msg::PoseWithCovarianceStamped::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
   size_t dep = 1;
@@ -1136,11 +1104,11 @@ TEST_F(CompassTransformerNodelet, PubPoseSuffix)  // NOLINT
     "azimuth_out/mag/enu/pose", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1157,8 +1125,7 @@ TEST_F(CompassTransformerNodelet, PubPoseSuffix)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1169,8 +1136,7 @@ TEST_F(CompassTransformerNodelet, PubPoseSuffix)  // NOLINT
   EXPECT_EQ(4.0, lastAz->pose.covariance[5 * 6 + 5]);
 }
 
-TEST_F(CompassTransformerNodelet, PubQuat)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubQuat) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -1186,10 +1152,10 @@ TEST_F(CompassTransformerNodelet, PubQuat)  // NOLINT
   executor.add_node(node);
 
   std::optional<geometry_msgs::msg::QuaternionStamped> lastAz;
-  auto cb = [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -1202,11 +1168,11 @@ TEST_F(CompassTransformerNodelet, PubQuat)  // NOLINT
     "azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1223,8 +1189,7 @@ TEST_F(CompassTransformerNodelet, PubQuat)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1234,8 +1199,7 @@ TEST_F(CompassTransformerNodelet, PubQuat)  // NOLINT
   EXPECT_NEAR(0.0, cras::getYaw(lastAz->quaternion), 1e-6);
 }
 
-TEST_F(CompassTransformerNodelet, PubQuatSuffix)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, PubQuatSuffix) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -1252,10 +1216,10 @@ TEST_F(CompassTransformerNodelet, PubQuatSuffix)  // NOLINT
   executor.add_node(node);
 
   std::optional<geometry_msgs::msg::QuaternionStamped> lastAz;
-  auto cb = [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
   size_t dep = 1;
@@ -1267,11 +1231,11 @@ TEST_F(CompassTransformerNodelet, PubQuatSuffix)  // NOLINT
     "azimuth_out/mag/enu/quat", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1288,8 +1252,7 @@ TEST_F(CompassTransformerNodelet, PubQuatSuffix)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1299,8 +1262,7 @@ TEST_F(CompassTransformerNodelet, PubQuatSuffix)  // NOLINT
   EXPECT_NEAR(0.0, cras::getYaw(lastAz->quaternion), 1e-6);
 }
 
-TEST_F(CompassTransformerNodelet, CrossType)  // NOLINT
-{
+TEST_F(CompassTransformerNodelet, CrossType) {  // NOLINT
   rclcpp::NodeOptions node_options;
   node_options.append_parameter_override("target_unit", "rad");
   node_options.append_parameter_override("target_orientation", "enu");
@@ -1318,10 +1280,10 @@ TEST_F(CompassTransformerNodelet, CrossType)  // NOLINT
   executor.add_node(node);
 
   std::optional<geometry_msgs::msg::QuaternionStamped> lastAz;
-  auto cb = [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg)
-  {
-    lastAz = *msg;
-  };
+  auto cb =
+    [&lastAz](const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& msg) {
+      lastAz = *msg;
+    };
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
   size_t dep = 1;
@@ -1333,11 +1295,11 @@ TEST_F(CompassTransformerNodelet, CrossType)  // NOLINT
     "azimuth_out", rclcpp::SensorDataQoS(sub_qos), cb);
 
   for (size_t i = 0; i < 1000 && (azimuthPub->get_subscription_count() == 0 || azimuthSub->get_publisher_count() == 0);
-    ++i)
+       ++i)
   {
     executor.spin_all(10ms);
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200.,
-      "Waiting for azimuth input and output topics.");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      node->get_logger(), *node->get_clock(), 200., "Waiting for azimuth input and output topics.");
   }
 
   ASSERT_GT(azimuthPub->get_subscription_count(), 0);
@@ -1353,8 +1315,7 @@ TEST_F(CompassTransformerNodelet, CrossType)  // NOLINT
 
   azimuthPub->publish(in);
 
-  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok() ; ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastAz.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastAz.has_value());
@@ -1364,8 +1325,7 @@ TEST_F(CompassTransformerNodelet, CrossType)  // NOLINT
   EXPECT_NEAR(0.0, cras::getYaw(lastAz->quaternion), 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

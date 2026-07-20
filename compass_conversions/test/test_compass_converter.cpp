@@ -22,15 +22,13 @@
 
 using Az = compass_interfaces::msg::Azimuth;
 
-TEST(CompassConverter, Construct)  // NOLINT
-{
+TEST(CompassConverter, Construct) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   ASSERT_NO_THROW(compass_conversions::CompassConverter converter(node, true));
   ASSERT_NO_THROW(compass_conversions::CompassConverter converter(node, false));
 }
 
-TEST(CompassConverter, ConfigFromParams)  // NOLINT
-{
+TEST(CompassConverter, ConfigFromParams) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   compass_conversions::CompassConverter converter(node, true);
@@ -76,8 +74,7 @@ TEST(CompassConverter, ConfigFromParams)  // NOLINT
   converter.configFromParams();
 }
 
-TEST(CompassConverter, ComputeMagneticDeclination)  // NOLINT
-{
+TEST(CompassConverter, ComputeMagneticDeclination) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -87,15 +84,17 @@ TEST(CompassConverter, ComputeMagneticDeclination)  // NOLINT
   fix.longitude = 15.0;
   fix.altitude = 200.0;
   auto maybeDeclination = converter.computeMagneticDeclination(fix, time);
-  if (!maybeDeclination.has_value())
+  if (!maybeDeclination.has_value()) {
     RCLCPP_ERROR(node.get_logger(), "%s", maybeDeclination.error().c_str());
+  }
   ASSERT_TRUE(maybeDeclination.has_value());
   EXPECT_NEAR(5.333, angles::to_degrees(*maybeDeclination), 1e-3);
 
   time = cras::parseTime("2019-11-18T13:00:00Z");
   maybeDeclination = converter.computeMagneticDeclination(fix, time);
-  if (!maybeDeclination.has_value())
+  if (!maybeDeclination.has_value()) {
     RCLCPP_ERROR(node.get_logger(), "%s", maybeDeclination.error().c_str());
+  }
   ASSERT_TRUE(maybeDeclination.has_value());
   EXPECT_NEAR(4.507, angles::to_degrees(*maybeDeclination), 1e-3);
 
@@ -111,8 +110,7 @@ TEST(CompassConverter, ComputeMagneticDeclination)  // NOLINT
   EXPECT_TRUE(maybeDeclination.has_value());
 }
 
-TEST(CompassConverter, GetMagneticDeclination)  // NOLINT
-{
+TEST(CompassConverter, GetMagneticDeclination) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -128,15 +126,17 @@ TEST(CompassConverter, GetMagneticDeclination)  // NOLINT
   converter.setNavSatPos(fix);
 
   maybeDeclination = converter.getMagneticDeclination(time);
-  if (!maybeDeclination.has_value())
+  if (!maybeDeclination.has_value()) {
     RCLCPP_ERROR(node.get_logger(), "%s", maybeDeclination.error().c_str());
+  }
   ASSERT_TRUE(maybeDeclination.has_value());
   EXPECT_NEAR(5.333, angles::to_degrees(*maybeDeclination), 1e-3);
 
   time = cras::parseTime("2019-11-18T13:00:00Z");
   maybeDeclination = converter.getMagneticDeclination(time);
-  if (!maybeDeclination.has_value())
+  if (!maybeDeclination.has_value()) {
     RCLCPP_ERROR(node.get_logger(), "%s", maybeDeclination.error().c_str());
+  }
   ASSERT_TRUE(maybeDeclination.has_value());
   EXPECT_NEAR(4.507, angles::to_degrees(*maybeDeclination), 1e-3);
 
@@ -152,8 +152,7 @@ TEST(CompassConverter, GetMagneticDeclination)  // NOLINT
   EXPECT_TRUE(maybeDeclination.has_value());
 }
 
-TEST(CompassConverter, ComputeUTMGridConvergence)  // NOLINT
-{
+TEST(CompassConverter, ComputeUTMGridConvergence) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -188,8 +187,7 @@ TEST(CompassConverter, ComputeUTMGridConvergence)  // NOLINT
   EXPECT_EQ(33, maybeConvergenceAndZone->second);
 }
 
-TEST(CompassConverter, GetUTMGridConvergence)  // NOLINT
-{
+TEST(CompassConverter, GetUTMGridConvergence) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
   converter.setKeepUTMZone(false);
@@ -239,8 +237,7 @@ TEST(CompassConverter, GetUTMGridConvergence)  // NOLINT
   EXPECT_EQ(33, *maybeZone);
 }
 
-TEST(CompassConverter, ConvertNotRequiresNavSat)  // NOLINT
-{
+TEST(CompassConverter, ConvertNotRequiresNavSat) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -249,8 +246,7 @@ TEST(CompassConverter, ConvertNotRequiresNavSat)  // NOLINT
   azimuth.header.frame_id = "test";
   azimuth.header.stamp = time;
 
-  for (const auto reference : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM})
-  {
+  for (const auto reference : std::list {Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM}) {
     SCOPED_TRACE(reference);
     azimuth.unit = Az::UNIT_RAD; azimuth.orientation = Az::ORIENTATION_ENU; azimuth.reference = reference;
     azimuth.azimuth = M_PI_2;
@@ -304,8 +300,7 @@ TEST(CompassConverter, ConvertNotRequiresNavSat)  // NOLINT
   }
 }
 
-TEST(CompassConverter, ConvertNavSatMissing)  // NOLINT
-{
+TEST(CompassConverter, ConvertNavSatMissing) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -315,17 +310,13 @@ TEST(CompassConverter, ConvertNavSatMissing)  // NOLINT
   azimuth.header.stamp = time;
   azimuth.azimuth = M_PI_2;
 
-  for (const auto fromUnit : std::list{Az::UNIT_DEG, Az::UNIT_RAD})
-  {
+  for (const auto fromUnit : std::list {Az::UNIT_DEG, Az::UNIT_RAD}) {
     SCOPED_TRACE(fromUnit);
-    for (const auto toUnit : std::list{Az::UNIT_DEG, Az::UNIT_RAD})
-    {
+    for (const auto toUnit : std::list {Az::UNIT_DEG, Az::UNIT_RAD}) {
       SCOPED_TRACE(toUnit);
-      for (const auto fromOrientation : std::list{Az::ORIENTATION_ENU, Az::ORIENTATION_NED})
-      {
+      for (const auto fromOrientation : std::list {Az::ORIENTATION_ENU, Az::ORIENTATION_NED}) {
         SCOPED_TRACE(fromOrientation);
-        for (const auto toOrientation : std::list{Az::ORIENTATION_ENU, Az::ORIENTATION_NED})
-        {
+        for (const auto toOrientation : std::list {Az::ORIENTATION_ENU, Az::ORIENTATION_NED}) {
           SCOPED_TRACE(toOrientation);
 
           azimuth.unit = fromUnit; azimuth.orientation = fromOrientation;
@@ -351,8 +342,7 @@ TEST(CompassConverter, ConvertNavSatMissing)  // NOLINT
   }
 }
 
-TEST(CompassConverter, ConvertRequiresNavSatFromMag)  // NOLINT
-{
+TEST(CompassConverter, ConvertRequiresNavSatFromMag) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -530,7 +520,6 @@ TEST(CompassConverter, ConvertRequiresNavSatFromMag)  // NOLINT
   EXPECT_EQ(Az::ORIENTATION_ENU, maybeAzimuth->orientation);
   EXPECT_EQ(Az::REFERENCE_UTM, maybeAzimuth->reference);
 
-
   //
   // From: MAG, DEG, ENU
   //
@@ -688,8 +677,7 @@ TEST(CompassConverter, ConvertRequiresNavSatFromMag)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_UTM, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertRequiresNavSatFromGeo)  // NOLINT
-{
+TEST(CompassConverter, ConvertRequiresNavSatFromGeo) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -867,7 +855,6 @@ TEST(CompassConverter, ConvertRequiresNavSatFromGeo)  // NOLINT
   EXPECT_EQ(Az::ORIENTATION_ENU, maybeAzimuth->orientation);
   EXPECT_EQ(Az::REFERENCE_UTM, maybeAzimuth->reference);
 
-
   //
   // From: GEO, DEG, ENU
   //
@@ -1025,8 +1012,7 @@ TEST(CompassConverter, ConvertRequiresNavSatFromGeo)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_UTM, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertRequiresNavSatFromUTM)  // NOLINT
-{
+TEST(CompassConverter, ConvertRequiresNavSatFromUTM) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -1204,7 +1190,6 @@ TEST(CompassConverter, ConvertRequiresNavSatFromUTM)  // NOLINT
   EXPECT_EQ(Az::ORIENTATION_ENU, maybeAzimuth->orientation);
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, maybeAzimuth->reference);
 
-
   //
   // From: UTM, DEG, ENU
   //
@@ -1362,8 +1347,7 @@ TEST(CompassConverter, ConvertRequiresNavSatFromUTM)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertWithInitialVals)  // NOLINT
-{
+TEST(CompassConverter, ConvertWithInitialVals) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   sensor_msgs::msg::NavSatFix fix;
@@ -1396,8 +1380,7 @@ TEST(CompassConverter, ConvertWithInitialVals)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertWithInitialValsZeroTime)  // NOLINT
-{
+TEST(CompassConverter, ConvertWithInitialValsZeroTime) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   sensor_msgs::msg::NavSatFix fix;
@@ -1425,8 +1408,7 @@ TEST(CompassConverter, ConvertWithInitialValsZeroTime)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertForcedDeclination)  // NOLINT
-{
+TEST(CompassConverter, ConvertForcedDeclination) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   sensor_msgs::msg::NavSatFix fix;
@@ -1460,8 +1442,7 @@ TEST(CompassConverter, ConvertForcedDeclination)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertForcedConvergence)  // NOLINT
-{
+TEST(CompassConverter, ConvertForcedConvergence) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   sensor_msgs::msg::NavSatFix fix;
@@ -1495,8 +1476,7 @@ TEST(CompassConverter, ConvertForcedConvergence)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertForcedBoth)  // NOLINT
-{
+TEST(CompassConverter, ConvertForcedBoth) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
   converter.forceMagneticDeclination(angles::from_degrees(5.0));
@@ -1523,8 +1503,7 @@ TEST(CompassConverter, ConvertForcedBoth)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(CompassConverter, ConvertQuaternion)  // NOLINT
-{
+TEST(CompassConverter, ConvertQuaternion) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -1567,8 +1546,7 @@ TEST(CompassConverter, ConvertQuaternion)  // NOLINT
   EXPECT_EQ(maybeAzimuth->reference, Az::REFERENCE_MAGNETIC);
 }
 
-TEST(CompassConverter, ConvertToPose)  // NOLINT
-{
+TEST(CompassConverter, ConvertToPose) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -1597,8 +1575,7 @@ TEST(CompassConverter, ConvertToPose)  // NOLINT
   EXPECT_NEAR(4.0, maybePose->pose.covariance[5 * 6 + 5], 1e-4);
 }
 
-TEST(CompassConverter, ConvertToImu)  // NOLINT
-{
+TEST(CompassConverter, ConvertToImu) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   compass_conversions::CompassConverter converter(node, true);
 
@@ -1626,8 +1603,7 @@ TEST(CompassConverter, ConvertToImu)  // NOLINT
   EXPECT_EQ(-1.0, maybeImu->linear_acceleration_covariance[0]);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

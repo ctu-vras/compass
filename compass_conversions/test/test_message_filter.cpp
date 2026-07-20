@@ -24,29 +24,26 @@
 using Az = compass_interfaces::msg::Azimuth;
 
 template<class T>
-class TestInput : public message_filters::SimpleFilter<T>
-{
+class TestInput : public message_filters::SimpleFilter<T> {
 public:
-  void add(const typename T::ConstSharedPtr& msg)
-  {
+  void add(const typename T::ConstSharedPtr& msg) {
     // Pass a complete MessageEvent to avoid calling node->now() to determine the missing timestamp
     this->signalMessage(message_filters::MessageEvent<T const>(msg, msg->header.stamp));
   }
 };
 
-TEST(MessageFilter, NoNavSatNeeded)  // NOLINT
-{
+TEST(MessageFilter, NoNavSatNeeded) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   TestInput<Az> azimuthInput;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
   Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
   Az::SharedPtr inMessage(new Az);
@@ -66,19 +63,18 @@ TEST(MessageFilter, NoNavSatNeeded)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
 }
 
-TEST(MessageFilter, NavSatNeededButNotGiven)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeededButNotGiven) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   TestInput<Az> azimuthInput;
   TestInput<sensor_msgs::msg::NavSatFix> fixInput;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
   Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
   Az::SharedPtr inMessage(new Az);
@@ -94,19 +90,18 @@ TEST(MessageFilter, NavSatNeededButNotGiven)  // NOLINT
   ASSERT_EQ(nullptr, outMessage);
 }
 
-TEST(MessageFilter, NavSatNeeded)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeeded) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   TestInput<Az> azimuthInput;
   TestInput<sensor_msgs::msg::NavSatFix> fixInput;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
   Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
   Az::SharedPtr inMessage(new Az);
@@ -147,19 +142,18 @@ TEST(MessageFilter, NavSatNeeded)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
 }
 
-TEST(MessageFilter, NavSatNeededAndGivenAsInitValue)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeededAndGivenAsInitValue) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   TestInput<Az> azimuthInput;
   auto converter = std::make_shared<compass_conversions::CompassConverter>(node, true);
   compass_conversions::CompassFilter filter(
-    node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
   Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
   Az::SharedPtr inMessage(new Az);
@@ -200,19 +194,18 @@ TEST(MessageFilter, NavSatNeededAndGivenAsInitValue)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
 }
 
-TEST(MessageFilter, ForcedDeclination)  // NOLINT
-{
+TEST(MessageFilter, ForcedDeclination) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
   TestInput<Az> azimuthInput;
   auto converter = std::make_shared<compass_conversions::CompassConverter>(node, true);
   compass_conversions::CompassFilter filter(
-    node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
   Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
   Az::SharedPtr inMessage(new Az);
@@ -248,8 +241,7 @@ TEST(MessageFilter, ForcedDeclination)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

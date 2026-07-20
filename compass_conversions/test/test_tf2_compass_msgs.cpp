@@ -58,8 +58,7 @@ TEST(TF2CompassMsgs, TransformRadNed)  // NOLINT
   transform.transform.rotation.w = std::cos(M_PI_4 / 2);
 
   Az outMessage;
-  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM})
-  {
+  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM}) {
     SCOPED_TRACE(ref);
     inMessage.reference = ref;
     tf2::doTransform(inMessage, outMessage, transform);
@@ -90,8 +89,7 @@ TEST(TF2CompassMsgs, TransformRadEnu)  // NOLINT
   transform.transform.rotation.w = std::cos(M_PI_4 / 2);
 
   Az outMessage;
-  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM})
-  {
+  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM}) {
     SCOPED_TRACE(ref);
     inMessage.reference = ref;
     tf2::doTransform(inMessage, outMessage, transform);
@@ -122,8 +120,7 @@ TEST(TF2CompassMsgs, TransformDegNed)  // NOLINT
   transform.transform.rotation.w = std::cos(M_PI_4 / 2);
 
   Az outMessage;
-  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM})
-  {
+  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM}) {
     SCOPED_TRACE(ref);
     inMessage.reference = ref;
     tf2::doTransform(inMessage, outMessage, transform);
@@ -154,8 +151,7 @@ TEST(TF2CompassMsgs, TransformDegEnu)  // NOLINT
   transform.transform.rotation.w = std::cos(M_PI_4 / 2);
 
   Az outMessage;
-  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM})
-  {
+  for (const auto ref : std::list{Az::REFERENCE_MAGNETIC, Az::REFERENCE_GEOGRAPHIC, Az::REFERENCE_UTM}) {
     SCOPED_TRACE(ref);
     inMessage.reference = ref;
     tf2::doTransform(inMessage, outMessage, transform);
@@ -167,8 +163,7 @@ TEST(TF2CompassMsgs, TransformDegEnu)  // NOLINT
   }
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
