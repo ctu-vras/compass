@@ -42,6 +42,11 @@ try_compile(TF2_SENSOR_MSGS_HAS_IMU
   CXX_STANDARD 20 LINK_LIBRARIES tf2_sensor_msgs::tf2_sensor_msgs)
 message(STATUS "TF2_SENSOR_MSGS_HAS_IMU=${TF2_SENSOR_MSGS_HAS_IMU}")
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+try_compile(TF2_ROS_HAS_NODE_INTERFACES
+  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+  CXX_STANDARD 20 LINK_LIBRARIES tf2_ros::tf2_ros)
+
 # LIBRARY 0 - do not use in outside projects
 add_library(_tf2_sensor_msgs INTERFACE)
 target_sources(_tf2_sensor_msgs INTERFACE
@@ -83,6 +88,9 @@ target_include_directories(${PROJECT_NAME}_nodelet_lib PUBLIC
 if(${message_filters_VERSION} VERSION_GREATER_EQUAL 7.1.0)
   target_compile_definitions(${PROJECT_NAME}_nodelet_lib PUBLIC
     MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES=1)
+endif()
+if(TF2_ROS_HAS_NODE_INTERFACES)
+  target_compile_definitions(${PROJECT_NAME}_nodelet_lib INTERFACE TF2_ROS_HAS_NODE_INTERFACES=1)
 endif()
 rclcpp_components_register_node(${PROJECT_NAME}_nodelet_lib
   PLUGIN "magnetometer_compass::MagnetometerCompassNodelet" EXECUTABLE ${PROJECT_NAME}_nodelet)
