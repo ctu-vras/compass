@@ -20,23 +20,21 @@
 #include <rclcpp/node_interfaces/node_logging_interface.hpp>
 #include <rclcpp/time.hpp>
 
-namespace magnetic_model
-{
+namespace magnetic_model {
 
 struct MagneticModelManagerPrivate;
 
 /**
  * \brief Earth magnetic model.
  */
-class MagneticModelManager
-{
+class MagneticModelManager {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface
+      NodeClockInterface,
+      NodeLoggingInterface
   >;
 
   /**
@@ -80,7 +78,7 @@ public:
    * \return The magnetic model or error if there is no suitable model.
    */
   virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
-    const rclcpp::Time& stamp, bool strict) const;
+      const rclcpp::Time& stamp, bool strict) const;
 
   /**
    * \brief Get the magnetic model with the given name.
@@ -89,7 +87,7 @@ public:
    * \return The magnetic model or error if it cannot be found.
    */
   virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
-    const std::string& name, bool strict) const;
+      const std::string& name, bool strict) const;
 
 protected:
   //! \brief PIMPL data
@@ -97,4 +95,4 @@ protected:
   RequiredInterfaces node;
 };
 
-}
+}  // namespace magnetic_model

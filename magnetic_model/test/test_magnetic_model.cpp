@@ -284,10 +284,11 @@ TEST_F(MagneticModelManager, SetModelPath)
   manager.setModelPath("");
   EXPECT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
   EXPECT_EQ(TEST_DATA_DIR, manager.getModelPath());
-  if (oldPath == nullptr)
+  if (oldPath == nullptr) {
     unsetenv("GEOGRAPHICLIB_MAGNETIC_PATH");
-  else
+  } else {
     setenv("GEOGRAPHICLIB_MAGNETIC_PATH", oldPath, true);
+  }
 
   manager.setModelPath(std::nullopt);
   EXPECT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
@@ -317,8 +318,7 @@ TEST_F(MagneticModelManager, GetModelByTime)
   EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("1970-11-18T13:00:00Z"), false).has_value());
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
