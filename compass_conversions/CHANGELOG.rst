@@ -5,8 +5,8 @@
 Changelog for package compass_conversions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.5 (2026-07-20)
+------------------
 * Fixed build on Rolling.
 * Updated readmes.
 * Contributors: Martin Pecka
