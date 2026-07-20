@@ -5,6 +5,11 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixed build on Rolling.
+* Contributors: Martin Pecka
+
 3.0.5 (2026-07-20)
 ------------------
 * Fixed build on Rolling.

@@ -5,6 +5,9 @@
 Changelog for package magnetic_model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.5 (2026-07-20)
 ------------------
 

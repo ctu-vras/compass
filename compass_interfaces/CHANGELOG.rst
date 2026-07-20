@@ -5,6 +5,9 @@
 Changelog for package compass_interfaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.5 (2026-07-20)
 ------------------
 * Updated readmes.
