@@ -65,6 +65,17 @@ if(SUBSCRIBER_BASE_IS_TEMPLATE)
   target_compile_definitions(_message_filters INTERFACE MESSAGE_FILTERS_VERSION_SUBSCRIBER_BASE_IS_TEMPLATE=1)
 endif()
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+try_compile(TF2_ROS_HAS_NODE_INTERFACES
+  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+  CXX_STANDARD 20 LINK_LIBRARIES tf2_ros::tf2_ros)
+
+add_library(_tf2_ros INTERFACE)
+target_link_libraries(_tf2_ros INTERFACE tf2_ros::tf2_ros)
+if(TF2_ROS_HAS_NODE_INTERFACES)
+  target_compile_definitions(_tf2_ros INTERFACE TF2_ROS_HAS_NODE_INTERFACES=1)
+endif()
+
 # LIBRARY 1
 add_library(compass_topic_names SHARED
   src/topic_names.cpp
@@ -119,7 +130,7 @@ add_library(compass_transformer_nodelet_lib SHARED
 target_link_libraries(compass_transformer_nodelet_lib
   PUBLIC compass_topic_names compass_converter compass_message_filter tf2_compass_msgs _message_filters
   PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
-  PUBLIC rclcpp::rclcpp tf2_ros::tf2_ros
+  PUBLIC rclcpp::rclcpp _tf2_ros
   PRIVATE cras_cpp_common::cras_cpp_common  rclcpp_components::component)
 target_include_directories(compass_transformer_nodelet_lib PUBLIC
   <BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
