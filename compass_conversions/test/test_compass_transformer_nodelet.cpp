@@ -130,9 +130,13 @@ TEST_F(CompassTransformerNodelet, TfConversion)  // NOLINT
   tf2::convert(q, tf.transform.rotation);
 
   auto tfBuffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*node);
+#else
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     node->get_node_base_interface(),
     node->get_node_timers_interface());
+#endif
   tfBuffer->setCreateTimerInterface(timer_interface);
 
   tfBuffer->setTransform(tf, "test", true);
@@ -216,9 +220,13 @@ TEST_F(CompassTransformerNodelet, TfConversionFail)  // NOLINT
   tf2::convert(q, tf.transform.rotation);
 
   auto tfBuffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*node);
+#else
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     node->get_node_base_interface(),
     node->get_node_timers_interface());
+#endif
   tfBuffer->setCreateTimerInterface(timer_interface);
 
   tfBuffer->setTransform(tf, "test", true);

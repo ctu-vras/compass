@@ -255,9 +255,14 @@ void CompassTransformerNodelet::init()
   }
   else
   {
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+    this->tfFilter = std::make_unique<tf2_ros::MessageFilter<Az>>(
+      *this->compassFilter, *this->buffer, targetFrame, queue_size, *this, std::chrono::milliseconds(100));
+#else
     this->tfFilter = std::make_unique<tf2_ros::MessageFilter<Az>>(
       *this->compassFilter, *this->buffer, targetFrame, queue_size, this->get_node_logging_interface(),
       this->get_node_clock_interface(), std::chrono::milliseconds(100));
+#endif
     this->tfFilter->registerCallback(&CompassTransformerNodelet::transformAndPublish, this);
     // registerFailureCallback IS CURRENTLY DISABLED IN TF2_ROS FOR "UNKNOWN REASONS" ...
     // this->tfFilter->registerFailureCallback(std::bind_front(&CompassTransformerNodelet::failedCb, this));
@@ -271,9 +276,13 @@ void CompassTransformerNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, con
 {
   this->buffer = buffer;
   this->buffer->setUsingDedicatedThread(using_dedicated_thread);
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+  const auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*this);
+#else
   const auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     this->get_node_base_interface(),
     this->get_node_timers_interface());
+#endif
   this->buffer->setCreateTimerInterface(timer_interface);
   this->listener = std::make_shared<tf2_ros::TransformListener>(*this->buffer, this, true);
 }

@@ -56,9 +56,13 @@ MagnetometerCompassNodelet::MagnetometerCompassNodelet(const rclcpp::NodeOptions
     listener(std::make_shared<tf2_ros::TransformListener>(*buffer))
 {
   this->buffer->setUsingDedicatedThread(true);
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*this);
+#else
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     this->get_node_base_interface(),
     this->get_node_timers_interface());
+#endif
   buffer->setCreateTimerInterface(timer_interface);
 }
 
@@ -66,9 +70,13 @@ void MagnetometerCompassNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, co
 {
   this->buffer = buffer;
   this->buffer->setUsingDedicatedThread(using_dedicated_thread);
+#ifdef TF2_ROS_HAS_NODE_INTERFACES
+  auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*this);
+#else
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
     this->get_node_base_interface(),
     this->get_node_timers_interface());
+#endif
   buffer->setCreateTimerInterface(timer_interface);
   this->listener = std::make_shared<tf2_ros::TransformListener>(*this->buffer);
 }
