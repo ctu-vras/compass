@@ -90,7 +90,7 @@ if(${message_filters_VERSION} VERSION_GREATER_EQUAL 7.1.0)
     MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES=1)
 endif()
 if(TF2_ROS_HAS_NODE_INTERFACES)
-  target_compile_definitions(${PROJECT_NAME}_nodelet_lib INTERFACE TF2_ROS_HAS_NODE_INTERFACES=1)
+  target_compile_definitions(${PROJECT_NAME}_nodelet_lib PRIVATE TF2_ROS_HAS_NODE_INTERFACES=1)
 endif()
 rclcpp_components_register_node(${PROJECT_NAME}_nodelet_lib
   PLUGIN "magnetometer_compass::MagnetometerCompassNodelet" EXECUTABLE ${PROJECT_NAME}_nodelet)
