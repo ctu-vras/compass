@@ -13,8 +13,7 @@
 
 #include <compass_interfaces/msg/azimuth.hpp>
 
-namespace compass_interfaces
-{
+namespace compass_interfaces {
 
 /**
  * \brief Convert the given azimuth unit to string.
@@ -64,4 +63,4 @@ std::string referenceToString(msg::Azimuth::_reference_type reference);
  */
 msg::Azimuth::_reference_type parseReference(const std::string& referenceStr);
 
-}
+}  // namespace compass_interfaces
