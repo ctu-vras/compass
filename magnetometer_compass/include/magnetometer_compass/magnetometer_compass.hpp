@@ -22,25 +22,23 @@
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <tf2_ros/buffer.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 struct MagnetometerCompassPrivate;
 
 /**
  * \brief Convert magnetometer and IMU measurements to azimuth.
  */
-class MagnetometerCompass
-{
+class MagnetometerCompass{
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
   using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface,
-    NodeParametersInterface
+      NodeClockInterface,
+      NodeLoggingInterface,
+      NodeParametersInterface
   >;
 
   /**
@@ -82,7 +80,7 @@ public:
    * \note Both inputs have to be transformable to the configured target frame.
    */
   virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> computeAzimuth(
-    const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased);
+      const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased);
 
   /**
    * \brief Reset the computation (i.e. the low-pass filter and estimated variance).
@@ -102,4 +100,4 @@ private:
   geometry_msgs::msg::Quaternion last_imu_orientation {};
 };
 
-}
+}  // namespace magnetometer_compass

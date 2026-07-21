@@ -22,8 +22,7 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
@@ -77,8 +76,7 @@ using Zone = std_msgs::msg::Int32;
  *                                                if variance cannot be determined from the input messages (e.g. for
  *                                                `QuaternionStamped`).
  */
-class VisualizeAzimuthNodelet : public rclcpp::Node
-{
+class VisualizeAzimuthNodelet : public rclcpp::Node{
 public:
   explicit VisualizeAzimuthNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~VisualizeAzimuthNodelet() override;
@@ -101,4 +99,4 @@ protected:
 
   rclcpp::Publisher<Pose>::SharedPtr visPub;
 };
-}
+}  // namespace magnetometer_compass

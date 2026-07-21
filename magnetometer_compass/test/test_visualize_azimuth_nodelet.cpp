@@ -33,21 +33,19 @@ using namespace std::chrono_literals;
 class VisualizeAzimuthNodelet : public cras::RclcppTestFixture {};
 
 std::shared_ptr<magnetometer_compass::VisualizeAzimuthNodelet> createNodelet(
-  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
-{
+    rclcpp::NodeOptions node_options = rclcpp::NodeOptions()) {
   return std::make_shared<magnetometer_compass::VisualizeAzimuthNodelet>(node_options);
 }
 
-TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
-{
+TEST_F(VisualizeAzimuthNodelet, Basic) {  // NOLINT
   auto node = createNodelet();
   node->init();
 
   std::optional<Pose> lastPose;
-  auto poseCb = [&lastPose](const Pose::ConstSharedPtr& msg)
-  {
-    lastPose = *msg;
-  };
+  auto poseCb =
+    [&lastPose](const Pose::ConstSharedPtr& msg) {
+      lastPose = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -70,15 +68,13 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for publisher connections.");
   }
 
   const auto subTest = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
-  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for subscriber connections.");
   }
@@ -101,8 +97,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   azimuth.reference = Az::REFERENCE_UTM;
   azPub->publish(azimuth);
 
-  for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastPose.has_value());
@@ -122,8 +117,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   azimuth.azimuth = M_PI_2;
   azPub->publish(azimuth);
 
-  for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastPose.has_value());
@@ -143,8 +137,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   azimuth.azimuth = M_PI;
   azPub->publish(azimuth);
 
-  for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !lastPose.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
 
@@ -168,8 +161,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   azimuth.reference = Az::REFERENCE_MAGNETIC;
   azPub->publish(azimuth);
 
-  for (size_t i = 0; i < 5 && !lastPose.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 5 && !lastPose.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_FALSE(lastPose.has_value());
@@ -189,8 +181,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   lastPose.reset();
   azimuth.azimuth = M_PI;
   azPub->publish(azimuth);
-  for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 50 && !lastPose.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
 
@@ -208,8 +199,7 @@ TEST_F(VisualizeAzimuthNodelet, Basic)  // NOLINT
   EXPECT_NEAR(0.741358, lastPose->pose.pose.orientation.w, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

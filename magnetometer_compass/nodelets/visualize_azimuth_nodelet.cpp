@@ -27,8 +27,7 @@
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
@@ -84,14 +83,12 @@ using Zone = std_msgs::msg::Int32;
  */
 
 VisualizeAzimuthNodelet::VisualizeAzimuthNodelet(const rclcpp::NodeOptions& options)
-  : Node("visualize_azimuth_nodelet", options)
-{
+    : Node("visualize_azimuth_nodelet", options) {
 }
 
 VisualizeAzimuthNodelet::~VisualizeAzimuthNodelet() = default;
 
-void VisualizeAzimuthNodelet::init()
-{
+void VisualizeAzimuthNodelet::init() {
   this->declare_parameter<double>("max_rate", -1.);
   // CompassConverter params:
   this->declare_parameter<double>("magnetic_declination", -9999.);
@@ -110,8 +107,7 @@ void VisualizeAzimuthNodelet::init()
   this->declare_parameter<double>("input_variance", -1.);
 
   double rate;
-  if (this->has_parameter("max_rate") && this->get_parameter("max_rate").as_double() != -1.)
-  {
+  if (this->has_parameter("max_rate") && this->get_parameter("max_rate").as_double() != -1.) {
     this->get_parameter<double>("max_rate", rate);
     this->rateLimiter = std::make_unique<cras::TokenBucketLimiter>(rclcpp::Rate(rate, this->get_clock()));
   }
@@ -145,17 +141,16 @@ void VisualizeAzimuthNodelet::init()
     this->azSub->getTopic().c_str(), this->visPub->get_topic_name());
 }
 
-void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
-{
-  if (this->rateLimiter != nullptr && !this->rateLimiter->shouldPublish(azimuthEast.header.stamp))
+void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast) {
+  if (this->rateLimiter != nullptr && !this->rateLimiter->shouldPublish(azimuthEast.header.stamp)) {
     return;
+  }
 
   auto azimuthNorth = azimuthEast;
   azimuthNorth.azimuth -= M_PI / 2;
 
   const auto maybePose = this->converter->convertToPose(azimuthNorth);
-  if (!maybePose.has_value())
-  {
+  if (!maybePose.has_value()) {
     RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 10000.,
       "Visualizing azimuth failed: %s", maybePose.error().c_str());
     return;
@@ -174,6 +169,6 @@ void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
   this->visPub->publish(pose);
 }
 
-}
+}  // namespace magnetometer_compass
 
 RCLCPP_COMPONENTS_REGISTER_NODE(magnetometer_compass::VisualizeAzimuthNodelet)

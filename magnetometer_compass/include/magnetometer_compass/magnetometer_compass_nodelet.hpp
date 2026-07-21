@@ -32,8 +32,7 @@
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Quat = geometry_msgs::msg::QuaternionStamped;
@@ -43,8 +42,7 @@ using Field = sensor_msgs::msg::MagneticField;
 
 typedef message_filters::sync_policies::ApproximateTime<Imu, Field> SyncPolicy;
 
-struct AzimuthPublishersConfigForOrientation
-{
+struct AzimuthPublishersConfigForOrientation{
   std::shared_ptr<compass_conversions::CompassConverter> converter;
 
   rclcpp::Node::SharedPtr namespace_node;
@@ -67,16 +65,15 @@ struct AzimuthPublishersConfigForOrientation
   AzimuthPublishersConfigForOrientation();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-    const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, uint8_t orientation,
-    const std::string& referenceStr, const std::string& orientationStr);
+      rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+      const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+      const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, uint8_t orientation,
+      const std::string& referenceStr, const std::string& orientationStr);
 
   void publishAzimuths(const Az& azimuthRad, const Imu& imuInBody);
 };
 
-struct AzimuthPublishersConfig
-{
+struct AzimuthPublishersConfig{
   std::shared_ptr<compass_conversions::CompassConverter> converter;
 
   rclcpp::Node::SharedPtr namespace_node;
@@ -93,9 +90,10 @@ struct AzimuthPublishersConfig
   AzimuthPublishersConfig();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-    const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, const std::string& referenceStr);
+      rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+      const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+      const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference,
+      const std::string& referenceStr);
 
   void publishAzimuths(const Az& nedAzimuth, const Imu& imuInBody);
 };
@@ -252,8 +250,7 @@ struct AzimuthPublishersConfig
  *      an automated decision is made based on the current year (or `~initial_year`, if set). This model is used for
  *      computing magnetic declination.
  */
-class MagnetometerCompassNodelet : public rclcpp::Node
-{
+class MagnetometerCompassNodelet : public rclcpp::Node{
 public:
   explicit MagnetometerCompassNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~MagnetometerCompassNodelet() override;
@@ -296,4 +293,4 @@ protected:
   AzimuthPublishersConfig utmPublishers;
 };
 
-}
+}  // namespace magnetometer_compass

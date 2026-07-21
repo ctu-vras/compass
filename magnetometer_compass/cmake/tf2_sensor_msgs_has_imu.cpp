@@ -10,8 +10,7 @@
 #include <sensor_msgs/msg/imu.hpp>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 
-int main(int, char**)
-{
+int main(int, char**) {
   sensor_msgs::msg::Imu imu;
   const auto stamp = tf2::getTimestamp(imu);
   return 0;

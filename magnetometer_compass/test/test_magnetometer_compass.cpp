@@ -24,8 +24,7 @@ using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
 using Field = sensor_msgs::msg::MagneticField;
 
-TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
-{
+TEST(MagnetometerCompass, ComputeAzimuth) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -140,8 +139,7 @@ TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
-{
+TEST(MagnetometerCompass, ConfigFromParams) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -253,8 +251,7 @@ TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-TEST(MagnetometerCompass, Reset)  // NOLINT
-{
+TEST(MagnetometerCompass, Reset) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -363,8 +360,7 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

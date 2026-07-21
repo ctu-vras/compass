@@ -29,15 +29,13 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/buffer.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
 using Field = sensor_msgs::msg::MagneticField;
 
-struct MagnetometerCompassPrivate
-{
+struct MagnetometerCompassPrivate{
   std::shared_ptr<tf2_ros::Buffer const> tf;
   std::string frame;
   std::optional<tf2::Quaternion> lastAzimuth;
@@ -47,19 +45,16 @@ struct MagnetometerCompassPrivate
 };
 
 MagnetometerCompass::MagnetometerCompass(
-  RequiredInterfaces node, const std::string& frame, const std::shared_ptr<tf2_ros::Buffer>& tf)
-  : data(new MagnetometerCompassPrivate{}), node(node)
-{
+    RequiredInterfaces node, const std::string& frame, const std::shared_ptr<tf2_ros::Buffer>& tf)
+    : data(new MagnetometerCompassPrivate{}), node(node) {
   this->data->tf = tf;
   this->data->frame = frame;
 }
 
 MagnetometerCompass::~MagnetometerCompass() = default;
 
-geometry_msgs::msg::Quaternion MagnetometerCompass::getRotationBetweenFrames(const sensor_msgs::msg::Imu& imu_msg)
-{
-  try
-  {
+geometry_msgs::msg::Quaternion MagnetometerCompass::getRotationBetweenFrames(const sensor_msgs::msg::Imu& imu_msg) {
+  try {
     // Lookup transform from IMU frame to target frame at the IMU's timestamp
     const auto transform_stamped = this->data->tf->lookupTransform(
       imu_msg.header.frame_id, this->data->frame, imu_msg.header.stamp, tf2::durationFromSec(0.1));
@@ -67,51 +62,42 @@ geometry_msgs::msg::Quaternion MagnetometerCompass::getRotationBetweenFrames(con
     // Extract rotation (quaternion) from the transform
     last_imu_orientation = transform_stamped.transform.rotation;
     return transform_stamped.transform.rotation;
-  }
-  catch (const tf2::TransformException& ex)
-  {
+  } catch (const tf2::TransformException& ex) {
     const auto& log = this->node.get_node_logging_interface();
     RCLCPP_WARN(log->get_logger(), "Transform failed: %s returning last known transform", ex.what());
     return last_imu_orientation;  // Return identity or handle failure appropriately
   }
 }
 
-void MagnetometerCompass::configFromParams()
-{
+void MagnetometerCompass::configFromParams() {
   const auto& params = this->node.get_node_parameters_interface();
-  if (params->has_parameter("initial_variance") && params->get_parameter("initial_variance").as_double() != -1.)
+  if (params->has_parameter("initial_variance") && params->get_parameter("initial_variance").as_double() != -1.) {
     this->data->variance = this->data->initialVariance = params->get_parameter("initial_variance").as_double();
+  }
 
-  if (params->has_parameter("low_pass_ratio") && params->get_parameter("low_pass_ratio").as_double() != -1.)
+  if (params->has_parameter("low_pass_ratio") && params->get_parameter("low_pass_ratio").as_double() != -1.) {
     this->data->lowPassRatio = params->get_parameter("low_pass_ratio").as_double();
+  }
 }
 
-void MagnetometerCompass::setLowPassRatio(const double ratio)
-{
+void MagnetometerCompass::setLowPassRatio(const double ratio) {
   this->data->lowPassRatio = ratio;
 }
 
 cras::expected<compass_interfaces::msg::Azimuth, std::string> MagnetometerCompass::computeAzimuth(
-  const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased)
-{
+    const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased) {
   Imu imuInBody;
-  try
-  {
+  try {
     this->data->tf->transform(imu, imuInBody, this->data->frame, tf2::durationFromSec(0.1));
-  }
-  catch (const tf2::TransformException& e)
-  {
+  } catch (const tf2::TransformException& e) {
     return cras::make_unexpected(cras::format(
       "Could not transform IMU data to frame {} because: {}", this->data->frame.c_str(), e.what()));
   }
 
   Field magUnbiasedInBody;
-  try
-  {
+  try {
     this->data->tf->transform(magUnbiased, magUnbiasedInBody, this->data->frame, tf2::durationFromSec(0.1));
-  }
-  catch (const tf2::TransformException& e)
-  {
+  } catch (const tf2::TransformException& e) {
     return cras::make_unexpected(cras::format(
       "Could not transform magnetometer to frame {} because: {}", this->data->frame.c_str(), e.what()));
   }
@@ -162,11 +148,12 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> MagnetometerCompas
   tf2::Quaternion magAzimuthNowQuat;
   magAzimuthNowQuat.setRPY(0, 0, magAzimuthNow);
 
-  if (!this->data->lastAzimuth.has_value())
+  if (!this->data->lastAzimuth.has_value()) {
     this->data->lastAzimuth = magAzimuthNowQuat;
-  else
+  } else {
     // low-pass filter
     this->data->lastAzimuth = this->data->lastAzimuth->slerp(magAzimuthNowQuat, 1 - this->data->lowPassRatio);
+  }
   this->updateVariance();
 
   compass_interfaces::msg::Azimuth nedAzimuthMsg;
@@ -181,14 +168,12 @@ cras::expected<compass_interfaces::msg::Azimuth, std::string> MagnetometerCompas
   return nedAzimuthMsg;
 }
 
-void MagnetometerCompass::reset()
-{
+void MagnetometerCompass::reset() {
   this->data->variance = this->data->initialVariance;
   this->data->lastAzimuth.reset();
 }
 
-void MagnetometerCompass::updateVariance()
-{
+void MagnetometerCompass::updateVariance() {
   // TODO: measure consistency of IMU rotation and azimuth increase similar to
   // https://www.sciencedirect.com/science/article/pii/S2405959519302929
 
@@ -196,4 +181,4 @@ void MagnetometerCompass::updateVariance()
   // their std...
 }
 
-}
+}  // namespace magnetometer_compass

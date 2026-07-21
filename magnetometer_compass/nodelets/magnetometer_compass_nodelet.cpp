@@ -39,8 +39,7 @@
 #include <tf2_ros/create_timer_ros.hpp>
 #include <tf2_ros/transform_listener.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Quat = geometry_msgs::msg::QuaternionStamped;
@@ -51,10 +50,9 @@ using Field = sensor_msgs::msg::MagneticField;
 typedef message_filters::sync_policies::ApproximateTime<Imu, Field> SyncPolicy;
 
 MagnetometerCompassNodelet::MagnetometerCompassNodelet(const rclcpp::NodeOptions& options)
-  : rclcpp::Node("magnetometer_compass_nodelet", options),
-    buffer(std::make_shared<tf2_ros::Buffer>(this->get_clock())),
-    listener(std::make_shared<tf2_ros::TransformListener>(*buffer))
-{
+    : rclcpp::Node("magnetometer_compass_nodelet", options),
+      buffer(std::make_shared<tf2_ros::Buffer>(this->get_clock())),
+      listener(std::make_shared<tf2_ros::TransformListener>(*buffer)) {
   this->buffer->setUsingDedicatedThread(true);
 #ifdef TF2_ROS_HAS_NODE_INTERFACES
   auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(*this);
@@ -66,8 +64,7 @@ MagnetometerCompassNodelet::MagnetometerCompassNodelet(const rclcpp::NodeOptions
   buffer->setCreateTimerInterface(timer_interface);
 }
 
-void MagnetometerCompassNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, const bool using_dedicated_thread)
-{
+void MagnetometerCompassNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, const bool using_dedicated_thread) {
   this->buffer = buffer;
   this->buffer->setUsingDedicatedThread(using_dedicated_thread);
 #ifdef TF2_ROS_HAS_NODE_INTERFACES
@@ -81,8 +78,7 @@ void MagnetometerCompassNodelet::setBuffer(tf2_ros::Buffer::SharedPtr buffer, co
   this->listener = std::make_shared<tf2_ros::TransformListener>(*this->buffer);
 }
 
-void MagnetometerCompassNodelet::init()
-{
+void MagnetometerCompassNodelet::init() {
   // CompassConverter params:
   this->declare_parameter<double>("magnetic_declination", -9999.);
   this->declare_parameter<std::string>("magnetic_model", std::string());
@@ -123,8 +119,9 @@ void MagnetometerCompassNodelet::init()
   this->publishMagUnbiased = this->get_parameter_or<bool>("publish_mag_unbiased", this->publishMagUnbiased);
   this->subscribeMagUnbiased = this->get_parameter_or<bool>("subscribe_mag_unbiased", this->subscribeMagUnbiased);
 
-  if (this->publishMagUnbiased && this->subscribeMagUnbiased)
+  if (this->publishMagUnbiased && this->subscribeMagUnbiased) {
     throw std::runtime_error("Cannot simultaneously subscribe and publish unbiased magnetometer.");
+  }
 
   // Set default publishers
   this->magPublishers.ned.publishDeg = true;
@@ -139,12 +136,14 @@ void MagnetometerCompassNodelet::init()
   this->utmPublishers.init(compassNh, this, this->converter, "publish", "", Az::REFERENCE_UTM, "utm");
   publish |= this->utmPublishers.publish;
 
-  if (!publish)
+  if (!publish) {
     RCLCPP_WARN(this->get_logger(),
-      "No publishers have been requested. Please, set one of the publish_* parameters to true.");
+                "No publishers have been requested. Please, set one of the publish_* parameters to true.");
+  }
 
-  if (this->publishMagUnbiased)
+  if (this->publishMagUnbiased) {
     this->magUnbiasedPub = imuNh->create_publisher<Field>("mag_unbiased", rclcpp::SystemDefaultsQoS());
+  }
 
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
   rclcpp::QoS imuQos(100);
@@ -165,14 +164,11 @@ void MagnetometerCompassNodelet::init()
   this->imuSub = std::make_unique<message_filters::Subscriber<Imu>>(imuNh, imuNs + "data", imuQos);
 
   // Check if we should try to unbias the magnetometer ourselves or if you already got it unbiased on the input.
-  if (this->subscribeMagUnbiased)
-  {
+  if (this->subscribeMagUnbiased) {
     this->magSub = std::make_unique<message_filters::Subscriber<Field>>(imuNh, imuNs + "mag_unbiased", magQos);
     this->syncSub = std::make_unique<message_filters::Synchronizer<SyncPolicy>>(
       SyncPolicy(200), *this->imuSub, *this->magSub);
-  }
-  else
-  {
+  } else {
     this->magSub = std::make_unique<message_filters::Subscriber<Field>>(imuNh, imuNs + "mag", magQos);
     this->magBiasSub = std::make_unique<message_filters::Subscriber<Field>>(imuNh, imuNs + "mag_bias", biasQos);
     this->magBiasRemoverFilter = std::make_unique<magnetometer_pipeline::BiasRemoverFilter>(
@@ -185,7 +181,7 @@ void MagnetometerCompassNodelet::init()
   this->syncSub->registerCallback(&MagnetometerCompassNodelet::imuMagCb, this);
 
   this->fixSub = this->create_subscription<sensor_msgs::msg::NavSatFix>("gps/fix", rclcpp::SensorDataQoS(),
-    [this](const sensor_msgs::msg::NavSatFix& msg) { this->fixCb(msg); });
+      [this](const sensor_msgs::msg::NavSatFix& msg) { this->fixCb(msg); });
 }
 
 MagnetometerCompassNodelet::~MagnetometerCompassNodelet() = default;
@@ -193,11 +189,10 @@ MagnetometerCompassNodelet::~MagnetometerCompassNodelet() = default;
 AzimuthPublishersConfigForOrientation::AzimuthPublishersConfigForOrientation() = default;
 
 void AzimuthPublishersConfigForOrientation::init(
-  rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-  const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-  const std::string& paramPrefix, const std::string& topicPrefix, const uint8_t reference, const uint8_t orientation,
-  const std::string& referenceStr, const std::string& orientationStr)
-{
+    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+    const std::string& paramPrefix, const std::string& topicPrefix, const uint8_t reference, const uint8_t orientation,
+    const std::string& referenceStr, const std::string& orientationStr) {
   this->namespace_node = namespace_node;
   this->param_node = param_node;
   this->converter = converter;
@@ -221,61 +216,63 @@ void AzimuthPublishersConfigForOrientation::init(
 
   prefix = cras::appendIfNonEmpty(topicPrefix, "/");
 
-  if (this->publishQuat)
+  if (this->publishQuat) {
     this->quatPub = namespace_node->create_publisher<Quat>(
       prefix + getAzimuthTopicSuffix<Quat>(Az::UNIT_RAD, orientation, reference), rclcpp::SystemDefaultsQoS());
-  if (this->publishImu)
+  }
+  if (this->publishImu) {
     this->imuPub = namespace_node->create_publisher<Imu>(
       prefix + getAzimuthTopicSuffix<Imu>(Az::UNIT_RAD, orientation, reference), rclcpp::SystemDefaultsQoS());
-  if (this->publishPose)
+  }
+  if (this->publishPose) {
     this->posePub = namespace_node->create_publisher<Pose>(
       prefix + getAzimuthTopicSuffix<Pose>(Az::UNIT_RAD, orientation, reference), rclcpp::SystemDefaultsQoS());
-  if (this->publishRad)
+  }
+  if (this->publishRad) {
     this->radPub = namespace_node->create_publisher<Az>(
       prefix + getAzimuthTopicSuffix<Az>(Az::UNIT_RAD, orientation, reference), rclcpp::SystemDefaultsQoS());
-  if (this->publishDeg)
+  }
+  if (this->publishDeg) {
     this->degPub = namespace_node->create_publisher<Az>(
       prefix + getAzimuthTopicSuffix<Az>(Az::UNIT_DEG, orientation, reference), rclcpp::SystemDefaultsQoS());
+  }
 }
 
 AzimuthPublishersConfig::AzimuthPublishersConfig() = default;
 
 void AzimuthPublishersConfig::init(
-  rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-  const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-  const std::string& paramPrefix, const std::string& topicPrefix,
-  const uint8_t reference, const std::string& referenceStr)
-{
+    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+    const std::string& paramPrefix, const std::string& topicPrefix,
+    const uint8_t reference, const std::string& referenceStr) {
   this->namespace_node = namespace_node;
   this->param_node = param_node;
   this->converter = converter;
-  this->ned.init(namespace_node, param_node, converter, paramPrefix, topicPrefix, reference,
+  this->ned.init(
+    namespace_node, param_node, converter, paramPrefix, topicPrefix, reference,
     Az::ORIENTATION_NED, referenceStr, "ned");
-  this->enu.init(namespace_node, param_node, converter, paramPrefix, topicPrefix, reference,
+  this->enu.init(
+    namespace_node, param_node, converter, paramPrefix, topicPrefix, reference,
     Az::ORIENTATION_ENU, referenceStr, "enu");
   this->publish = this->ned.publish || this->enu.publish;
 }
 
-void MagnetometerCompassNodelet::imuMagCb(const Imu& imu, const Field& magUnbiased)
-{
-  if (this->publishMagUnbiased)
+void MagnetometerCompassNodelet::imuMagCb(const Imu& imu, const Field& magUnbiased) {
+  if (this->publishMagUnbiased) {
     this->magUnbiasedPub->publish(magUnbiased);
+  }
 
   const auto maybeAzimuth = this->compass->computeAzimuth(imu, magUnbiased);
-  if (!maybeAzimuth.has_value())
-  {
+  if (!maybeAzimuth.has_value()) {
     RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 1000., "%s", maybeAzimuth.error().c_str());
     return;
   }
 
   Imu imuInBody;
-  try
-  {
+  try {
     // No timeout because computeAzimuth() has already waited for this exact transform
     this->buffer->transform(imu, imuInBody, this->frame);
-  }
-  catch (const tf2::TransformException& e)
-  {
+  } catch (const tf2::TransformException& e) {
     RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 1000.,
       "Could not transform IMU data to frame %s because: %s", this->frame.c_str(), e.what());
     return;
@@ -284,47 +281,37 @@ void MagnetometerCompassNodelet::imuMagCb(const Imu& imu, const Field& magUnbias
   const auto& nedAzimuthMsg = *maybeAzimuth;
   this->magPublishers.publishAzimuths(nedAzimuthMsg, imuInBody);
 
-  if (this->truePublishers.publish)
-  {
+  if (this->truePublishers.publish) {
     const auto maybeTrueNedAzimuthMsg = this->converter->convertAzimuth(
       nedAzimuthMsg, nedAzimuthMsg.unit, nedAzimuthMsg.orientation, Az::REFERENCE_GEOGRAPHIC);
-    if (maybeTrueNedAzimuthMsg)
-    {
+    if (maybeTrueNedAzimuthMsg) {
       this->truePublishers.publishAzimuths(*maybeTrueNedAzimuthMsg, imuInBody);
-    }
-    else
-    {
+    } else {
       RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 1000.,
         "%s", maybeTrueNedAzimuthMsg.error().c_str());
     }
   }
 
-  if (this->utmPublishers.publish)
-  {
+  if (this->utmPublishers.publish) {
     const auto maybeUTMNedAzimuthMsg = this->converter->convertAzimuth(
       nedAzimuthMsg, nedAzimuthMsg.unit, nedAzimuthMsg.orientation, Az::REFERENCE_UTM);
-    if (maybeUTMNedAzimuthMsg.has_value())
-    {
+    if (maybeUTMNedAzimuthMsg.has_value()) {
       this->utmPublishers.publishAzimuths(*maybeUTMNedAzimuthMsg, imuInBody);
-    }
-    else
-    {
+    } else {
       RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 1000., "%s",
         maybeUTMNedAzimuthMsg.error().c_str());
     }
   }
 }
 
-void AzimuthPublishersConfig::publishAzimuths(const Az& nedAzimuth, const Imu& imuInBody)
-{
-  if (!this->publish)
+void AzimuthPublishersConfig::publishAzimuths(const Az& nedAzimuth, const Imu& imuInBody) {
+  if (!this->publish) {
     return;
+  }
 
-  if (this->ned.publish)
-  {
+  if (this->ned.publish) {
     auto imuNed = imuInBody;  // If IMU message should not be published, we fake it here with the ENU-referenced one
-    if (this->ned.publishImu)
-    {
+    if (this->ned.publishImu) {
       geometry_msgs::msg::TransformStamped tf;
       tf.header.stamp = imuInBody.header.stamp;
       tf.header.frame_id = imuInBody.header.frame_id + "_ned";
@@ -334,42 +321,37 @@ void AzimuthPublishersConfig::publishAzimuths(const Az& nedAzimuth, const Imu& i
     this->ned.publishAzimuths(nedAzimuth, imuNed);
   }
 
-  if (this->enu.publish)
-  {
+  if (this->enu.publish) {
     // Rotate to ENU
     auto maybeEnuAzimuth = this->converter->convertAzimuth(
       nedAzimuth, nedAzimuth.unit, Az::ORIENTATION_ENU, nedAzimuth.reference);
 
-    if (maybeEnuAzimuth.has_value())
+    if (maybeEnuAzimuth.has_value()) {
       this->enu.publishAzimuths(*maybeEnuAzimuth, imuInBody);
-    else
+    } else {
       RCLCPP_ERROR_THROTTLE(namespace_node->get_logger(), *namespace_node->get_clock(), 1000.,
-        "Could not convert from NED to ENU: %s", maybeEnuAzimuth.error().c_str());
+                            "Could not convert from NED to ENU: %s", maybeEnuAzimuth.error().c_str());
+    }
   }
 }
 
-void AzimuthPublishersConfigForOrientation::publishAzimuths(const Az& azimuthRad, const Imu& imuInBody)
-{
-  if (this->publishQuat)
-  {
+void AzimuthPublishersConfigForOrientation::publishAzimuths(const Az& azimuthRad, const Imu& imuInBody) {
+  if (this->publishQuat) {
     const auto maybeQuat = this->converter->convertToQuaternion(azimuthRad);
-    if (maybeQuat.has_value())
+    if (maybeQuat.has_value()) {
       this->quatPub->publish(*maybeQuat);
-    else
-      RCLCPP_ERROR_THROTTLE(namespace_node->get_logger(), *namespace_node->get_clock(), 1000.,
-        "%s", maybeQuat.error().c_str());
+    } else {
+      RCLCPP_ERROR_THROTTLE(
+        namespace_node->get_logger(), *namespace_node->get_clock(), 1000., "%s", maybeQuat.error().c_str());
+    }
   }
 
-  if (this->publishImu)
-  {
+  if (this->publishImu) {
     const auto maybeQuat = this->converter->convertToQuaternion(azimuthRad);
-    if (!maybeQuat.has_value())
-    {
-      RCLCPP_ERROR_THROTTLE(namespace_node->get_logger(), *namespace_node->get_clock(), 1000.,
-        "%s", maybeQuat.error().c_str());
-    }
-    else
-    {
+    if (!maybeQuat.has_value()) {
+      RCLCPP_ERROR_THROTTLE(
+        namespace_node->get_logger(), *namespace_node->get_clock(), 1000., "%s", maybeQuat.error().c_str());
+    } else {
       // The IMU message comes in an arbitrarily-referenced frame, and we adjust its yaw to become georeferenced.
       double azimuthYaw = cras::getYaw(maybeQuat->quaternion);
 
@@ -396,38 +378,36 @@ void AzimuthPublishersConfigForOrientation::publishAzimuths(const Az& azimuthRad
     }
   }
 
-  if (this->publishPose)
-  {
+  if (this->publishPose) {
     const auto maybePose = this->converter->convertToPose(azimuthRad);
-    if (maybePose.has_value())
+    if (maybePose.has_value()) {
       this->posePub->publish(*maybePose);
-    else
-      RCLCPP_ERROR_THROTTLE(namespace_node->get_logger(), *namespace_node->get_clock(), 1000.,
-        "%s", maybePose.error().c_str());
+    } else {
+      RCLCPP_ERROR_THROTTLE(
+        namespace_node->get_logger(), *namespace_node->get_clock(), 1000., "%s", maybePose.error().c_str());
+    }
   }
 
-  if (this->publishRad)
-  {
+  if (this->publishRad) {
     this->radPub->publish(azimuthRad);
   }
 
-  if (this->publishDeg)
-  {
+  if (this->publishDeg) {
     const auto maybeAzimuthDeg = this->converter->convertAzimuth(
       azimuthRad, Az::UNIT_DEG, azimuthRad.orientation, azimuthRad.reference);
-    if (maybeAzimuthDeg.has_value())
+    if (maybeAzimuthDeg.has_value()) {
       this->degPub->publish(*maybeAzimuthDeg);
-    else
-      RCLCPP_ERROR_THROTTLE(namespace_node->get_logger(), *namespace_node->get_clock(), 1000.,
-        "%s", maybeAzimuthDeg.error().c_str());
+    } else {
+      RCLCPP_ERROR_THROTTLE(
+        namespace_node->get_logger(), *namespace_node->get_clock(), 1000., "%s", maybeAzimuthDeg.error().c_str());
+    }
   }
 }
 
-void MagnetometerCompassNodelet::fixCb(const sensor_msgs::msg::NavSatFix& fix)
-{
+void MagnetometerCompassNodelet::fixCb(const sensor_msgs::msg::NavSatFix& fix) {
   this->converter->setNavSatPos(fix);
 }
 
-}
+}  // namespace magnetometer_compass
 
 RCLCPP_COMPONENTS_REGISTER_NODE(magnetometer_compass::MagnetometerCompassNodelet)
