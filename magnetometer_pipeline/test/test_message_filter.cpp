@@ -21,17 +21,14 @@
 using Field = sensor_msgs::msg::MagneticField;
 
 template<class T>
-class TestInput : public message_filters::SimpleFilter<T>
-{
+class TestInput : public message_filters::SimpleFilter<T> {
 public:
-  void add(const typename T::ConstSharedPtr& msg)
-  {
+  void add(const typename T::ConstSharedPtr& msg) {
     // Pass a complete MessageEvent to avoid calling node->now() to determine the missing timestamp
     this->signalMessage(message_filters::MessageEvent<T const>(msg, msg->header.stamp));
   }
 
-  void subscribe()
-  {
+  void subscribe() {
   }
 };
 
@@ -44,10 +41,10 @@ TEST(MessageFilter, Basic)  // NOLINT
   magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
 
   Field::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Field const>&)>(cb));
 
   builtin_interfaces::msg::Time time;
@@ -118,10 +115,10 @@ TEST(MessageFilter, ConfigFromParams)  // NOLINT
   TestInput<Field> magBiasInput;
   magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
   Field::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  const auto cb =
+    [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage) {
+      outMessage = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Field const>&)>(cb));
 
   node.declare_parameter("initial_mag_bias_x", -0.097227663);
@@ -180,8 +177,7 @@ TEST(MessageFilter, ConfigFromParams)  // NOLINT
   EXPECT_NEAR(0.149800, outMessage->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

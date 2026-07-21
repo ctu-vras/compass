@@ -20,19 +20,16 @@
 #include <rclcpp_components/register_node_macro.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 
 using Field = sensor_msgs::msg::MagneticField;
 
 MagnetometerBiasRemoverNodelet::MagnetometerBiasRemoverNodelet(const rclcpp::NodeOptions& options)
-  : rclcpp::Node("magnetometer_bias_remover_nodelet", options)
-{
+    : rclcpp::Node("magnetometer_bias_remover_nodelet", options) {
   this->onInit();
 }
 
-void MagnetometerBiasRemoverNodelet::onInit()
-{
+void MagnetometerBiasRemoverNodelet::onInit() {
   this->declare_parameter<double>("initial_mag_bias_x", -1.);
   this->declare_parameter<double>("initial_mag_bias_y", -1.);
   this->declare_parameter<double>("initial_mag_bias_z", -1.);
@@ -62,13 +59,12 @@ void MagnetometerBiasRemoverNodelet::onInit()
     std::function<void(const Field&)>(std::bind_front(&MagnetometerBiasRemoverNodelet::cb, this)));
 }
 
-void MagnetometerBiasRemoverNodelet::cb(const Field& msg)
-{
+void MagnetometerBiasRemoverNodelet::cb(const Field& msg) {
   this->magUnbiasedPub->publish(msg);
 }
 
 MagnetometerBiasRemoverNodelet::~MagnetometerBiasRemoverNodelet() = default;
 
-}
+}  // namespace magnetometer_pipeline
 
 RCLCPP_COMPONENTS_REGISTER_NODE(magnetometer_pipeline::MagnetometerBiasRemoverNodelet)

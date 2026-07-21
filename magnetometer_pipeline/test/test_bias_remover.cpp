@@ -230,8 +230,7 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
   EXPECT_NEAR(0.149800, maybeMagUnbiased->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

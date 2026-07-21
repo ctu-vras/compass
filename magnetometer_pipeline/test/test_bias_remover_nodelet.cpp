@@ -24,8 +24,7 @@ using Field = sensor_msgs::msg::MagneticField;
 using namespace std::chrono_literals;
 
 std::shared_ptr<magnetometer_pipeline::MagnetometerBiasRemoverNodelet> createNodelet(
-  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
-{
+    rclcpp::NodeOptions node_options = rclcpp::NodeOptions()) {
   return std::make_shared<magnetometer_pipeline::MagnetometerBiasRemoverNodelet>(node_options);
 }
 
@@ -41,10 +40,10 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   executor.add_node(node);
 
   std::optional<Field> lastField;
-  auto magCb = [&lastField](const Field::ConstSharedPtr& msg)
-  {
-    lastField = *msg;
-  };
+  auto magCb =
+    [&lastField](const Field::ConstSharedPtr& msg) {
+      lastField = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -65,16 +64,14 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
 
   const auto pubTest = [](const rclcpp::PublisherBase::SharedPtr p) {return p->get_subscription_count() == 0;};
 
-  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for publisher connections.");
   }
 
   const auto subTest = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
 
-  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for subscriber connections.");
   }
@@ -96,8 +93,7 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   mag.magnetic_field.z = 0.157033;
   magPub->publish(mag);
 
-  for (size_t i = 0; i < 5 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 5 && !lastField.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
 
@@ -120,8 +116,7 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
 
   magPub->publish(mag);
 
-  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastField.has_value());
@@ -145,8 +140,7 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   mag.magnetic_field.z = 0.149800;
   magPub->publish(mag);
 
-  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
   ASSERT_TRUE(lastField.has_value());
@@ -158,8 +152,7 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   EXPECT_NEAR(0.149800, lastField->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

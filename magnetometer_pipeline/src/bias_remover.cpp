@@ -20,32 +20,29 @@
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 using Field = sensor_msgs::msg::MagneticField;
 
-struct MagnetometerBiasRemoverPrivate
-{
+struct MagnetometerBiasRemoverPrivate{
   //! \brief Whether magnetometer bias has already been established either from subscriber or initial parameters.
-  bool hasBias{false};
+  bool hasBias {false};
 
   //! \brief Whether magnetometer scale has already been established either from subscriber or initial parameters and
   //! it is different from identity.
-  bool hasScale{false};
+  bool hasScale {false};
 
   //! \brief Last received value of magnetometer bias.
-  Eigen::Vector3d lastBias{0, 0, 0};
+  Eigen::Vector3d lastBias {0, 0, 0};
 
   //! \brief Scaling factor of magnetometer measurements (optional).
-  Eigen::Matrix3d lastScale{Eigen::Matrix3d::Identity()};
+  Eigen::Matrix3d lastScale {Eigen::Matrix3d::Identity()};
 
   MagnetometerBiasRemover::RequiredInterfaces node;
   MagnetometerBiasRemover::NodeLoggingInterface::SharedPtr log;
   MagnetometerBiasRemover::NodeParametersInterface::SharedPtr params;
 };
 
-MagnetometerBiasRemover::MagnetometerBiasRemover(RequiredInterfaces node) : data(new MagnetometerBiasRemoverPrivate{})
-{
+MagnetometerBiasRemover::MagnetometerBiasRemover(RequiredInterfaces node) : data(new MagnetometerBiasRemoverPrivate{}) {
   this->data->node = node;
   this->data->log = node.get_node_logging_interface();
   this->data->params = node.get_node_parameters_interface();
@@ -53,8 +50,7 @@ MagnetometerBiasRemover::MagnetometerBiasRemover(RequiredInterfaces node) : data
 
 MagnetometerBiasRemover::~MagnetometerBiasRemover() = default;
 
-void MagnetometerBiasRemover::configFromParams()
-{
+void MagnetometerBiasRemover::configFromParams() {
   const auto& params = this->data->params;
   const auto& log = this->data->log;
 
@@ -63,31 +59,29 @@ void MagnetometerBiasRemover::configFromParams()
       (params->has_parameter("initial_mag_bias_z") && params->get_parameter("initial_mag_bias_z").as_double() != -1.))
   {
     sensor_msgs::msg::MagneticField msg;
-    msg.magnetic_field.x = params->has_parameter("initial_mag_bias_x") ?
-      params->get_parameter("initial_mag_bias_x").as_double() : 0.0;
-    msg.magnetic_field.y = params->has_parameter("initial_mag_bias_y") ?
-      params->get_parameter("initial_mag_bias_y").as_double() : 0.0;
-    msg.magnetic_field.z = params->has_parameter("initial_mag_bias_z") ?
-      params->get_parameter("initial_mag_bias_z").as_double() : 0.0;
+    msg.magnetic_field.x =
+      params->has_parameter("initial_mag_bias_x") ?
+        params->get_parameter("initial_mag_bias_x").as_double() : 0.0;
+    msg.magnetic_field.y =
+      params->has_parameter("initial_mag_bias_y") ?
+        params->get_parameter("initial_mag_bias_y").as_double() : 0.0;
+    msg.magnetic_field.z =
+      params->has_parameter("initial_mag_bias_z") ?
+        params->get_parameter("initial_mag_bias_z").as_double() : 0.0;
 
     std::vector<double> scaling_vec;
     if (params->has_parameter("initial_mag_scaling_matrix") &&
         params->get_parameter("initial_mag_scaling_matrix").as_double_array().size() != 1)
     {
       scaling_vec = params->get_parameter("initial_mag_scaling_matrix").as_double_array();
-    }
-    else
-    {
+    } else {
       scaling_vec = std::vector<double>(this->data->lastScale.data(), this->data->lastScale.data() + 9);
     }
 
     Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> scalingMatrix(msg.magnetic_field_covariance.data());
-    if (scaling_vec.size() == 9)
-    {
+    if (scaling_vec.size() == 9) {
       scalingMatrix = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(scaling_vec.data());
-    }
-    else
-    {
+    } else {
       scalingMatrix = this->data->lastScale;
     }
 
@@ -98,20 +92,18 @@ void MagnetometerBiasRemover::configFromParams()
   }
 }
 
-bool MagnetometerBiasRemover::hasBias() const
-{
+bool MagnetometerBiasRemover::hasBias() const{
   return this->data->hasBias;
 }
 
-bool MagnetometerBiasRemover::hasScale() const
-{
+bool MagnetometerBiasRemover::hasScale() const{
   return this->data->hasScale;
 }
 
-cras::expected<Field, std::string> MagnetometerBiasRemover::removeBias(const Field& mag)
-{
-  if (!this->data->hasBias)
+cras::expected<Field, std::string> MagnetometerBiasRemover::removeBias(const Field& mag) {
+  if (!this->data->hasBias) {
     return cras::make_unexpected("Magnetometer bias not available.");
+  }
 
   Eigen::Vector3d field;
   tf2::fromMsg(mag.magnetic_field, field);
@@ -125,15 +117,15 @@ cras::expected<Field, std::string> MagnetometerBiasRemover::removeBias(const Fie
   return magUnbiased;
 }
 
-void MagnetometerBiasRemover::setBias(const Field& bias)
-{
+void MagnetometerBiasRemover::setBias(const Field& bias) {
   tf2::fromMsg(bias.magnetic_field, this->data->lastBias);
   this->data->hasBias = true;
 
   Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> covMatrix(bias.magnetic_field_covariance.data());
-  if (covMatrix.cwiseAbs().sum() > 1e-10)
+  if (covMatrix.cwiseAbs().sum() > 1e-10) {
     this->data->lastScale = covMatrix;
+  }
   this->data->hasScale = (this->data->lastScale - Eigen::Matrix3d::Identity()).cwiseAbs().sum() > 1e-10;
 }
 
-}
+}  // namespace magnetometer_pipeline

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Czech Technical University in Prague
 
 cmake_minimum_required(VERSION 3.20)
-project(magnetometer_pipeline CXX)
+project(magnetometer_pipeline)
 
 set(CMAKE_CXX_STANDARD 20)
 

@@ -20,8 +20,7 @@
 #include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 
 /**
  * \brief Message filter to remove bias from 3-axis magnetometer measurements.
@@ -42,17 +41,16 @@ namespace magnetometer_pipeline
  * });
  * \endcode
  */
-class BiasRemoverFilter : public message_filters::SimpleFilter<sensor_msgs::msg::MagneticField>
-{
+class BiasRemoverFilter : public message_filters::SimpleFilter<sensor_msgs::msg::MagneticField> {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
   using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface,
-    NodeParametersInterface
+      NodeClockInterface,
+      NodeLoggingInterface,
+      NodeParametersInterface
   >;
 
   /**
@@ -65,8 +63,7 @@ public:
    * \param[in] biasInput The message filter producing magnetometer bias messages.
    */
   template<class MagInput, class BiasInput>
-  BiasRemoverFilter(RequiredInterfaces node, MagInput& magInput, BiasInput& biasInput) : node(node)
-  {
+  BiasRemoverFilter(RequiredInterfaces node, MagInput& magInput, BiasInput& biasInput) : node(node) {
     this->remover = std::make_unique<MagnetometerBiasRemover>(node);
     this->connectMagnetometerInput(magInput);
     this->connectBiasInput(biasInput);
@@ -75,15 +72,13 @@ public:
   virtual ~BiasRemoverFilter();
 
   template<class MagInput>
-  void connectMagnetometerInput(MagInput& f)
-  {
+  void connectMagnetometerInput(MagInput& f) {
     this->magConnection.disconnect();
     this->magConnection = f.registerCallback(&BiasRemoverFilter::cbMag, this);
   }
 
   template<class BiasInput>
-  void connectBiasInput(BiasInput& f)
-  {
+  void connectBiasInput(BiasInput& f) {
     this->biasConnection.disconnect();
     this->biasConnection = f.registerCallback(&BiasRemoverFilter::cbBias, this);
     // Bias can be a latched message, so we could miss the only message sent there. Resubscribe to be sure we get it.
@@ -112,4 +107,4 @@ protected:
   RequiredInterfaces node;
 };
 
-}
+}  // namespace magnetometer_pipeline
