@@ -27,14 +27,14 @@ std::string unitToString(const msg::Azimuth::_unit_type unit) {
   }
 }
 
-msg::Azimuth::_unit_type parseUnit(const std::string& unitStr) {
-  const auto unit = cras::toLower(unitStr);
+msg::Azimuth::_unit_type parseUnit(const std::string& unit_str) {
+  const auto unit = cras::toLower(unit_str);
   if (unit == "rad") {
     return compass_interfaces::msg::Azimuth::UNIT_RAD;
   } else if (unit == "deg") {
     return compass_interfaces::msg::Azimuth::UNIT_DEG;
   } else {
-    throw std::runtime_error(cras::format("Invalid compass_interfaces::msg::Azimuth::unit '{}'", unitStr.c_str()));
+    throw std::runtime_error(cras::format("Invalid compass_interfaces::msg::Azimuth::unit '{}'", unit_str));
   }
 }
 
@@ -50,15 +50,15 @@ std::string orientationToString(const msg::Azimuth::_orientation_type orientatio
   }
 }
 
-msg::Azimuth::_orientation_type parseOrientation(const std::string& orientationStr) {
-  const auto orientation = cras::toLower(orientationStr);
+msg::Azimuth::_orientation_type parseOrientation(const std::string& orientation_str) {
+  const auto orientation = cras::toLower(orientation_str);
   if (orientation == "enu") {
     return compass_interfaces::msg::Azimuth::ORIENTATION_ENU;
   } else if (orientation == "ned") {
     return compass_interfaces::msg::Azimuth::ORIENTATION_NED;
   } else {
     throw std::runtime_error(
-      cras::format("Invalid compass_interfaces::msg::Azimuth::orientation '{}'", orientationStr.c_str()));
+      cras::format("Invalid compass_interfaces::msg::Azimuth::orientation '{}'", orientation_str));
   }
 }
 
@@ -76,8 +76,8 @@ std::string referenceToString(const msg::Azimuth::_reference_type reference) {
   }
 }
 
-msg::Azimuth::_reference_type parseReference(const std::string& referenceStr) {
-  const auto reference = cras::toLower(referenceStr);
+msg::Azimuth::_reference_type parseReference(const std::string& reference_str) {
+  const auto reference = cras::toLower(reference_str);
   if (reference == "magnetic") {
     return compass_interfaces::msg::Azimuth::REFERENCE_MAGNETIC;
   } else if (reference == "geographic" || reference == "true") {
@@ -86,7 +86,7 @@ msg::Azimuth::_reference_type parseReference(const std::string& referenceStr) {
     return compass_interfaces::msg::Azimuth::REFERENCE_UTM;
   } else {
     throw std::runtime_error(
-      cras::format("Invalid compass_interfaces::msg::Azimuth::reference '{}'", referenceStr.c_str()));
+      cras::format("Invalid compass_interfaces::msg::Azimuth::reference '{}'", reference_str));
   }
 }
 
