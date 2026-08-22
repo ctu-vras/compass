@@ -86,17 +86,17 @@ public:
 protected:
   /**
    * \brief Callback Azimuth messages are received.
-   * \param[in] azimuth The Azimuth converted to pose.
+   * \param[in] azimuth_east The Azimuth converted to pose.
    */
-  void azimuthCb(const Az& azimuth);
+  void azimuthCb(const Az& azimuth_east);
 
-  std::unique_ptr<cras::RateLimiter> rateLimiter;
-  std::shared_ptr<compass_conversions::CompassConverter> converter;
-  std::unique_ptr<compass_conversions::UniversalAzimuthSubscriber> azSub;
-  std::unique_ptr<message_filters::Subscriber<Fix>> fixSub;
-  std::unique_ptr<message_filters::Subscriber<Zone>> zoneSub;
-  std::unique_ptr<compass_conversions::CompassFilter> filter;
+  std::unique_ptr<cras::RateLimiter> rate_limiter_;
+  std::shared_ptr<compass_conversions::CompassConverter> converter_;
+  std::unique_ptr<compass_conversions::UniversalAzimuthSubscriber> az_sub_;
+  std::unique_ptr<message_filters::Subscriber<Fix>> fix_sub_;
+  std::unique_ptr<message_filters::Subscriber<Zone>> zone_sub_;
+  std::unique_ptr<compass_conversions::CompassFilter> filter_;
 
-  rclcpp::Publisher<Pose>::SharedPtr visPub;
+  rclcpp::Publisher<Pose>::SharedPtr vis_pub_;
 };
 }  // namespace magnetometer_compass
