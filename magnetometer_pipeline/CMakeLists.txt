@@ -4,8 +4,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(magnetometer_pipeline)
 
-set(CMAKE_CXX_STANDARD 20)
-
 find_package(ament_cmake REQUIRED)
 find_package(cras_cpp_common REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -25,36 +23,27 @@ ament_export_dependencies(
   rclcpp
 )
 
-# LIBRARY 1
-add_library(magnetometer_bias_remover SHARED
-  src/bias_remover.cpp
-)
+add_library(${PROJECT_NAME}_defaults INTERFACE)
+target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)
+target_compile_features(${PROJECT_NAME}_defaults INTERFACE $<BUILD_INTERFACE:cxx_std_20>)
+target_include_directories(${PROJECT_NAME}_defaults INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+
+add_library(magnetometer_bias_remover SHARED src/bias_remover.cpp)
 target_link_libraries(magnetometer_bias_remover
-  PUBLIC ${sensor_msgs_TARGETS} cras_cpp_common::cras_expected rclcpp::rclcpp
+  PUBLIC ${sensor_msgs_TARGETS} cras_cpp_common::cras_expected rclcpp::rclcpp ${PROJECT_NAME}_defaults
   PRIVATE cras_cpp_common::cras_cpp_common Eigen3::Eigen tf2_eigen::tf2_eigen)
-target_include_directories(magnetometer_bias_remover PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 2
-add_library(magnetometer_bias_remover_filter SHARED
-  src/message_filter.cpp
-)
+add_library(magnetometer_bias_remover_filter SHARED src/message_filter.cpp)
 target_link_libraries(magnetometer_bias_remover_filter
-  PUBLIC magnetometer_bias_remover
+  PUBLIC magnetometer_bias_remover ${PROJECT_NAME}_defaults
   PUBLIC ${sensor_msgs_TARGETS} message_filters::message_filters rclcpp::rclcpp)
-target_include_directories(magnetometer_bias_remover_filter PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 3
-add_library(magnetometer_bias_remover_nodelet SHARED
-  nodelets/magnetometer_bias_remover_nodelet.cpp
-)
+add_library(magnetometer_bias_remover_nodelet SHARED nodelets/magnetometer_bias_remover_nodelet.cpp)
 target_link_libraries(magnetometer_bias_remover_nodelet
   PUBLIC magnetometer_bias_remover_filter
-  PUBLIC ${sensor_msgs_TARGETS} message_filters::message_filters rclcpp::rclcpp
+  PUBLIC ${sensor_msgs_TARGETS} message_filters::message_filters rclcpp::rclcpp ${PROJECT_NAME}_defaults
   PRIVATE cras_cpp_common::cras_cpp_common rclcpp_components::component)
-target_include_directories(magnetometer_bias_remover_nodelet PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 rclcpp_components_register_node(magnetometer_bias_remover_nodelet
   PLUGIN "magnetometer_pipeline::MagnetometerBiasRemoverNodelet"
   EXECUTABLE magnetometer_bias_remover_node)
@@ -72,6 +61,7 @@ install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
 # All PUBLIC and INTERFACE dependencies of these libraries have to be <depend> and they have to be covered by
 # ament_export_dependencies() for each package they depend on.
 set(EXPORTED_LIBS
+  ${PROJECT_NAME}_defaults
   magnetometer_bias_remover
   magnetometer_bias_remover_filter
 )
@@ -118,20 +108,15 @@ if(BUILD_TESTING)
   ament_add_ros_isolated_gtest(test_magnetometer_bias_remover_nodelet test/test_bias_remover_nodelet.cpp)
   target_link_libraries(test_magnetometer_bias_remover_nodelet
     magnetometer_bias_remover_nodelet
-    cras_cpp_common::cras_cpp_common)
-  target_include_directories(test_magnetometer_bias_remover_nodelet PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+    cras_cpp_common::cras_cpp_common ${PROJECT_NAME}_defaults)
 
   ament_add_gtest(test_magnetometer_bias_remover test/test_bias_remover.cpp)
-  target_link_libraries(test_magnetometer_bias_remover magnetometer_bias_remover)
-  target_include_directories(test_magnetometer_bias_remover PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_magnetometer_bias_remover magnetometer_bias_remover ${PROJECT_NAME}_defaults)
 
   ament_add_gtest(test_magnetometer_bias_remover_filter test/test_message_filter.cpp)
   target_link_libraries(test_magnetometer_bias_remover_filter
-    magnetometer_bias_remover_filter magnetometer_bias_remover)
-  target_include_directories(test_magnetometer_bias_remover_filter PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+    magnetometer_bias_remover_filter magnetometer_bias_remover
+    ${PROJECT_NAME}_defaults)
 endif()
 
 ament_package()

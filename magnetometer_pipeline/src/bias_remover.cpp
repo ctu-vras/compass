@@ -25,34 +25,35 @@ using Field = sensor_msgs::msg::MagneticField;
 
 struct MagnetometerBiasRemoverPrivate{
   //! \brief Whether magnetometer bias has already been established either from subscriber or initial parameters.
-  bool hasBias {false};
+  bool has_bias_ {false};
 
   //! \brief Whether magnetometer scale has already been established either from subscriber or initial parameters and
   //! it is different from identity.
-  bool hasScale {false};
+  bool has_scale_ {false};
 
   //! \brief Last received value of magnetometer bias.
-  Eigen::Vector3d lastBias {0, 0, 0};
+  Eigen::Vector3d last_bias_ {0, 0, 0};
 
   //! \brief Scaling factor of magnetometer measurements (optional).
-  Eigen::Matrix3d lastScale {Eigen::Matrix3d::Identity()};
+  Eigen::Matrix3d last_scale_ {Eigen::Matrix3d::Identity()};
 
-  MagnetometerBiasRemover::RequiredInterfaces node;
-  MagnetometerBiasRemover::NodeLoggingInterface::SharedPtr log;
-  MagnetometerBiasRemover::NodeParametersInterface::SharedPtr params;
+  MagnetometerBiasRemover::RequiredInterfaces node_;
+  MagnetometerBiasRemover::NodeLoggingInterface::SharedPtr log_;
+  MagnetometerBiasRemover::NodeParametersInterface::SharedPtr params_;
 };
 
-MagnetometerBiasRemover::MagnetometerBiasRemover(RequiredInterfaces node) : data(new MagnetometerBiasRemoverPrivate{}) {
-  this->data->node = node;
-  this->data->log = node.get_node_logging_interface();
-  this->data->params = node.get_node_parameters_interface();
+MagnetometerBiasRemover::MagnetometerBiasRemover(RequiredInterfaces node)
+    : data_(new MagnetometerBiasRemoverPrivate{}) {
+  data_->node_ = node;
+  data_->log_ = node.get_node_logging_interface();
+  data_->params_ = node.get_node_parameters_interface();
 }
 
 MagnetometerBiasRemover::~MagnetometerBiasRemover() = default;
 
 void MagnetometerBiasRemover::configFromParams() {
-  const auto& params = this->data->params;
-  const auto& log = this->data->log;
+  const auto& params = data_->params_;
+  const auto& log = data_->log_;
 
   if ((params->has_parameter("initial_mag_bias_x") && params->get_parameter("initial_mag_bias_x").as_double() != -1.) ||
       (params->has_parameter("initial_mag_bias_y") && params->get_parameter("initial_mag_bias_y").as_double() != -1.) ||
@@ -75,39 +76,39 @@ void MagnetometerBiasRemover::configFromParams() {
     {
       scaling_vec = params->get_parameter("initial_mag_scaling_matrix").as_double_array();
     } else {
-      scaling_vec = std::vector<double>(this->data->lastScale.data(), this->data->lastScale.data() + 9);
+      scaling_vec = std::vector<double>(data_->last_scale_.data(), data_->last_scale_.data() + 9);
     }
 
     Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> scalingMatrix(msg.magnetic_field_covariance.data());
     if (scaling_vec.size() == 9) {
       scalingMatrix = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(scaling_vec.data());
     } else {
-      scalingMatrix = this->data->lastScale;
+      scalingMatrix = data_->last_scale_;
     }
 
-    this->setBias(msg);
+    setBias(msg);
 
     RCLCPP_INFO(log->get_logger(), "Initial magnetometer bias is %0.3f %0.3f %0.3f %s scaling factor",
-      msg.magnetic_field.x, msg.magnetic_field.y, msg.magnetic_field.z, this->hasScale() ? "with" : "without");
+      msg.magnetic_field.x, msg.magnetic_field.y, msg.magnetic_field.z, hasScale() ? "with" : "without");
   }
 }
 
 bool MagnetometerBiasRemover::hasBias() const{
-  return this->data->hasBias;
+  return data_->has_bias_;
 }
 
 bool MagnetometerBiasRemover::hasScale() const{
-  return this->data->hasScale;
+  return data_->has_scale_;
 }
 
 cras::expected<Field, std::string> MagnetometerBiasRemover::removeBias(const Field& mag) {
-  if (!this->data->hasBias) {
+  if (!data_->has_bias_) {
     return cras::make_unexpected("Magnetometer bias not available.");
   }
 
   Eigen::Vector3d field;
   tf2::fromMsg(mag.magnetic_field, field);
-  field = this->data->lastScale * (field - this->data->lastBias);
+  field = data_->last_scale_ * (field - data_->last_bias_);
 
   Field magUnbiased = mag;
   magUnbiased.magnetic_field.x = field.x();
@@ -118,14 +119,14 @@ cras::expected<Field, std::string> MagnetometerBiasRemover::removeBias(const Fie
 }
 
 void MagnetometerBiasRemover::setBias(const Field& bias) {
-  tf2::fromMsg(bias.magnetic_field, this->data->lastBias);
-  this->data->hasBias = true;
+  tf2::fromMsg(bias.magnetic_field, data_->last_bias_);
+  data_->has_bias_ = true;
 
   Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> covMatrix(bias.magnetic_field_covariance.data());
   if (covMatrix.cwiseAbs().sum() > 1e-10) {
-    this->data->lastScale = covMatrix;
+    data_->last_scale_ = covMatrix;
   }
-  this->data->hasScale = (this->data->lastScale - Eigen::Matrix3d::Identity()).cwiseAbs().sum() > 1e-10;
+  data_->has_scale_ = (data_->last_scale_ - Eigen::Matrix3d::Identity()).cwiseAbs().sum() > 1e-10;
 }
 
 }  // namespace magnetometer_pipeline

@@ -75,7 +75,7 @@ public:
   cras::expected<sensor_msgs::msg::MagneticField, std::string> removeBias(const sensor_msgs::msg::MagneticField& mag);
 
 private:
-  std::unique_ptr<MagnetometerBiasRemoverPrivate> data;  //!< PIMPL
+  std::unique_ptr<MagnetometerBiasRemoverPrivate> data_;  //!< PIMPL
 };
 
 }  // namespace magnetometer_pipeline

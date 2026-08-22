@@ -36,14 +36,14 @@ TEST(MessageFilter, Basic)  // NOLINT
 {
   rclcpp::Node node = rclcpp::Node("test_node");
 
-  TestInput<Field> magInput;
-  TestInput<Field> magBiasInput;
-  magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
+  TestInput<Field> mag_input;
+  TestInput<Field> mag_bias_input;
+  magnetometer_pipeline::BiasRemoverFilter filter(node, mag_input, mag_bias_input);
 
-  Field::ConstSharedPtr outMessage;
+  Field::ConstSharedPtr out_message;
   const auto cb =
-    [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage) {
-      outMessage = filteredMessage.getConstMessage();
+    [&out_message](const message_filters::MessageEvent<Field const>& filtered_message) {
+      out_message = filtered_message.getConstMessage();
     };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Field const>&)>(cb));
 
@@ -67,23 +67,23 @@ TEST(MessageFilter, Basic)  // NOLINT
   bias->magnetic_field.y = -0.692264333;
   bias->magnetic_field.z = 0;
 
-  outMessage.reset();
-  magInput.add(mag);
+  out_message.reset();
+  mag_input.add(mag);
 
-  EXPECT_EQ(nullptr, outMessage);
+  EXPECT_EQ(nullptr, out_message);
 
-  outMessage.reset();
-  magBiasInput.add(bias);
-  EXPECT_EQ(nullptr, outMessage);
+  out_message.reset();
+  mag_bias_input.add(bias);
+  EXPECT_EQ(nullptr, out_message);
 
-  outMessage.reset();
-  magInput.add(mag);
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_EQ(time, outMessage->header.stamp);
-  EXPECT_EQ("imu", outMessage->header.frame_id);
-  EXPECT_NEAR(0.360320, outMessage->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.153587, outMessage->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, outMessage->magnetic_field.z, 1e-6);
+  out_message.reset();
+  mag_input.add(mag);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_EQ(time, out_message->header.stamp);
+  EXPECT_EQ("imu", out_message->header.frame_id);
+  EXPECT_NEAR(0.360320, out_message->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.153587, out_message->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, out_message->magnetic_field.z, 1e-6);
 
   // New data
 
@@ -97,27 +97,27 @@ TEST(MessageFilter, Basic)  // NOLINT
   mag->magnetic_field.y = -0.533960;
   mag->magnetic_field.z = 0.149800;
 
-  outMessage.reset();
-  magInput.add(mag);
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_EQ(time, outMessage->header.stamp);
-  EXPECT_EQ("imu", outMessage->header.frame_id);
-  EXPECT_NEAR(0.361427, outMessage->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.158304, outMessage->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, outMessage->magnetic_field.z, 1e-6);
+  out_message.reset();
+  mag_input.add(mag);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_EQ(time, out_message->header.stamp);
+  EXPECT_EQ("imu", out_message->header.frame_id);
+  EXPECT_NEAR(0.361427, out_message->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.158304, out_message->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, out_message->magnetic_field.z, 1e-6);
 }
 
 TEST(MessageFilter, ConfigFromParams)  // NOLINT
 {
   rclcpp::Node node = rclcpp::Node("test_node");
 
-  TestInput<Field> magInput;
-  TestInput<Field> magBiasInput;
-  magnetometer_pipeline::BiasRemoverFilter filter(node, magInput, magBiasInput);
-  Field::ConstSharedPtr outMessage;
+  TestInput<Field> mag_input;
+  TestInput<Field> mag_bias_input;
+  magnetometer_pipeline::BiasRemoverFilter filter(node, mag_input, mag_bias_input);
+  Field::ConstSharedPtr out_message;
   const auto cb =
-    [&outMessage](const message_filters::MessageEvent<Field const>& filteredMessage) {
-      outMessage = filteredMessage.getConstMessage();
+    [&out_message](const message_filters::MessageEvent<Field const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
     };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Field const>&)>(cb));
 
@@ -146,14 +146,14 @@ TEST(MessageFilter, ConfigFromParams)  // NOLINT
   mag->magnetic_field.y = -0.538677;
   mag->magnetic_field.z = 0.157033;
 
-  outMessage.reset();
-  magInput.add(mag);
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_EQ(time, outMessage->header.stamp);
-  EXPECT_EQ("imu", outMessage->header.frame_id);
-  EXPECT_NEAR(0.360320, outMessage->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.153587, outMessage->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, outMessage->magnetic_field.z, 1e-6);
+  out_message.reset();
+  mag_input.add(mag);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_EQ(time, out_message->header.stamp);
+  EXPECT_EQ("imu", out_message->header.frame_id);
+  EXPECT_NEAR(0.360320, out_message->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.153587, out_message->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, out_message->magnetic_field.z, 1e-6);
 
   // New data
 
@@ -167,14 +167,14 @@ TEST(MessageFilter, ConfigFromParams)  // NOLINT
   mag->magnetic_field.y = -0.533960;
   mag->magnetic_field.z = 0.149800;
 
-  outMessage.reset();
-  magInput.add(mag);
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_EQ(time, outMessage->header.stamp);
-  EXPECT_EQ("imu", outMessage->header.frame_id);
-  EXPECT_NEAR(0.361427, outMessage->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.158304, outMessage->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, outMessage->magnetic_field.z, 1e-6);
+  out_message.reset();
+  mag_input.add(mag);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_EQ(time, out_message->header.stamp);
+  EXPECT_EQ("imu", out_message->header.frame_id);
+  EXPECT_NEAR(0.361427, out_message->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.158304, out_message->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, out_message->magnetic_field.z, 1e-6);
 }
 
 int main(int argc, char** argv) {

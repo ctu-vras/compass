@@ -55,12 +55,12 @@ public:
 
 protected:
   void cb(const Field& msg);
-  std::unique_ptr<BiasRemoverFilter> remover;  //!< \brief The bias remover doing the actual work.
+  std::unique_ptr<BiasRemoverFilter> remover_;  //!< \brief The bias remover doing the actual work.
 
-  std::unique_ptr<message_filters::Subscriber<Field>> magSub;  //!< \brief Subscriber for magnetic field measurements.
-  std::unique_ptr<message_filters::Subscriber<Field>> magBiasSub;  //!< \brief Subscriber for bias.
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_sub_;  //!< \brief Subscriber for magnetic field measurements.
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_bias_sub_;  //!< \brief Subscriber for bias.
 
-  rclcpp::Publisher<Field>::SharedPtr magUnbiasedPub;  //!< \brief Publisher of unbiased measurements.
+  rclcpp::Publisher<Field>::SharedPtr mag_unbiased_pub_;  //!< \brief Publisher of unbiased measurements.
 };
 
 }  // namespace magnetometer_pipeline
