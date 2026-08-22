@@ -78,7 +78,9 @@ add_library(${PROJECT_NAME}_defaults INTERFACE)
 target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)
 target_compile_features(${PROJECT_NAME}_defaults INTERFACE $<BUILD_INTERFACE:cxx_std_20>)
 target_include_directories(${PROJECT_NAME}_defaults INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
 
 add_library(compass_topic_names SHARED src/topic_names.cpp)
 target_link_libraries(compass_topic_names
@@ -120,7 +122,7 @@ rclcpp_components_register_node(compass_transformer_nodelet_lib
 
 pluginlib_export_plugin_description_file(rclcpp plugins.xml)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME}/)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
 
 # All shared libraries exported by the project. Do not add component nodes here (they should not be exported).

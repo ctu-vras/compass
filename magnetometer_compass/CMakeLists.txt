@@ -49,7 +49,9 @@ add_library(${PROJECT_NAME}_defaults INTERFACE)
 target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)
 target_compile_features(${PROJECT_NAME}_defaults INTERFACE $<BUILD_INTERFACE:cxx_std_20>)
 target_include_directories(${PROJECT_NAME}_defaults INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
 
 # do not use in outside projects
 add_library(_tf2_sensor_msgs INTERFACE)
@@ -102,7 +104,7 @@ rclcpp_components_register_node(visualize_azimuth_nodelet_lib
 
 pluginlib_export_plugin_description_file(rclcpp plugins.xml)
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME}/)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
 
 # All shared libraries exported by the project. Do not add component nodes here (they should not be exported).
