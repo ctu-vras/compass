@@ -42,51 +42,51 @@ namespace magnetic_model {
  */
 struct MagneticModelManagerPrivate {
   //! \brief Cache of already initialized magnetic field models. Keys are model names/strictness.
-  std::map<std::pair<std::string, bool>, std::shared_ptr<MagneticModel>> magneticModels;
+  std::map<std::pair<std::string, bool>, std::shared_ptr<MagneticModel>> magnetic_models_;
 
   //! \brief Path to the models on disk. Empty means system default.
-  std::string modelPath;
+  std::string model_path_;
 
-  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr log;
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr log_;
 };
 
-MagneticModelManager::MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& modelPath)
-    : data(new MagneticModelManagerPrivate{}), node(node) {
-  this->data->log = node.get_node_logging_interface();
-  this->setModelPath(modelPath);
+MagneticModelManager::MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& model_path)
+    : data_(new MagneticModelManagerPrivate{}), node_(node) {
+  data_->log_ = node.get_node_logging_interface();
+  setModelPath(model_path);
 }
 
 MagneticModelManager::~MagneticModelManager() = default;
 
 std::string MagneticModelManager::getModelPath() const{
-  return this->data->modelPath;
+  return data_->model_path_;
 }
 
-void MagneticModelManager::setModelPath(const std::optional<std::string>& modelPath) {
-  if (modelPath.has_value()) {
-    if (modelPath->empty()) {
-      this->data->modelPath = GeographicLib::MagneticModel::DefaultMagneticPath();
+void MagneticModelManager::setModelPath(const std::optional<std::string>& model_path) {
+  if (model_path.has_value()) {
+    if (model_path->empty()) {
+      data_->model_path_ = GeographicLib::MagneticModel::DefaultMagneticPath();
     } else {
-      this->data->modelPath = *modelPath;
+      data_->model_path_ = *model_path;
     }
   } else {
     try {
 #ifdef AMENT_INDEX_CPP_DONT_USE_STD_FILESYSTEM
-      this->data->modelPath = ament_index_cpp::get_package_share_directory("magnetic_model") + "/data/magnetic";
+      data_->model_path_ = ament_index_cpp::get_package_share_directory("magnetic_model") + "/data/magnetic";
 #else
-      this->data->modelPath =
+      data_->model_path_ =
         (ament_index_cpp::get_package_share_path("magnetic_model") / "data" / "magnetic").string();
 #endif
     } catch (const ament_index_cpp::PackageNotFoundError&) {
-      RCLCPP_ERROR(this->data->log->get_logger(),
+      RCLCPP_ERROR(data_->log_->get_logger(),
         "Could not resolve package magnetic_model. Is the workspace properly sourced?");
-      this->data->modelPath = GeographicLib::MagneticModel::DefaultMagneticPath();
+      data_->model_path_ = GeographicLib::MagneticModel::DefaultMagneticPath();
     }
   }
 
-  this->data->magneticModels.clear();
+  data_->magnetic_models_.clear();
 
-  RCLCPP_INFO(this->data->log->get_logger(), "Using WMM models from directory %s.", this->data->modelPath.c_str());
+  RCLCPP_INFO(data_->log_->get_logger(), "Using WMM models from directory %s.", data_->model_path_.c_str());
 }
 
 std::string MagneticModelManager::getBestMagneticModelName(const rclcpp::Time& date) const{
@@ -107,8 +107,8 @@ std::string MagneticModelManager::getBestMagneticModelName(const rclcpp::Time& d
 
 cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
     const rclcpp::Time& stamp, const bool strict) const {
-  const auto name = this->getBestMagneticModelName(stamp);
-  const auto model = this->getMagneticModel(name, strict);
+  const auto name = getBestMagneticModelName(stamp);
+  const auto model = getMagneticModel(name, strict);
   if (!model.has_value()) {
     return cras::make_unexpected(model.error());
   }
@@ -122,16 +122,16 @@ cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager
 cras::expected<std::shared_ptr<MagneticModel>, std::string> MagneticModelManager::getMagneticModel(
     const std::string& name, const bool strict) const {
   const auto key = std::make_pair(name, strict);
-  if (!this->data->magneticModels.contains(key)) {
+  if (!data_->magnetic_models_.contains(key)) {
     try {
-      this->data->magneticModels[key] = std::make_shared<MagneticModel>(
-        this->node, name, this->data->modelPath, strict);
+      data_->magnetic_models_[key] = std::make_shared<MagneticModel>(
+        node_, name, data_->model_path_, strict);
     } catch (const std::invalid_argument& e) {
       return cras::make_unexpected(e.what());
     }
   }
 
-  return this->data->magneticModels[key];
+  return data_->magnetic_models_[key];
 }
 
 }  // namespace magnetic_model
