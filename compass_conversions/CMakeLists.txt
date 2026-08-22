@@ -4,8 +4,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(compass_conversions)
 
-set(CMAKE_CXX_STANDARD 20)
-
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
 find_package(compass_interfaces REQUIRED)
@@ -76,64 +74,47 @@ if(TF2_ROS_HAS_NODE_INTERFACES)
   target_compile_definitions(_tf2_ros INTERFACE TF2_ROS_HAS_NODE_INTERFACES=1)
 endif()
 
-# LIBRARY 1
-add_library(compass_topic_names SHARED
-  src/topic_names.cpp
-)
-target_link_libraries(compass_topic_names
-  PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS}
-  PRIVATE cras_cpp_common::cras_cpp_common)
-target_include_directories(compass_topic_names PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+add_library(${PROJECT_NAME}_defaults INTERFACE)
+target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)
+target_compile_features(${PROJECT_NAME}_defaults INTERFACE $<BUILD_INTERFACE:cxx_std_20>)
+target_include_directories(${PROJECT_NAME}_defaults INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 2
-add_library(compass_converter SHARED
-  src/compass_converter.cpp
-)
+add_library(compass_topic_names SHARED src/topic_names.cpp)
+target_link_libraries(compass_topic_names
+  PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${PROJECT_NAME}_defaults
+  PRIVATE cras_cpp_common::cras_cpp_common)
+
+add_library(compass_converter SHARED src/compass_converter.cpp)
 target_link_libraries(compass_converter
-  PUBLIC compass_topic_names _message_filters
+  PUBLIC compass_topic_names _message_filters ${PROJECT_NAME}_defaults
   PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
   PUBLIC cras_cpp_common::cras_expected rclcpp::rclcpp
   PRIVATE angles::angles cras_cpp_common::cras_cpp_common GeographicLib magnetic_model::magnetic_model
   PRIVATE tf2::tf2 tf2_geometry_msgs::tf2_geometry_msgs)
-target_include_directories(compass_converter PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 3
-add_library(compass_message_filter SHARED
-  src/message_filter.cpp
-)
+add_library(compass_message_filter SHARED src/message_filter.cpp)
 target_link_libraries(compass_message_filter
-  PUBLIC compass_converter _message_filters
+  PUBLIC compass_converter _message_filters ${PROJECT_NAME}_defaults
   PUBLIC ${compass_interfaces_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
   PUBLIC rclcpp::rclcpp
   PRIVATE cras_cpp_common::cras_cpp_common
 )
-target_include_directories(compass_message_filter PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 4
-add_library(tf2_compass_msgs SHARED
-  src/tf2_compass_msgs.cpp
-)
+add_library(tf2_compass_msgs SHARED src/tf2_compass_msgs.cpp)
 target_link_libraries(tf2_compass_msgs
+  PUBLIC ${PROJECT_NAME}_defaults
   PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS}
   PUBLIC tf2::tf2
   PRIVATE angles::angles cras_cpp_common::cras_cpp_common rclcpp::rclcpp)
-target_include_directories(tf2_compass_msgs PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
-# LIBRARY 5
-add_library(compass_transformer_nodelet_lib SHARED
-  nodelets/compass_transformer.cpp
-)
+add_library(compass_transformer_nodelet_lib SHARED nodelets/compass_transformer.cpp)
 target_link_libraries(compass_transformer_nodelet_lib
   PUBLIC compass_topic_names compass_converter compass_message_filter tf2_compass_msgs _message_filters
+  PUBLIC ${PROJECT_NAME}_defaults
   PUBLIC ${compass_interfaces_TARGETS} ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS} ${std_msgs_TARGETS}
   PUBLIC rclcpp::rclcpp _tf2_ros
   PRIVATE cras_cpp_common::cras_cpp_common  rclcpp_components::component)
-target_include_directories(compass_transformer_nodelet_lib PUBLIC
-  <BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 rclcpp_components_register_node(compass_transformer_nodelet_lib
   PLUGIN "compass_conversions::CompassTransformerNodelet" EXECUTABLE compass_transformer)
 
@@ -151,6 +132,7 @@ set(EXPORTED_LIBS
   compass_message_filter
   tf2_compass_msgs
   _message_filters
+  ${PROJECT_NAME}_defaults
 )
 
 # Libraries that should not be exported (i.e. external packages will not link to them). E.g. component nodes go here.
@@ -193,36 +175,26 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_compass_converter test/test_compass_converter.cpp)
   target_link_libraries(test_compass_converter
-    angles::angles compass_converter compass_topic_names cras_cpp_common::cras_cpp_common)
-  target_include_directories(test_compass_converter PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+    angles::angles compass_converter compass_topic_names cras_cpp_common::cras_cpp_common ${PROJECT_NAME}_defaults)
   set_tests_properties(test_compass_converter PROPERTIES ENVIRONMENT "GTEST_CAPTURE=0")
 
   ament_add_ros_isolated_gtest(test_compass_transformer_nodelet test/test_compass_transformer_nodelet.cpp)
   target_link_libraries(test_compass_transformer_nodelet
     compass_converter compass_message_filter compass_topic_names compass_transformer_nodelet_lib tf2_compass_msgs
-    angles::angles cras_cpp_common::cras_cpp_common tf2_geometry_msgs::tf2_geometry_msgs)
-  target_include_directories(test_compass_transformer_nodelet PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+    angles::angles cras_cpp_common::cras_cpp_common tf2_geometry_msgs::tf2_geometry_msgs ${PROJECT_NAME}_defaults)
 
   ament_add_gtest(test_compass_message_filter test/test_message_filter.cpp)
   target_link_libraries(test_compass_message_filter
     compass_converter compass_message_filter compass_topic_names
-    angles::angles cras_cpp_common::cras_cpp_common)
-  target_include_directories(test_compass_message_filter PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+    angles::angles cras_cpp_common::cras_cpp_common ${PROJECT_NAME}_defaults)
 
   ament_add_gtest(test_tf2_compass_msgs test/test_tf2_compass_msgs.cpp)
   target_link_libraries(test_tf2_compass_msgs
     tf2_compass_msgs
-    angles::angles cras_cpp_common::cras_cpp_common)
-  target_include_directories(test_tf2_compass_msgs PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+    angles::angles cras_cpp_common::cras_cpp_common ${PROJECT_NAME}_defaults)
 
   ament_add_gtest(test_compass_topic_names test/test_topic_names.cpp)
-  target_link_libraries(test_compass_topic_names compass_topic_names)
-  target_include_directories(test_compass_topic_names PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+  target_link_libraries(test_compass_topic_names compass_topic_names ${PROJECT_NAME}_defaults)
 endif()
 
 ament_package()

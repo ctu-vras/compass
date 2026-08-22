@@ -82,27 +82,39 @@ public:
   /**
    * \brief Constructor
    *
-   * \param log Logger.
-   * \param nh The ros::NodeHandle to use for subscribing.
-   * \param topic The topic to subscribe to.
-   * \param queueSize Queue size of the subscription.
+   * \param[in] node The ROS node to use for subscribing.
+   * \param[in] topic The topic to subscribe to.
+   * \param[in] qos The QoS setting for the subscription.
+   * \param[in] subscribe_options Subscriber options.
    */
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
   UniversalAzimuthSubscriber(
       RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos = {10},
-      rclcpp::SubscriptionOptions subscribeOptions = {});
-
-  UniversalAzimuthSubscriber(rclcpp::Node* node, const std::string& topic, const rclcpp::QoS& qos = {10},
-      rclcpp::SubscriptionOptions subscribeOptions = {})
-      : UniversalAzimuthSubscriber(*node, topic, qos, subscribeOptions) {}
+      rclcpp::SubscriptionOptions subscribe_options = {});
 #else
   UniversalAzimuthSubscriber(
       rclcpp::Node* node, const std::string& topic, rmw_qos_profile_t qos = rmw_qos_profile_default,
-      rclcpp::SubscriptionOptions subscribeOptions = {});
+      rclcpp::SubscriptionOptions subscribe_options = {});
+#endif
 
-  UniversalAzimuthSubscriber(rclcpp::Node* node, const std::string& topic, rclcpp::QoS qos = {10},
-      rclcpp::SubscriptionOptions subscribeOptions = {})
-      : UniversalAzimuthSubscriber(node, topic, qos.get_rmw_qos_profile(), subscribeOptions) {}
+  /**
+   * \brief Constructor
+   *
+   * \param[in] node The ROS node to use for subscribing.
+   * \param[in] topic The topic to subscribe to.
+   * \param[in] qos The QoS setting for the subscription.
+   * \param[in] subscribe_options Subscriber options.
+   */
+#if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
+  UniversalAzimuthSubscriber(
+      rclcpp::Node* node, const std::string& topic, const rclcpp::QoS& qos = {10},
+      rclcpp::SubscriptionOptions subscribe_options = {})
+      : UniversalAzimuthSubscriber(*node, topic, qos, subscribe_options) {}
+#else
+  UniversalAzimuthSubscriber(
+      rclcpp::Node* node, const std::string& topic, rclcpp::QoS qos = {10},
+      rclcpp::SubscriptionOptions subscribe_options = {})
+      : UniversalAzimuthSubscriber(node, topic, qos.get_rmw_qos_profile(), subscribe_options) {}
 #endif
 
   ~UniversalAzimuthSubscriber() override;
@@ -110,33 +122,33 @@ public:
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
   virtual void subscribe(
       RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos,
-      rclcpp::SubscriptionOptions subscribeOptions);
+      rclcpp::SubscriptionOptions subscribe_options);
 
   void subscribe(
       SubscriberBase::RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos,
-      rclcpp::SubscriptionOptions subscribeOptions) override {
+      rclcpp::SubscriptionOptions subscribe_options) override {
     const RequiredInterfaces newNode {
-      this->node.get_node_clock_interface(), this->node.get_node_graph_interface(),
-      this->node.get_node_logging_interface(),
+      node_.get_node_clock_interface(), node_.get_node_graph_interface(),
+      node_.get_node_logging_interface(),
       node.get_node_parameters_interface(), node.get_node_topics_interface()
     };
-    this->subscribe(newNode, topic, qos, subscribeOptions);
+    subscribe(newNode, topic, qos, subscribe_options);
   }
 
   void subscribe(SubscriberBase::RequiredInterfaces node, const std::string& topic, const rclcpp::QoS& qos) override {
-    this->subscribe(node, topic, qos, {});
+    subscribe(node, topic, qos, {});
   }
 #else
   void subscribe(
       rclcpp::Node* node, const std::string& topic, rmw_qos_profile_t qos,
-      rclcpp::SubscriptionOptions subscribeOptions) override;
+      rclcpp::SubscriptionOptions subscribe_options) override;
 
   void subscribe(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos) override {
-    this->subscribe(node.get(), topic, qos, {});
+    subscribe(node.get(), topic, qos, {});
   }
 
   void subscribe(rclcpp::Node* node, const std::string& topic, const rmw_qos_profile_t qos) override {
-    this->subscribe(node, topic, qos, {});
+    subscribe(node, topic, qos, {});
   }
 #endif
 
@@ -186,22 +198,20 @@ public:
    */
   std::string getTopic() const;
 
-  // *INDENT-OFF*
   /**
    * \brief Returns the internal rclcpp::Subscription.
    */
-  const message_filters::Subscriber<compass_interfaces::msg::Azimuth>& getAzSubscriber() const { return this->azSub; }
+  const message_filters::Subscriber<compass_interfaces::msg::Azimuth>& getAzSubscriber() const { return az_sub_; }
 
   const message_filters::Subscriber<geometry_msgs::msg::PoseWithCovarianceStamped>& getPoseSubscriber() const {
-    return this->poseSub;
+    return pose_sub_;
   }
 
   const message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped>& getQuatSubscriber() const {
-    return this->quatSub;
+    return quat_sub_;
   }
 
-  const message_filters::Subscriber<sensor_msgs::msg::Imu>& getImuSubscriber() const { return this->imuSub; }
-  // *INDENT-ON*
+  const message_filters::Subscriber<sensor_msgs::msg::Imu>& getImuSubscriber() const { return imu_sub_; }
 
   // const message_filters::Subscriber<rclcpp::SerializedMessage>& getSubscriber() const;
 
@@ -221,36 +231,36 @@ protected:
 
   void serCb(const SerializedEventType& event);
 
-  message_filters::Subscriber<compass_interfaces::msg::Azimuth> azSub;
-  message_filters::Subscriber<geometry_msgs::msg::PoseWithCovarianceStamped> poseSub;
-  message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped> quatSub;
-  message_filters::Subscriber<sensor_msgs::msg::Imu> imuSub;
-  message_filters::Subscriber<rclcpp::SerializedMessage> serSub;
+  message_filters::Subscriber<compass_interfaces::msg::Azimuth> az_sub_;
+  message_filters::Subscriber<geometry_msgs::msg::PoseWithCovarianceStamped> pose_sub_;
+  message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped> quat_sub_;
+  message_filters::Subscriber<sensor_msgs::msg::Imu> imu_sub_;
+  message_filters::Subscriber<rclcpp::SerializedMessage> ser_sub_;
   // rclcpp::GenericSubscription sub;
 
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
-  RequiredInterfaces node;
+  RequiredInterfaces node_;
 #else
-  rclcpp::Node* node;
+  rclcpp::Node* node_;
 #endif
 
-  CompassConverter converter;  //!< The azimuth message converter.
+  CompassConverter converter_;  //!< The azimuth message converter.
 
   //! Orientation of the input azimuth (in case it is a data type which does not tell orientation explicitly).
-  std::optional<Orientation> inputOrientation;
+  std::optional<Orientation> input_orientation_;
 
   //! Reference of the input azimuth (in case it is a data type which does not tell reference explicitly).
-  std::optional<Reference> inputReference;
+  std::optional<Reference> input_reference_;
 
   //! Variance of the input azimuth (in case it is a data type which does not tell reference explicitly).
-  std::optional<Variance> inputVariance;
+  std::optional<Variance> input_variance_;
 
-  std::string topic {std::string()};
-  rclcpp::SubscriptionOptions options {};
+  std::string topic_;
+  rclcpp::SubscriptionOptions options_;
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
-  rclcpp::QoS qos {10};
+  rclcpp::QoS qos_ {10};
 #else
-  rmw_qos_profile_t qos {rmw_qos_profile_default};
+  rmw_qos_profile_t qos_ {rmw_qos_profile_default};
 #endif
 };
 
@@ -306,9 +316,9 @@ public:
    * \tparam UTMZoneInput The type of the UTM Zone filter.
    * \param[in] node The node to use.
    * \param[in] converter The azimuth converter instance. If nullptr, a default converter is constructed.
-   * \param[in] azimuthInput The message filter producing azimuth messages.
-   * \param[in] fixInput The message filter producing fix messages.
-   * \param[in] utmZoneInput The message filter producing UTM zone messages.
+   * \param[in] azimuth_input The message filter producing azimuth messages.
+   * \param[in] fix_input The message filter producing fix messages.
+   * \param[in] utm_zone_input The message filter producing UTM zone messages.
    * \param[in] unit The output azimuth unit.
    * \param[in] orientation The output azimuth orientation.
    * \param[in] reference The output azimuth reference.
@@ -316,23 +326,23 @@ public:
   template<class AzimuthInput, class FixInput, class UTMZoneInput>
   CompassFilter(
       RequiredInterfaces node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, FixInput& fixInput, UTMZoneInput& utmZoneInput,
+      AzimuthInput& azimuth_input, FixInput& fix_input, UTMZoneInput& utm_zone_input,
       const Unit unit, const Orientation orientation, const Reference reference)
-      : converter(converter), unit(unit), orientation(orientation), reference(reference), node(node) {
-    if (this->converter == nullptr) {
-      this->converter = std::make_shared<CompassConverter>(node, true);
+      : converter_(converter), unit_(unit), orientation_(orientation), reference_(reference), node_(node) {
+    if (converter_ == nullptr) {
+      converter_ = std::make_shared<CompassConverter>(node, true);
     }
-    this->connectAzimuthInput(azimuthInput);
-    this->connectFixInput(fixInput);
-    this->connectUTMZoneInput(utmZoneInput);
+    connectAzimuthInput(azimuth_input);
+    connectFixInput(fix_input);
+    connectUTMZoneInput(utm_zone_input);
   }
 
   template<class AzimuthInput, class FixInput, class UTMZoneInput>
   CompassFilter(
       rclcpp::Node* node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, FixInput& fixInput, UTMZoneInput& utmZoneInput,
+      AzimuthInput& azimuth_input, FixInput& fix_input, UTMZoneInput& utm_zone_input,
       const Unit unit, const Orientation orientation, const Reference reference)
-      : CompassFilter(*node, converter, azimuthInput, fixInput, utmZoneInput, unit, orientation, reference) {}
+      : CompassFilter(*node, converter, azimuth_input, fix_input, utm_zone_input, unit, orientation, reference) {}
 
   /**
    * \brief Construct azimuth filter that can convert all parameters.
@@ -341,8 +351,8 @@ public:
    * \tparam FixInput The type of the navsat fix filter.
    * \param[in] node The node to use.
    * \param[in] converter The azimuth converter instance. If nullptr, a default converter is constructed.
-   * \param[in] azimuthInput The message filter producing azimuth messages.
-   * \param[in] fixInput The message filter producing fix messages.
+   * \param[in] azimuth_input The message filter producing azimuth messages.
+   * \param[in] fix_input The message filter producing fix messages.
    * \param[in] unit The output azimuth unit.
    * \param[in] orientation The output azimuth orientation.
    * \param[in] reference The output azimuth reference.
@@ -350,22 +360,22 @@ public:
   template<class AzimuthInput, class FixInput>
   CompassFilter(
       RequiredInterfaces node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, FixInput& fixInput,
+      AzimuthInput& azimuth_input, FixInput& fix_input,
       const Unit unit, const Orientation orientation, const Reference reference)
-      : converter(converter), unit(unit), orientation(orientation), reference(reference), node(node) {
-    if (this->converter == nullptr) {
-      this->converter = std::make_shared<CompassConverter>(node, true);
+      : converter_(converter), unit_(unit), orientation_(orientation), reference_(reference), node_(node) {
+    if (converter_ == nullptr) {
+      converter_ = std::make_shared<CompassConverter>(node, true);
     }
-    this->connectAzimuthInput(azimuthInput);
-    this->connectFixInput(fixInput);
+    connectAzimuthInput(azimuth_input);
+    connectFixInput(fix_input);
   }
 
   template<class AzimuthInput, class FixInput>
   CompassFilter(
       rclcpp::Node* node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, FixInput& fixInput,
+      AzimuthInput& azimuth_input, FixInput& fix_input,
       const Unit unit, const Orientation orientation, const Reference reference)
-      : CompassFilter(*node, converter, azimuthInput, fixInput, unit, orientation, reference) {}
+      : CompassFilter(*node, converter, azimuth_input, fix_input, unit, orientation, reference) {}
 
   /**
    * \brief Construct azimuth filter that can only convert units and orientation.
@@ -373,7 +383,7 @@ public:
    * \tparam AzimuthInput The type of the input filter.
    * \param[in] node The node to use.
    * \param[in] converter The azimuth converter instance. If nullptr, a default converter is constructed.
-   * \param[in] azimuthInput The message filter producing azimuth messages.
+   * \param[in] azimuth_input The message filter producing azimuth messages.
    * \param[in] unit The output azimuth unit.
    * \param[in] orientation The output azimuth orientation.
    * \param[in] reference The output azimuth reference.
@@ -381,66 +391,66 @@ public:
   template<class AzimuthInput>
   CompassFilter(
       const RequiredInterfaces node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, const Unit unit, const Orientation orientation, const Reference reference)
-      : converter(converter), unit(unit), orientation(orientation), reference(reference), node(node) {
-    if (this->converter == nullptr) {
-      this->converter = std::make_shared<CompassConverter>(node, true);
+      AzimuthInput& azimuth_input, const Unit unit, const Orientation orientation, const Reference reference)
+      : converter_(converter), unit_(unit), orientation_(orientation), reference_(reference), node_(node) {
+    if (converter_ == nullptr) {
+      converter_ = std::make_shared<CompassConverter>(node, true);
     }
-    this->connectAzimuthInput(azimuthInput);
+    connectAzimuthInput(azimuth_input);
   }
 
   template<class AzimuthInput>
   CompassFilter(
       rclcpp::Node* node, const std::shared_ptr<CompassConverter>& converter,
-      AzimuthInput& azimuthInput, const Unit unit, const Orientation orientation, const Reference reference)
-      : CompassFilter(*node, converter, azimuthInput, unit, orientation, reference) {}
+      AzimuthInput& azimuth_input, const Unit unit, const Orientation orientation, const Reference reference)
+      : CompassFilter(*node, converter, azimuth_input, unit, orientation, reference) {}
 
   virtual ~CompassFilter();
 
   template<class AzimuthInput>
   void connectAzimuthInput(AzimuthInput& f) {
-    this->azimuthConnection.disconnect();
+    azimuth_connection_.disconnect();
     // The explicit cast to boost:function is needed to retain the message event metadata
-    this->azimuthConnection = f.registerCallback(
+    azimuth_connection_ = f.registerCallback(
       std::function<void(const AzimuthEventType&)>(std::bind_front(&CompassFilter::cbAzimuth, this)));
   }
 
   template<class FixInput>
   void connectFixInput(FixInput& f) {
-    this->fixConnection.disconnect();
+    fix_connection_.disconnect();
     // The explicit cast to boost:function is needed to retain the message event metadata
-    this->fixConnection = f.registerCallback(
+    fix_connection_ = f.registerCallback(
       std::function<void(const FixEventType&)>(std::bind_front(&CompassFilter::cbFix, this)));
   }
 
   template<class UTMZoneInput>
   void connectUTMZoneInput(UTMZoneInput& f) {
-    this->utmZoneConnection.disconnect();
+    utm_zone_connection_.disconnect();
     // The explicit cast to boost:function is needed to retain the message event metadata
-    this->utmZoneConnection = f.registerCallback(
+    utm_zone_connection_ = f.registerCallback(
       std::function<void(const UTMZoneEventType&)>(std::bind_front(&CompassFilter::cbUTMZone, this)));
   }
 
 protected:
-  virtual void cbAzimuth(const AzimuthEventType& azimuthEvent);
+  virtual void cbAzimuth(const AzimuthEventType& azimuth_event);
 
-  virtual void cbFix(const FixEventType& fixEvent);
+  virtual void cbFix(const FixEventType& fix_event);
 
-  virtual void cbUTMZone(const UTMZoneEventType& utmZoneEvent);
+  virtual void cbUTMZone(const UTMZoneEventType& utm_zone_event);
 
-  message_filters::Connection azimuthConnection;  //!< Connection to the azimuth input.
-  message_filters::Connection fixConnection;  //!< Connection to the navsat fix input.
-  message_filters::Connection utmZoneConnection;  //!< Connection to the UTM zone input.
+  message_filters::Connection azimuth_connection_;  //!< Connection to the azimuth input.
+  message_filters::Connection fix_connection_;  //!< Connection to the navsat fix input.
+  message_filters::Connection utm_zone_connection_;  //!< Connection to the UTM zone input.
 
-  std::shared_ptr<CompassConverter> converter;  //!< The compass converter instance.
-  bool fixReceived {false};  //!< Whether at least one navsat fix message has been received.
+  std::shared_ptr<CompassConverter> converter_;  //!< The compass converter instance.
+  bool fix_received_ {false};  //!< Whether at least one navsat fix message has been received.
 
-  Unit unit;  //!< The target azimuth unit.
-  Orientation orientation;  //!< The target azimuth orientation.
+  Unit unit_;  //!< The target azimuth unit.
+  Orientation orientation_;  //!< The target azimuth orientation.
 
   //! The target azimuth reference (unchanged if empty).
-  std::optional<Reference> reference;
-  RequiredInterfaces node;
+  std::optional<Reference> reference_;
+  RequiredInterfaces node_;
 };
 
 }  // namespace compass_conversions

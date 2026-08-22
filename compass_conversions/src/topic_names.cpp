@@ -26,10 +26,10 @@ namespace compass_conversions {
 namespace {
 
 std::string getAzimuthTopicSuffix(const Orientation orientation, const Reference reference) {
-  const std::string refStr =
+  const std::string ref_str =
     reference == Az::REFERENCE_MAGNETIC ? "mag" : (reference == Az::REFERENCE_GEOGRAPHIC ? "true" : "utm");
   const std::string orStr = orientation == Az::ORIENTATION_ENU ? "enu" : "ned";
-  return refStr + "/" + orStr;
+  return ref_str + "/" + orStr;
 }
 
 }  // namespace
@@ -37,8 +37,8 @@ std::string getAzimuthTopicSuffix(const Orientation orientation, const Reference
 template<>
 std::string getAzimuthTopicSuffix<Az>(
     const Unit unit, const Orientation orientation, const Reference reference) {
-  const auto unitStr = unit == Az::UNIT_RAD ? "rad" : "deg";
-  return getAzimuthTopicSuffix(orientation, reference) + "/" + unitStr;
+  const auto unit_str = unit == Az::UNIT_RAD ? "rad" : "deg";
+  return getAzimuthTopicSuffix(orientation, reference) + "/" + unit_str;
 }
 
 template<>
@@ -68,36 +68,36 @@ parseAzimuthTopicName(const std::string& topic) {
   }
 
   auto it = parts.rbegin();
-  const auto unitPart = *it;
+  const auto unit_part = *it;
   ++it;
-  const auto orPart = *it;
+  const auto or_part = *it;
   ++it;
-  const auto refPart = *it;
+  const auto ref_part = *it;
 
   Unit unit;
-  if (unitPart == "deg") {
+  if (unit_part == "deg") {
     unit = Az::UNIT_DEG;
-  } else if (unitPart == "rad" || unitPart == "imu" || unitPart == "pose" || unitPart == "quat") {
+  } else if (unit_part == "rad" || unit_part == "imu" || unit_part == "pose" || unit_part == "quat") {
     unit = Az::UNIT_RAD;
   } else {
     return {};
   }
 
   Orientation orientation;
-  if (orPart == "ned") {
+  if (or_part == "ned") {
     orientation = Az::ORIENTATION_NED;
-  } else if (orPart == "enu") {
+  } else if (or_part == "enu") {
     orientation = Az::ORIENTATION_ENU;
   } else {
     return {};
   }
 
   Reference reference;
-  if (refPart == "mag") {
+  if (ref_part == "mag") {
     reference = Az::REFERENCE_MAGNETIC;
-  } else if (refPart == "true") {
+  } else if (ref_part == "true") {
     reference = Az::REFERENCE_GEOGRAPHIC;
-  } else if (refPart == "utm") {
+  } else if (ref_part == "utm") {
     reference = Az::REFERENCE_UTM;
   } else {
     return {};
@@ -107,9 +107,9 @@ parseAzimuthTopicName(const std::string& topic) {
 }
 
 std::optional<std::tuple<Unit, Orientation, Reference>>
-parseAzimuthTopicName(const std::shared_ptr<std::map<std::string, std::string>>& connectionHeaderPtr) {
-  if (connectionHeaderPtr != nullptr && connectionHeaderPtr->contains("topic")) {
-    return parseAzimuthTopicName(connectionHeaderPtr->at("topic"));
+parseAzimuthTopicName(const std::shared_ptr<std::map<std::string, std::string>>& connection_header_ptr) {
+  if (connection_header_ptr != nullptr && connection_header_ptr->contains("topic")) {
+    return parseAzimuthTopicName(connection_header_ptr->at("topic"));
   }
   return {};
 }

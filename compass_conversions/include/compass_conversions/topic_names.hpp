@@ -55,10 +55,10 @@ std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(co
 /**
  * \brief Autodetect azimuth representation from connection header of a topic it came on.
  *
- * \param[in] connectionHeaderPtr Pointer to the connection header, should contain key "topic".
+ * \param[in] connection_header_ptr Pointer to the connection header, should contain key "topic".
  * \return The autodetected parameters, or nullopt if autodetection failed.
  */
 std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(
-    const std::shared_ptr<std::map<std::string, std::string>>& connectionHeaderPtr);
+    const std::shared_ptr<std::map<std::string, std::string>>& connection_header_ptr);
 
 }  // namespace compass_conversions
