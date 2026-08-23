@@ -34,16 +34,28 @@ ament_export_dependencies(
   tf2_ros
 )
 
+include(CMakePushCheckState)
+
+cmake_push_check_state(RESET)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
 try_compile(TF2_SENSOR_MSGS_HAS_IMU
-  ${CMAKE_BINARY_DIR}/has_imu ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_sensor_msgs_has_imu.cpp
+  ${CMAKE_BINARY_DIR}/has_imu
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_sensor_msgs_has_imu.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dummy.c
   CXX_STANDARD 20 LINK_LIBRARIES tf2_sensor_msgs::tf2_sensor_msgs)
+cmake_pop_check_state()
 message(STATUS "TF2_SENSOR_MSGS_HAS_IMU=${TF2_SENSOR_MSGS_HAS_IMU}")
 
+cmake_push_check_state(RESET)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(TF2_ROS_HAS_NODE_INTERFACES
-  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dummy.c
   CXX_STANDARD 20 LINK_LIBRARIES tf2_ros::tf2_ros)
+cmake_pop_check_state()
 
 add_library(${PROJECT_NAME}_defaults INTERFACE)
 target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)

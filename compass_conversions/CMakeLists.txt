@@ -20,10 +20,6 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-# Ubuntu libgeographic-dev package installs into non-standard location
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};/usr/share/cmake/geographiclib")
-find_package(GeographicLib REQUIRED)
-
 ament_export_dependencies(
   compass_interfaces
   cras_cpp_common
@@ -36,16 +32,28 @@ ament_export_dependencies(
   tf2_ros
 )
 
+include(CMakePushCheckState)
+
+cmake_push_check_state(RESET)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(SUBSCRIBER_BASE_IS_TEMPLATE
-  ${CMAKE_BINARY_DIR}/is_template ${CMAKE_CURRENT_SOURCE_DIR}/cmake/message_filters_subscriber_base_is_template.cpp
+  ${CMAKE_BINARY_DIR}/is_template
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/message_filters_subscriber_base_is_template.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dummy.c  # This dummy C file fixes build on Lyrical and newer
   CXX_STANDARD 20 LINK_LIBRARIES message_filters::message_filters)
+cmake_pop_check_state()
 
 if(SUBSCRIBER_BASE_IS_TEMPLATE)
+  cmake_push_check_state(RESET)
   set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
   try_compile(HAS_NODE_INTERFACES
-    ${CMAKE_BINARY_DIR}/node_interfaces ${CMAKE_CURRENT_SOURCE_DIR}/cmake/message_filters_has_node_interfaces.cpp
+    ${CMAKE_BINARY_DIR}/node_interfaces
+    SOURCES
+      ${CMAKE_CURRENT_SOURCE_DIR}/cmake/message_filters_has_node_interfaces.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dummy.c
     CXX_STANDARD 20 LINK_LIBRARIES message_filters::message_filters)
+  cmake_pop_check_state()
 else()
   set(HAS_NODE_INTERFACES TRUE)
 endif()
@@ -63,10 +71,15 @@ if(SUBSCRIBER_BASE_IS_TEMPLATE)
   target_compile_definitions(_message_filters INTERFACE MESSAGE_FILTERS_VERSION_SUBSCRIBER_BASE_IS_TEMPLATE=1)
 endif()
 
+cmake_push_check_state(RESET)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(TF2_ROS_HAS_NODE_INTERFACES
-  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+  ${CMAKE_BINARY_DIR}/tf2_ros_node_interfaces
+  SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tf2_ros_has_node_interfaces.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/dummy.c
   CXX_STANDARD 20 LINK_LIBRARIES tf2_ros::tf2_ros)
+cmake_pop_check_state()
 
 add_library(_tf2_ros INTERFACE)
 target_link_libraries(_tf2_ros INTERFACE tf2_ros::tf2_ros)
