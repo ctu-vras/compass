@@ -5,8 +5,8 @@
 Changelog for package magnetometer_compass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2026-08-23)
+------------------
 * fix: Fixed build on Lyrical and Rolling.
 * fix: Adapt to latest changes in cras_cpp_common.
 * feat!: Install include directories to subdirectory to support workspace overlays.

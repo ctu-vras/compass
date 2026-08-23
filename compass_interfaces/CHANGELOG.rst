@@ -5,8 +5,8 @@
 Changelog for package compass_interfaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2026-08-23)
+------------------
 * fix: Properly export cras_cpp_common dependency.
 * feat!: Install include directories to subdirectory to support workspace overlays.
 * feat!: Applied new naming scheme.

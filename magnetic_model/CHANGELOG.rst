@@ -5,8 +5,8 @@
 Changelog for package magnetic_model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2026-08-23)
+------------------
 * feat!: Install include directories to subdirectory to support workspace overlays.
 * feat!: Applied new naming scheme.
 * feat: Updated coding style.
