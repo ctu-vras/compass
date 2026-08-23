@@ -5,8 +5,8 @@
 Changelog for package magnetometer_pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.1 (2026-08-23)
+------------------
 * fix: Updated license strings to SPDX identifiers
 * Contributors: Martin Pecka
 
