@@ -14,7 +14,7 @@
 #include <compass_conversions/compass_converter.hpp>
 #include <compass_conversions/message_filter.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <cras_cpp_common/rate_limiter.h>
+#include <cras_cpp_common/rate_limiter.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <magnetometer_compass/visualize_azimuth_nodelet.hpp>
 #include <message_filters/subscriber.hpp>
@@ -27,8 +27,7 @@
 #include <tf2/LinearMath/Quaternion.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
@@ -84,84 +83,80 @@ using Zone = std_msgs::msg::Int32;
  */
 
 VisualizeAzimuthNodelet::VisualizeAzimuthNodelet(const rclcpp::NodeOptions& options)
-  : Node("visualize_azimuth_nodelet", options)
-{
+    : Node("visualize_azimuth_nodelet", options) {
 }
 
 VisualizeAzimuthNodelet::~VisualizeAzimuthNodelet() = default;
 
-void VisualizeAzimuthNodelet::init()
-{
-  this->declare_parameter<double>("max_rate", -1.);
+void VisualizeAzimuthNodelet::init() {
+  declare_parameter<double>("max_rate", -1.);
   // CompassConverter params:
-  this->declare_parameter<double>("magnetic_declination", -9999.);
-  this->declare_parameter<std::string>("magnetic_model", std::string());
-  this->declare_parameter<std::string>("magnetic_models_path", std::string());
-  this->declare_parameter<double>("utm_grid_convergence", -1.);
-  this->declare_parameter<int>("utm_zone", -1);
-  this->declare_parameter<bool>("keep_utm_zone", true);
-  this->declare_parameter<double>("initial_lat", -1.);
-  this->declare_parameter<double>("initial_lon", -1.);
-  this->declare_parameter<double>("initial_alt", -1.);
-  this->declare_parameter<bool>("use_wall_time_for_declination", false);
+  declare_parameter<double>("magnetic_declination", -9999.);
+  declare_parameter<std::string>("magnetic_model", std::string());
+  declare_parameter<std::string>("magnetic_models_path", std::string());
+  declare_parameter<double>("utm_grid_convergence", -1.);
+  declare_parameter<int>("utm_zone", -1);
+  declare_parameter<bool>("keep_utm_zone", true);
+  declare_parameter<double>("initial_lat", -1.);
+  declare_parameter<double>("initial_lon", -1.);
+  declare_parameter<double>("initial_alt", -1.);
+  declare_parameter<bool>("use_wall_time_for_declination", false);
   // UniversalAzimuthSubscriber params:
-  this->declare_parameter<std::string>("input_orientation", std::string());
-  this->declare_parameter<std::string>("input_reference", std::string());
-  this->declare_parameter<double>("input_variance", -1.);
+  declare_parameter<std::string>("input_orientation", std::string());
+  declare_parameter<std::string>("input_reference", std::string());
+  declare_parameter<double>("input_variance", -1.);
 
   double rate;
-  if (this->has_parameter("max_rate") && this->get_parameter("max_rate").as_double() != -1.)
-  {
-    this->get_parameter<double>("max_rate", rate);
-    this->rateLimiter = std::make_unique<cras::TokenBucketLimiter>(rclcpp::Rate(rate, this->get_clock()));
+  if (has_parameter("max_rate") && get_parameter("max_rate").as_double() != -1.) {
+    get_parameter<double>("max_rate", rate);
+    rate_limiter_ = std::make_unique<cras::TokenBucketLimiter>(rclcpp::Rate(rate, get_clock()));
   }
   // set compass converter
-  this->converter = std::make_shared<compass_conversions::CompassConverter>(this, true);
-  this->converter->configFromParams();
+  converter_ = std::make_shared<compass_conversions::CompassConverter>(this, true);
+  converter_->configFromParams();
 
   // publisher
-  this->visPub = this->create_publisher<Pose>("visualize_azimuth/azimuth_vis", rclcpp::SystemDefaultsQoS());
+  vis_pub_ = create_publisher<Pose>("visualize_azimuth/azimuth_vis", rclcpp::SystemDefaultsQoS());
 
   // subscribe azimuth, gps fix, utm_zone
-  this->azSub = std::make_unique<compass_conversions::UniversalAzimuthSubscriber>(
+  az_sub_ = std::make_unique<compass_conversions::UniversalAzimuthSubscriber>(
     this, "visualize_azimuth/azimuth", 100);
-  this->azSub->configFromParams();
+  az_sub_->configFromParams();
 
 #if MESSAGE_FILTERS_VERSION_SUBSCRIBER_USES_NODE_INTERFACES
   const rclcpp::QoS qos(10);
 #else
   const rmw_qos_profile_t qos = rclcpp::QoS(10).get_rmw_qos_profile();
 #endif
-  this->fixSub = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix", qos);
-  this->zoneSub = std::make_unique<message_filters::Subscriber<Zone>>(this, "utm_zone", qos);
+  fix_sub_ = std::make_unique<message_filters::Subscriber<Fix>>(this, "gps/fix", qos);
+  zone_sub_ = std::make_unique<message_filters::Subscriber<Zone>>(this, "utm_zone", qos);
 
   // set compass filter
-  this->filter = std::make_unique<compass_conversions::CompassFilter>(
-    this, this->converter, *this->azSub, *this->fixSub, *this->zoneSub,
+  filter_ = std::make_unique<compass_conversions::CompassFilter>(
+    this, converter_, *az_sub_, *fix_sub_, *zone_sub_,
     Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_UTM);
-  this->filter->registerCallback(&VisualizeAzimuthNodelet::azimuthCb, this);
+  filter_->registerCallback(&VisualizeAzimuthNodelet::azimuthCb, this);
 
-  RCLCPP_INFO(this->get_logger(), "Visualizing azimuth messages from [%s] on topic [%s]",
-    this->azSub->getTopic().c_str(), this->visPub->get_topic_name());
+  RCLCPP_INFO(get_logger(), "Visualizing azimuth messages from [%s] on topic [%s]",
+    az_sub_->getTopic().c_str(), vis_pub_->get_topic_name());
 }
 
-void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
-{
-  if (this->rateLimiter != nullptr && !this->rateLimiter->shouldPublish(azimuthEast.header.stamp))
-    return;
-
-  auto azimuthNorth = azimuthEast;
-  azimuthNorth.azimuth -= M_PI / 2;
-
-  const auto maybePose = this->converter->convertToPose(azimuthNorth);
-  if (!maybePose.has_value())
-  {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE(this->get_logger(), *this->get_clock(), 10000.,
-      "Visualizing azimuth failed: %s", maybePose.error().c_str());
+void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuth_east) {
+  if (rate_limiter_ != nullptr && !rate_limiter_->shouldPublish(azimuth_east.header.stamp)) {
     return;
   }
 
-  auto pose = *maybePose;
+  auto azimuth_north = azimuth_east;
+  azimuth_north.azimuth -= M_PI / 2;
+
+  const auto maybe_pose = converter_->convertToPose(azimuth_north);
+  if (!maybe_pose.has_value()) {
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(get_logger(), *get_clock(), 10000.,
+      "Visualizing azimuth failed: %s", maybe_pose.error().c_str());
+    return;
+  }
+
+  auto pose = *maybe_pose;
   // Invert the orientation. Normally, azimuth tells us the direction of local X axis from North. However, for
   // visualization, we want to get a pose in local frame that points to North.
   tf2::Quaternion q;
@@ -171,9 +166,9 @@ void VisualizeAzimuthNodelet::azimuthCb(const Az& azimuthEast)
   pose.pose.covariance[0 * 6 + 0] = 0;
   pose.pose.covariance[1 * 6 + 1] = 0;
   pose.pose.covariance[2 * 6 + 2] = 0;
-  this->visPub->publish(pose);
+  vis_pub_->publish(pose);
 }
 
-}
+}  // namespace magnetometer_compass
 
 RCLCPP_COMPONENTS_REGISTER_NODE(magnetometer_compass::VisualizeAzimuthNodelet)

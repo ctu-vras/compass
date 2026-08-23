@@ -17,23 +17,21 @@
 #include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 
 struct MagnetometerBiasRemoverPrivate;
 
 /**
  * \brief Remove known bias from 3-axis magnetometer.
  */
-class MagnetometerBiasRemover
-{
+class MagnetometerBiasRemover{
 public:
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
   using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeLoggingInterface,
-    NodeParametersInterface
+      NodeLoggingInterface,
+      NodeParametersInterface
   >;
 
   explicit MagnetometerBiasRemover(RequiredInterfaces node);
@@ -77,7 +75,7 @@ public:
   cras::expected<sensor_msgs::msg::MagneticField, std::string> removeBias(const sensor_msgs::msg::MagneticField& mag);
 
 private:
-  std::unique_ptr<MagnetometerBiasRemoverPrivate> data;  //!< PIMPL
+  std::unique_ptr<MagnetometerBiasRemoverPrivate> data_;  //!< PIMPL
 };
 
-}
+}  // namespace magnetometer_pipeline

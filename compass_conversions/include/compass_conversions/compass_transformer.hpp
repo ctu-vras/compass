@@ -27,52 +27,55 @@
 #include <tf2_ros/message_filter.hpp>
 #include <tf2_ros/transform_listener.hpp>
 
-namespace compass_conversions
-{
+namespace compass_conversions {
 
-enum class OutputType
-{
+enum class OutputType {
   Azimuth,
   Imu,
   Pose,
   Quaternion,
 };
 
-OutputType parseOutputType(const std::string& outputType);
+OutputType parseOutputType(const std::string& output_type);
+
 std::string outputTypeToString(OutputType type);
 
-class CompassTransformerNodelet : public rclcpp::Node
-{
+class CompassTransformerNodelet : public rclcpp::Node {
 public:
   explicit CompassTransformerNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+
   ~CompassTransformerNodelet() override;
 
   void init();
+
   void setBuffer(tf2_ros::Buffer::SharedPtr buffer, bool using_dedicated_thread);
 
 protected:
   void publish(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg);
+
   void transformAndPublish(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg);
-  void failedCb(const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg,
-                tf2_ros::filter_failure_reasons::FilterFailureReason reason);
 
-  std::shared_ptr<CompassConverter> converter;
-  std::unique_ptr<UniversalAzimuthSubscriber> azimuthInput;
-  std::unique_ptr<message_filters::Subscriber<sensor_msgs::msg::NavSatFix>> fixInput;
-  std::unique_ptr<message_filters::Subscriber<std_msgs::msg::Int32>> utmZoneInput;
-  std::unique_ptr<CompassFilter> compassFilter;
-  std::unique_ptr<tf2_ros::MessageFilter<compass_interfaces::msg::Azimuth>> tfFilter;
+  void failedCb(
+      const compass_interfaces::msg::Azimuth::ConstSharedPtr& msg,
+      tf2_ros::filter_failure_reasons::FilterFailureReason reason);
 
-  rclcpp::Publisher<compass_interfaces::msg::Azimuth>::SharedPtr pub_az;
-  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu;
-  rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pub_pose;
-  rclcpp::Publisher<geometry_msgs::msg::QuaternionStamped>::SharedPtr pub_quat;
+  std::shared_ptr<CompassConverter> converter_;
+  std::unique_ptr<UniversalAzimuthSubscriber> azimuth_input_;
+  std::unique_ptr<message_filters::Subscriber<sensor_msgs::msg::NavSatFix>> fix_input_;
+  std::unique_ptr<message_filters::Subscriber<std_msgs::msg::Int32>> utm_zone_input_;
+  std::unique_ptr<CompassFilter> compass_filter_;
+  std::unique_ptr<tf2_ros::MessageFilter<compass_interfaces::msg::Azimuth>> tf_filter_;
 
-  std::string targetFrame;
-  std::string outFrameId;
-  OutputType targetType {OutputType::Azimuth};
-  tf2_ros::Buffer::SharedPtr buffer;
-  std::shared_ptr<tf2_ros::TransformListener> listener;
+  rclcpp::Publisher<compass_interfaces::msg::Azimuth>::SharedPtr pub_az_;
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pub_pose_;
+  rclcpp::Publisher<geometry_msgs::msg::QuaternionStamped>::SharedPtr pub_quat_;
+
+  std::string target_frame_;
+  std::string out_frame_id_;
+  OutputType target_type_;
+  tf2_ros::Buffer::SharedPtr buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> listener_;
 };
 
-}
+}  // namespace compass_conversions

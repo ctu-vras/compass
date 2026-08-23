@@ -24,8 +24,7 @@ using Field = sensor_msgs::msg::MagneticField;
 using namespace std::chrono_literals;
 
 std::shared_ptr<magnetometer_pipeline::MagnetometerBiasRemoverNodelet> createNodelet(
-  rclcpp::NodeOptions node_options = rclcpp::NodeOptions())
-{
+    rclcpp::NodeOptions node_options = rclcpp::NodeOptions()) {
   return std::make_shared<magnetometer_pipeline::MagnetometerBiasRemoverNodelet>(node_options);
 }
 
@@ -40,11 +39,11 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  std::optional<Field> lastField;
-  auto magCb = [&lastField](const Field::ConstSharedPtr& msg)
-  {
-    lastField = *msg;
-  };
+  std::optional<Field> last_field;
+  auto mag_cb =
+    [&last_field](const Field::ConstSharedPtr& msg) {
+      last_field = *msg;
+    };
 
   auto sub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data);
   auto pub_qos = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_system_default);
@@ -53,34 +52,33 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   sub_qos.depth = dep;
 
   std::list<rclcpp::PublisherBase::SharedPtr> pubs;
-  auto magPub = node->create_publisher<Field>("imu/mag", rclcpp::SystemDefaultsQoS(pub_qos));
-  pubs.push_back(magPub);
-  auto magBiasPub = node->create_publisher<Field>("imu/mag_bias", rclcpp::SystemDefaultsQoS(pub_qos).transient_local());
-  pubs.push_back(magBiasPub);
+  auto mag_pub = node->create_publisher<Field>("imu/mag", rclcpp::SystemDefaultsQoS(pub_qos));
+  pubs.push_back(mag_pub);
+  auto mag_bias_pub = node->create_publisher<Field>(
+    "imu/mag_bias", rclcpp::SystemDefaultsQoS(pub_qos).transient_local());
+  pubs.push_back(mag_bias_pub);
 
   std::list<rclcpp::SubscriptionBase::SharedPtr> subs;
 
-  auto magUnbiasedSub = node->create_subscription<Field>("imu/mag_unbiased", rclcpp::SensorDataQoS(sub_qos), magCb);
-  subs.push_back(magUnbiasedSub);
+  auto mag_unbiased_sub = node->create_subscription<Field>("imu/mag_unbiased", rclcpp::SensorDataQoS(sub_qos), mag_cb);
+  subs.push_back(mag_unbiased_sub);
 
-  const auto pubTest = [](const rclcpp::PublisherBase::SharedPtr p) {return p->get_subscription_count() == 0;};
+  const auto pub_test = [](const rclcpp::PublisherBase::SharedPtr p) {return p->get_subscription_count() == 0;};
 
-  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pubTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(pubs.begin(), pubs.end(), pub_test); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for publisher connections.");
   }
 
-  const auto subTest = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
+  const auto sub_test = [](const rclcpp::SubscriptionBase::SharedPtr p) {return p->get_publisher_count() == 0;};
 
-  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), subTest); ++i)
-  {
+  for (size_t i = 0; i < 1000 && std::any_of(subs.begin(), subs.end(), sub_test); ++i) {
     executor.spin_all(10ms);
     RCLCPP_WARN_SKIPFIRST_THROTTLE(node->get_logger(), *node->get_clock(), 200., "Waiting for subscriber connections.");
   }
 
-  ASSERT_FALSE(std::any_of(pubs.begin(), pubs.end(), pubTest));
-  ASSERT_FALSE(std::any_of(subs.begin(), subs.end(), subTest));
+  ASSERT_FALSE(std::any_of(pubs.begin(), pubs.end(), pub_test));
+  ASSERT_FALSE(std::any_of(subs.begin(), subs.end(), sub_test));
 
   builtin_interfaces::msg::Time time;
   time.sec = 1664286802;
@@ -94,15 +92,14 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   mag.magnetic_field.x = 0.263093;
   mag.magnetic_field.y = -0.538677;
   mag.magnetic_field.z = 0.157033;
-  magPub->publish(mag);
+  mag_pub->publish(mag);
 
-  for (size_t i = 0; i < 5 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 5 && !last_field.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
 
   // Missing bias, nothing published
-  ASSERT_FALSE(lastField.has_value());
+  ASSERT_FALSE(last_field.has_value());
 
   // Publish bias. Now it should have everything.
   Field bias;
@@ -111,29 +108,28 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   bias.magnetic_field.x = -0.097227663;
   bias.magnetic_field.y = -0.692264333;
   bias.magnetic_field.z = 0;
-  magBiasPub->publish(bias);
+  mag_bias_pub->publish(bias);
 
   executor.spin_once();
 
   // Wait until the latched messages are received
   executor.spin_all(200ms);
 
-  magPub->publish(mag);
+  mag_pub->publish(mag);
 
-  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !last_field.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
-  ASSERT_TRUE(lastField.has_value());
+  ASSERT_TRUE(last_field.has_value());
 
-  EXPECT_EQ(time, lastField->header.stamp);
-  EXPECT_EQ("imu", lastField->header.frame_id);
-  EXPECT_NEAR(0.360320, lastField->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.153587, lastField->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, lastField->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, last_field->header.stamp);
+  EXPECT_EQ("imu", last_field->header.frame_id);
+  EXPECT_NEAR(0.360320, last_field->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.153587, last_field->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, last_field->magnetic_field.z, 1e-6);
 
   // New data
-  lastField.reset();
+  last_field.reset();
   time.sec = 1664286802;
   time.nanosec = 197458028;
 
@@ -143,23 +139,21 @@ TEST_F(MagnetometerBiasRemoverNodelet, Basic)  // NOLINT
   mag.magnetic_field.x = 0.264200;
   mag.magnetic_field.y = -0.533960;
   mag.magnetic_field.z = 0.149800;
-  magPub->publish(mag);
+  mag_pub->publish(mag);
 
-  for (size_t i = 0; i < 10 && !lastField.has_value() && rclcpp::ok(); ++i)
-  {
+  for (size_t i = 0; i < 10 && !last_field.has_value() && rclcpp::ok(); ++i) {
     executor.spin_all(100ms);
   }
-  ASSERT_TRUE(lastField.has_value());
+  ASSERT_TRUE(last_field.has_value());
 
-  EXPECT_EQ(time, lastField->header.stamp);
-  EXPECT_EQ("imu", lastField->header.frame_id);
-  EXPECT_NEAR(0.361427, lastField->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.158304, lastField->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, lastField->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, last_field->header.stamp);
+  EXPECT_EQ("imu", last_field->header.frame_id);
+  EXPECT_NEAR(0.361427, last_field->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.158304, last_field->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, last_field->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

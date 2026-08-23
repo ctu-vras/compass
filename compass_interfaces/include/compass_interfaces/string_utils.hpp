@@ -13,8 +13,7 @@
 
 #include <compass_interfaces/msg/azimuth.hpp>
 
-namespace compass_interfaces
-{
+namespace compass_interfaces {
 
 /**
  * \brief Convert the given azimuth unit to string.
@@ -26,11 +25,11 @@ std::string unitToString(msg::Azimuth::_unit_type unit);
 
 /**
  * \brief Convert the given string to azimuth unit.
- * \param[in] unitStr A string describing the unit.
+ * \param[in] unit_str A string describing the unit.
  * \return The unit.
  * \throw std::runtime_error If the unit is invalid.
  */
-msg::Azimuth::_unit_type parseUnit(const std::string& unitStr);
+msg::Azimuth::_unit_type parseUnit(const std::string& unit_str);
 
 /**
  * \brief Convert the given azimuth orientation to string.
@@ -42,11 +41,11 @@ std::string orientationToString(msg::Azimuth::_orientation_type orientation);
 
 /**
  * \brief Convert the given string to azimuth orientation.
- * \param[in] orientationStr A string describing the orientation.
+ * \param[in] orientation_str A string describing the orientation.
  * \return The orientation.
  * \throw std::runtime_error If the orientation is invalid.
  */
-msg::Azimuth::_orientation_type parseOrientation(const std::string& orientationStr);
+msg::Azimuth::_orientation_type parseOrientation(const std::string& orientation_str);
 
 /**
  * \brief Convert the given azimuth reference to string.
@@ -58,10 +57,10 @@ std::string referenceToString(msg::Azimuth::_reference_type reference);
 
 /**
  * \brief Convert the given string to azimuth reference.
- * \param[in] referenceStr A string describing the reference.
+ * \param[in] reference_str A string describing the reference.
  * \return The reference.
  * \throw std::runtime_error If the reference is invalid.
  */
-msg::Azimuth::_reference_type parseReference(const std::string& referenceStr);
+msg::Azimuth::_reference_type parseReference(const std::string& reference_str);
 
-}
+}  // namespace compass_interfaces

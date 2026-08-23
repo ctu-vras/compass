@@ -2,9 +2,7 @@
 # SPDX-FileCopyrightText: Czech Technical University in Prague
 
 cmake_minimum_required(VERSION 3.20)
-project(magnetic_model CXX)
-
-set(CMAKE_CXX_STANDARD 20)
+project(magnetic_model)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
@@ -24,6 +22,14 @@ ament_export_dependencies(
   sensor_msgs
 )
 
+add_library(${PROJECT_NAME}_defaults INTERFACE)
+target_link_libraries(${PROJECT_NAME}_defaults INTERFACE cras_cpp_common::cras_defaults)
+target_compile_features(${PROJECT_NAME}_defaults INTERFACE $<BUILD_INTERFACE:cxx_std_20>)
+target_include_directories(${PROJECT_NAME}_defaults INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
+
 # LIBRARY
 add_library(${PROJECT_NAME} SHARED
   src/magnetic_model_manager.cpp
@@ -31,12 +37,10 @@ add_library(${PROJECT_NAME} SHARED
 )
 target_link_libraries(${PROJECT_NAME}
   PUBLIC ${geometry_msgs_TARGETS} ${sensor_msgs_TARGETS}
-  PUBLIC cras_cpp_common::cras_expected rclcpp::rclcpp
+  PUBLIC cras_cpp_common::cras_expected rclcpp::rclcpp ${PROJECT_NAME}_defaults
   PRIVATE ament_index_cpp::ament_index_cpp angles::angles cras_cpp_common::cras_cpp_common GeographicLib)
-target_include_directories(${PROJECT_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME}/)
 install(DIRECTORY share/data DESTINATION share/${PROJECT_NAME})
 
 add_library(${PROJECT_NAME}_version INTERFACE)
@@ -44,7 +48,7 @@ ament_generate_version_header(${PROJECT_NAME}_version)
 
 # Install exported libs
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
-install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_version
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_defaults ${PROJECT_NAME}_version
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -60,9 +64,6 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_${PROJECT_NAME} test/test_${PROJECT_NAME}.cpp)
   target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME} angles::angles cras_cpp_common::cras_string_utils)
-  target_include_directories(test_${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
-  )
   target_compile_definitions(test_${PROJECT_NAME} PRIVATE -DTEST_DATA_DIR="${CMAKE_SOURCE_DIR}/share/data/magnetic")
 endif()
 

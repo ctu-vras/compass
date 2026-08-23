@@ -24,8 +24,7 @@ using Az = compass_interfaces::msg::Azimuth;
 using Imu = sensor_msgs::msg::Imu;
 using Field = sensor_msgs::msg::MagneticField;
 
-TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
-{
+TEST(MagnetometerCompass, ComputeAzimuth) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -72,37 +71,37 @@ TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
   mag.magnetic_field.y = -0.538677 - -0.692264333;
   mag.magnetic_field.z = 0.157033 - 0;
 
-  auto maybeAzimuth = compass.computeAzimuth(imu, mag);
+  auto maybe_azimuth = compass.computeAzimuth(imu, mag);
 
   // Missing tf, nothing published
-  ASSERT_FALSE(maybeAzimuth.has_value());
-  ASSERT_FALSE(maybeAzimuth.error().empty());
+  ASSERT_FALSE(maybe_azimuth.has_value());
+  ASSERT_FALSE(maybe_azimuth.error().empty());
 
   // Publish tf. Now it should have everything.
 
-  geometry_msgs::msg::TransformStamped baseLinkImuTf;
-  baseLinkImuTf.header.stamp = time;
-  baseLinkImuTf.header.frame_id = "base_link";
-  baseLinkImuTf.child_frame_id = "imu";
-  baseLinkImuTf.transform.translation.x = 0;
-  baseLinkImuTf.transform.translation.y = 0;
-  baseLinkImuTf.transform.translation.z = 0.15;
-  baseLinkImuTf.transform.rotation.x = 0.7071067811882787;
-  baseLinkImuTf.transform.rotation.y = -0.7071067811848163;
-  baseLinkImuTf.transform.rotation.z = 7.312301077167311e-14;
-  baseLinkImuTf.transform.rotation.w = -7.312301077203115e-14;
-  tf->setTransform(baseLinkImuTf, "test", true);
+  geometry_msgs::msg::TransformStamped base_link_imu_tf;
+  base_link_imu_tf.header.stamp = time;
+  base_link_imu_tf.header.frame_id = "base_link";
+  base_link_imu_tf.child_frame_id = "imu";
+  base_link_imu_tf.transform.translation.x = 0;
+  base_link_imu_tf.transform.translation.y = 0;
+  base_link_imu_tf.transform.translation.z = 0.15;
+  base_link_imu_tf.transform.rotation.x = 0.7071067811882787;
+  base_link_imu_tf.transform.rotation.y = -0.7071067811848163;
+  base_link_imu_tf.transform.rotation.z = 7.312301077167311e-14;
+  base_link_imu_tf.transform.rotation.w = -7.312301077203115e-14;
+  tf->setTransform(base_link_imu_tf, "test", true);
 
-  maybeAzimuth = compass.computeAzimuth(imu, mag);
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  maybe_azimuth = compass.computeAzimuth(imu, mag);
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.534008 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(0.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.534008 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(0.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 
   // New data
   time.sec = 1664286802;
@@ -127,21 +126,20 @@ TEST(MagnetometerCompass, ComputeAzimuth)  // NOLINT
   mag.magnetic_field.y = -0.533960 - -0.692264333;
   mag.magnetic_field.z = 0.149800 - 0;
 
-  maybeAzimuth = compass.computeAzimuth(imu, mag);
+  maybe_azimuth = compass.computeAzimuth(imu, mag);
 
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.544417 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(0.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.544417 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(0.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 }
 
-TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
-{
+TEST(MagnetometerCompass, ConfigFromParams) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node", rclcpp::NodeOptions().allow_undeclared_parameters(true));
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -160,18 +158,18 @@ TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
   time.sec = 1664286802;
   time.nanosec = 187375068;
 
-  geometry_msgs::msg::TransformStamped baseLinkImuTf;
-  baseLinkImuTf.header.stamp = time;
-  baseLinkImuTf.header.frame_id = "base_link";
-  baseLinkImuTf.child_frame_id = "imu";
-  baseLinkImuTf.transform.translation.x = 0;
-  baseLinkImuTf.transform.translation.y = 0;
-  baseLinkImuTf.transform.translation.z = 0.15;
-  baseLinkImuTf.transform.rotation.x = 0.7071067811882787;
-  baseLinkImuTf.transform.rotation.y = -0.7071067811848163;
-  baseLinkImuTf.transform.rotation.z = 7.312301077167311e-14;
-  baseLinkImuTf.transform.rotation.w = -7.312301077203115e-14;
-  tf->setTransform(baseLinkImuTf, "test", true);
+  geometry_msgs::msg::TransformStamped base_link_imu_tf;
+  base_link_imu_tf.header.stamp = time;
+  base_link_imu_tf.header.frame_id = "base_link";
+  base_link_imu_tf.child_frame_id = "imu";
+  base_link_imu_tf.transform.translation.x = 0;
+  base_link_imu_tf.transform.translation.y = 0;
+  base_link_imu_tf.transform.translation.z = 0.15;
+  base_link_imu_tf.transform.rotation.x = 0.7071067811882787;
+  base_link_imu_tf.transform.rotation.y = -0.7071067811848163;
+  base_link_imu_tf.transform.rotation.z = 7.312301077167311e-14;
+  base_link_imu_tf.transform.rotation.w = -7.312301077203115e-14;
+  tf->setTransform(base_link_imu_tf, "test", true);
 
   Imu imu;
   imu.header.stamp = time;
@@ -205,17 +203,17 @@ TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
   mag.magnetic_field.y = -0.538677 - -0.692264333;
   mag.magnetic_field.z = 0.157033 - 0;
 
-  auto maybeAzimuth = compass.computeAzimuth(imu, mag);
+  auto maybe_azimuth = compass.computeAzimuth(imu, mag);
 
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.534008 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(4.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.534008 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(4.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 
   // New data
   time.sec = 1664286802;
@@ -240,21 +238,20 @@ TEST(MagnetometerCompass, ConfigFromParams)  // NOLINT
   mag.magnetic_field.y = -0.533960 - -0.692264333;
   mag.magnetic_field.z = 0.149800 - 0;
 
-  maybeAzimuth = compass.computeAzimuth(imu, mag);
+  maybe_azimuth = compass.computeAzimuth(imu, mag);
 
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.544417 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(4.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.544417 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(4.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 }
 
-TEST(MagnetometerCompass, Reset)  // NOLINT
-{
+TEST(MagnetometerCompass, Reset) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
   auto tf = std::make_shared<tf2_ros::Buffer>(node.get_clock());
@@ -267,18 +264,18 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   time.sec = 1664286802;
   time.nanosec = 187375068;
 
-  geometry_msgs::msg::TransformStamped baseLinkImuTf;
-  baseLinkImuTf.header.stamp = time;
-  baseLinkImuTf.header.frame_id = "base_link";
-  baseLinkImuTf.child_frame_id = "imu";
-  baseLinkImuTf.transform.translation.x = 0;
-  baseLinkImuTf.transform.translation.y = 0;
-  baseLinkImuTf.transform.translation.z = 0.15;
-  baseLinkImuTf.transform.rotation.x = 0.7071067811882787;
-  baseLinkImuTf.transform.rotation.y = -0.7071067811848163;
-  baseLinkImuTf.transform.rotation.z = 7.312301077167311e-14;
-  baseLinkImuTf.transform.rotation.w = -7.312301077203115e-14;
-  tf->setTransform(baseLinkImuTf, "test", true);
+  geometry_msgs::msg::TransformStamped base_link_imu_tf;
+  base_link_imu_tf.header.stamp = time;
+  base_link_imu_tf.header.frame_id = "base_link";
+  base_link_imu_tf.child_frame_id = "imu";
+  base_link_imu_tf.transform.translation.x = 0;
+  base_link_imu_tf.transform.translation.y = 0;
+  base_link_imu_tf.transform.translation.z = 0.15;
+  base_link_imu_tf.transform.rotation.x = 0.7071067811882787;
+  base_link_imu_tf.transform.rotation.y = -0.7071067811848163;
+  base_link_imu_tf.transform.rotation.z = 7.312301077167311e-14;
+  base_link_imu_tf.transform.rotation.w = -7.312301077203115e-14;
+  tf->setTransform(base_link_imu_tf, "test", true);
 
   Imu imu;
   imu.header.stamp = time;
@@ -312,17 +309,17 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   mag.magnetic_field.y = -0.538677 - -0.692264333;
   mag.magnetic_field.z = 0.157033 - 0;
 
-  auto maybeAzimuth = compass.computeAzimuth(imu, mag);
+  auto maybe_azimuth = compass.computeAzimuth(imu, mag);
 
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.534008 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(0.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.534008 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(0.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 
   // Without resetting the filter, the next azimuth would be a mean of the two.
   compass.reset();
@@ -350,21 +347,20 @@ TEST(MagnetometerCompass, Reset)  // NOLINT
   mag.magnetic_field.y = -0.533960 - -0.692264333;
   mag.magnetic_field.z = 0.149800 - 0;
 
-  maybeAzimuth = compass.computeAzimuth(imu, mag);
+  maybe_azimuth = compass.computeAzimuth(imu, mag);
 
-  ASSERT_TRUE(maybeAzimuth.has_value());
+  ASSERT_TRUE(maybe_azimuth.has_value());
 
-  EXPECT_EQ(time, maybeAzimuth->header.stamp);
-  EXPECT_EQ("base_link", maybeAzimuth->header.frame_id);
-  EXPECT_NEAR(3.544417 - M_PI_2, maybeAzimuth->azimuth, 1e-6);
-  EXPECT_EQ(0.0, maybeAzimuth->variance);
-  EXPECT_EQ(Az::UNIT_RAD, maybeAzimuth->unit);
-  EXPECT_EQ(Az::ORIENTATION_NED, maybeAzimuth->orientation);
-  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybeAzimuth->reference);
+  EXPECT_EQ(time, maybe_azimuth->header.stamp);
+  EXPECT_EQ("base_link", maybe_azimuth->header.frame_id);
+  EXPECT_NEAR(3.544417 - M_PI_2, maybe_azimuth->azimuth, 1e-6);
+  EXPECT_EQ(0.0, maybe_azimuth->variance);
+  EXPECT_EQ(Az::UNIT_RAD, maybe_azimuth->unit);
+  EXPECT_EQ(Az::ORIENTATION_NED, maybe_azimuth->orientation);
+  EXPECT_EQ(Az::REFERENCE_MAGNETIC, maybe_azimuth->reference);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

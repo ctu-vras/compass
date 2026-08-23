@@ -22,25 +22,23 @@
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <tf2_ros/buffer.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 struct MagnetometerCompassPrivate;
 
 /**
  * \brief Convert magnetometer and IMU measurements to azimuth.
  */
-class MagnetometerCompass
-{
+class MagnetometerCompass{
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
   using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface,
-    NodeParametersInterface
+      NodeClockInterface,
+      NodeLoggingInterface,
+      NodeParametersInterface
   >;
 
   /**
@@ -76,13 +74,13 @@ public:
   /**
    * \brief Compute azimuth from the provided IMU and magnetometer measurements.
    * \param[in] imu IMU tied to the magnetometer. It has to contain valid orientation.
-   * \param[in] magUnbiased Magnetometer measurement with removed bias.
+   * \param[in] mag_unbiased Magnetometer measurement with removed bias.
    * \return The computed azimuth, or an error message. The azimuth will be in radians and NED frame.
    * \note The function does not check time synchronization of the two inputs.
    * \note Both inputs have to be transformable to the configured target frame.
    */
   virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> computeAzimuth(
-    const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& magUnbiased);
+      const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& mag_unbiased);
 
   /**
    * \brief Reset the computation (i.e. the low-pass filter and estimated variance).
@@ -97,9 +95,9 @@ protected:
   virtual void updateVariance();
 
 private:
-  std::unique_ptr<MagnetometerCompassPrivate> data;  //!< PIMPL
-  RequiredInterfaces node;
-  geometry_msgs::msg::Quaternion last_imu_orientation {};
+  std::unique_ptr<MagnetometerCompassPrivate> data_;  //!< PIMPL
+  RequiredInterfaces node_;
+  geometry_msgs::msg::Quaternion last_imu_orientation_ {};
 };
 
-}
+}  // namespace magnetometer_compass

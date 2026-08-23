@@ -34,8 +34,7 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/header.hpp>
 
-namespace compass_conversions
-{
+namespace compass_conversions {
 
 struct CompassConverterPrivate;
 
@@ -46,8 +45,7 @@ struct CompassConverterPrivate;
  * However, if you need to convert between different references, you need to provide a NavSatFix with valid GNSS
  * position and time and set it using setNavSatPos().
  */
-class CompassConverter
-{
+class CompassConverter {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeGraphInterface = rclcpp::node_interfaces::NodeGraphInterface;
@@ -56,11 +54,11 @@ public:
   using NodeTopicsInterface = rclcpp::node_interfaces::NodeTopicsInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeGraphInterface,
-    NodeLoggingInterface,
-    NodeParametersInterface,
-    NodeTopicsInterface
+      NodeClockInterface,
+      NodeGraphInterface,
+      NodeLoggingInterface,
+      NodeParametersInterface,
+      NodeTopicsInterface
   >;
 
   using Unit = compass_interfaces::msg::Azimuth::_unit_type;
@@ -121,12 +119,12 @@ public:
 
   /**
    * \brief Set the path where magnetic models are stored.
-   * \param[in] modelPath Path to the folder with stored models. If nullopt, the default data distributed with this
-   *                      package will be used. If empty string, a default system location will be used. The default
-   *                      system location is determined by GeographicLib and can be influenced by setting environment
-   *                      variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
+   * \param[in] model_path Path to the folder with stored models. If nullopt, the default data distributed with this
+   *                       package will be used. If empty string, a default system location will be used. The default
+   *                       system location is determined by GeographicLib and can be influenced by setting environment
+   *                       variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
    */
-  virtual void setMagneticModelPath(const std::optional<std::string>& modelPath);
+  virtual void setMagneticModelPath(const std::optional<std::string>& model_path);
 
   /**
    * \brief Force using the given magnetic model instead of automatically selecting the best one.
@@ -172,7 +170,7 @@ public:
    * \note This function does not take forcedMagneticDeclination into account.
    */
   virtual cras::expected<double, std::string> computeMagneticDeclination(
-    const sensor_msgs::msg::NavSatFix& fix, const rclcpp::Time& stamp) const;
+      const sensor_msgs::msg::NavSatFix& fix, const rclcpp::Time& stamp) const;
 
   /**
    * \brief Get the value of UTM grid convergence for the last location received by setNatSatPos().
@@ -201,12 +199,12 @@ public:
   /**
    * \brief Get the value of UTM grid convergence and UTM zone for the provided place.
    * \param[in] fix The place for which grid convergence is queried.
-   * \param[in] utmZone Optional forced UTM zone. If not specified, the default UTM zone will be used.
+   * \param[in] utm_zone Optional forced UTM zone. If not specified, the default UTM zone will be used.
    * \return The UTM grid convergence in radians and corresponding UTM zone, or an error message.
    * \note This function does not take forcedUTMGridConvergence into account.
    */
   virtual cras::expected<std::pair<double, int>, std::string> computeUTMGridConvergenceAndZone(
-    const sensor_msgs::msg::NavSatFix& fix, const std::optional<int>& utmZone) const;
+      const sensor_msgs::msg::NavSatFix& fix, const std::optional<int>& utm_zone) const;
 
   /**
    * \brief Convert the given compass_interfaces::msg::Azimuth message parametrized by the given unit,
@@ -222,7 +220,7 @@ public:
    *       The declination and grid convergence of the last set navsat pose will be used.
    */
   virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> convertAzimuth(
-    const compass_interfaces::msg::Azimuth& azimuth, Unit unit, Orientation orientation, Reference reference) const;
+      const compass_interfaces::msg::Azimuth& azimuth, Unit unit, Orientation orientation, Reference reference) const;
 
   /**
    * \brief Convert the given geometry_msgs::msg::QuaternionStamped message to Azimuth parametrized by the given unit,
@@ -236,8 +234,8 @@ public:
    * \return The converted Azimuth message or an error message.
    */
   virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> convertQuaternion(
-    const geometry_msgs::msg::QuaternionStamped& quat, Variance variance,
-    Unit unit, Orientation orientation, Reference reference) const;
+      const geometry_msgs::msg::QuaternionStamped& quat, Variance variance,
+      Unit unit, Orientation orientation, Reference reference) const;
 
   /**
    * \brief Convert the given geometry_msgs::msg::Quaternion message to Azimuth parametrized by the given unit,
@@ -252,14 +250,15 @@ public:
    * \return The converted Azimuth message or an error message.
    */
   virtual cras::expected<compass_interfaces::msg::Azimuth, std::string> convertQuaternion(
-    const geometry_msgs::msg::Quaternion& quat, const std_msgs::msg::Header& header, Variance variance,
-    Unit unit, Orientation orientation, Reference reference) const;
+      const geometry_msgs::msg::Quaternion& quat, const std_msgs::msg::Header& header, Variance variance,
+      Unit unit, Orientation orientation, Reference reference) const;
 
   /**
-   * \brief Convert a received geometry_msgs::msg::QuaternionStamped message to Azimuth. If needed, extract the orientation
-   *        and reference from the topic name.
+   * \brief Convert a received geometry_msgs::msg::QuaternionStamped message to Azimuth. If needed, extract the
+   *        orientation and reference from the topic name.
    *
-   * \param[in] quatEvent The input quaternion message.
+   * \param[in] topic The topic on which the message has been received.
+   * \param[in] quat_event The input quaternion message.
    * \param[in] variance Variance of the measurement (in rad^2).
    * \param[in] unit The output azimuth units.
    * \param[in] orientation The declared input orientation (autodetected from topic if not specified).
@@ -267,32 +266,34 @@ public:
    * \return The converted Azimuth message or an error message.
    */
   cras::expected<compass_interfaces::msg::Azimuth, std::string> convertQuaternionMsgEvent(
-    const std::string& topic,
-    const message_filters::MessageEvent<geometry_msgs::msg::QuaternionStamped const>& quatEvent,
-    Variance variance = 0, Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD,
-    const std::optional<Orientation>& orientation = {}, const std::optional<Reference>& reference = {}) const;
+      const std::string& topic,
+      const message_filters::MessageEvent<geometry_msgs::msg::QuaternionStamped const>& quat_event,
+      Variance variance = 0, Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD,
+      const std::optional<Orientation>& orientation = {}, const std::optional<Reference>& reference = {}) const;
 
   /**
    * \brief Convert a received geometry_msgs::msg::PoseWithCovarianceStamped message to Azimuth. If needed, extract the
    *        orientation and reference from the topic name.
    *
-   * \param[in] poseEvent The input pose message.
+   * \param[in] topic The topic on which the message has been received.
+   * \param[in] pose_event The input pose message.
    * \param[in] unit The output azimuth units.
    * \param[in] orientation The declared input orientation (autodetected from topic if not specified).
    * \param[in] reference The declared input reference (autodetected from topic if not specified).
    * \return The converted Azimuth message or an error message.
    */
   cras::expected<compass_interfaces::msg::Azimuth, std::string> convertPoseMsgEvent(
-    const std::string& topic,
-    const message_filters::MessageEvent<geometry_msgs::msg::PoseWithCovarianceStamped const>& poseEvent,
-    Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD, const std::optional<Orientation>& orientation = {},
-    const std::optional<Reference>& reference = {}) const;
+      const std::string& topic,
+      const message_filters::MessageEvent<geometry_msgs::msg::PoseWithCovarianceStamped const>& pose_event,
+      Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD, const std::optional<Orientation>& orientation = {},
+      const std::optional<Reference>& reference = {}) const;
 
   /**
-   * \brief Convert a received sensor_msgs::msg::Imu message to Azimuth. If needed, extract the orientation and reference
-   *        from the topic name.
+   * \brief Convert a received sensor_msgs::msg::Imu message to Azimuth. If needed, extract the orientation and
+   *        reference from the topic name.
    *
-   * \param[in] imuEvent The input IMU message.
+   * \param[in] topic The topic on which the message has been received.
+   * \param[in] imu_event The input IMU message.
    * \param[in] unit The output azimuth units.
    * \param[in] orientation The declared input orientation (autodetected from topic if not specified).
    * \param[in] reference The declared input reference (autodetected from topic if not specified).
@@ -300,9 +301,9 @@ public:
    */
 
   cras::expected<compass_interfaces::msg::Azimuth, std::string> convertImuMsgEvent(
-    const std::string& topic, const message_filters::MessageEvent<sensor_msgs::msg::Imu>& imuEvent,
-    Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD, const std::optional<Orientation>& orientation = {},
-    const std::optional<Reference>& reference = {}) const;
+      const std::string& topic, const message_filters::MessageEvent<sensor_msgs::msg::Imu>& imu_event,
+      Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD, const std::optional<Orientation>& orientation = {},
+      const std::optional<Reference>& reference = {}) const;
 
   /**
    * \brief Convert a received message to Azimuth. If needed, extract the orientation and reference from the topic name.
@@ -310,6 +311,7 @@ public:
    * Supported message types are compass_interfaces::msg::Azimuth, geometry_msgs::msg::QuaternionStamped,
    * geometry_msgs::msg::PoseWithCovarianceStamped and sensor_msgs::msg::Imu.
    *
+   * \param[in] topic The topic on which the message has been received.
    * \param[in] event The input message.
    * \param[in] variance Variance of the measurement (in rad^2) (if it isn't a part of the message).
    * \param[in] unit The output azimuth units.
@@ -318,9 +320,9 @@ public:
    * \return The converted Azimuth message or an error message.
    */
   cras::expected<compass_interfaces::msg::Azimuth, std::string> convertSerializedMsgEvent(
-    const std::string& topic, const message_filters::MessageEvent<rclcpp::SerializedMessage const>& event,
-    Variance variance = 0, Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD,
-    const std::optional<Orientation>& orientation = {}, const std::optional<Reference>& reference = {}) const;
+      const std::string& topic, const message_filters::MessageEvent<rclcpp::SerializedMessage const>& event,
+      Variance variance = 0, Unit unit = compass_interfaces::msg::Azimuth::UNIT_RAD,
+      const std::optional<Orientation>& orientation = {}, const std::optional<Reference>& reference = {}) const;
 
   /**
    * \brief Convert the given Azimuth message to geometry_msgs::msg::QuaternionStamped in the same parametrization.
@@ -329,16 +331,17 @@ public:
    * \return The converted geometry_msgs::msg::QuaternionStamped message or an error message.
    */
   virtual cras::expected<geometry_msgs::msg::QuaternionStamped, std::string> convertToQuaternion(
-    const compass_interfaces::msg::Azimuth& azimuth) const;
+      const compass_interfaces::msg::Azimuth& azimuth) const;
 
   /**
-   * \brief Convert the given Azimuth message to geometry_msgs::msg::PoseWithCovarianceStamped in the same parametrization.
+   * \brief Convert the given Azimuth message to geometry_msgs::msg::PoseWithCovarianceStamped in the same
+   *        parametrization.
    *
    * \param[in] azimuth The input azimuth message.
    * \return The converted geometry_msgs::msg::PoseWithCovarianceStamped message or an error message.
    */
   virtual cras::expected<geometry_msgs::msg::PoseWithCovarianceStamped, std::string> convertToPose(
-    const compass_interfaces::msg::Azimuth& azimuth) const;
+      const compass_interfaces::msg::Azimuth& azimuth) const;
 
   /**
    * \brief Convert the given Azimuth message to sensor_msgs::msg::Imu in the same parametrization.
@@ -347,43 +350,43 @@ public:
    * \return The converted sensor_msgs::msg::Imu message or an error message.
    */
   virtual cras::expected<sensor_msgs::msg::Imu, std::string> convertToImu(
-    const compass_interfaces::msg::Azimuth& azimuth) const;
+      const compass_interfaces::msg::Azimuth& azimuth) const;
 
 protected:
   //! \brief UTM convergence of the last received navsat position (or the forced one).
-  std::optional<double> lastUTMGridConvergence;
+  std::optional<double> last_utm_grid_convergence_;
 
   //! \brief Last determined UTM zone. If empty, no zone has been determined yet.
-  std::optional<int> lastUTMZone;
+  std::optional<int> last_utm_zone_;
 
   //! \brief The user-forced magnetic declination (if set, do not compute it).
-  std::optional<double> forcedMagneticDeclination;
+  std::optional<double> forced_magnetic_declination_;
 
   //! \brief The user-forced UTM grid convergence (if set, do not compute it).
-  std::optional<double> forcedUTMGridConvergence;
+  std::optional<double> forced_utm_grid_convergence_;
 
   //! \brief The user-forced UTM zone (if set, do not compute it).
-  std::optional<int> forcedUTMZone;
+  std::optional<int> forced_utm_zone_;
 
   //! \brief If true, the first determined UTM zone will be kept for all future queries.
-  bool keepUTMZone {true};
+  bool keep_utm_zone_ {true};
 
   //! \brief If the user forces a magnetic model, this is its name.
-  std::string forcedMagneticModelName{};
+  std::string forced_magnetic_model_name_ {};
 
   //! \brief If true, magnetic declination computations will use wall time instead of ROS time.
-  bool useWallTimeForDeclination {false};
+  bool use_wall_time_for_declination_ {false};
 
   //! \brief If true, convertAzimuth() will fail when the magnetic model is used outside its bounds.
-  bool strict {true};
+  bool strict_ {true};
 
   //! \brief Last received GNSS fix. Used for determining magnetic declination and UTM grid convergence.
-  std::optional<sensor_msgs::msg::NavSatFix> lastFix;
+  std::optional<sensor_msgs::msg::NavSatFix> last_fix_;
 
-  RequiredInterfaces node;
+  RequiredInterfaces node_;
 
   //! \brief PIMPL data
-  std::unique_ptr<CompassConverterPrivate> data;
+  std::unique_ptr<CompassConverterPrivate> data_;
 };
 
-}
+}  // namespace compass_conversions

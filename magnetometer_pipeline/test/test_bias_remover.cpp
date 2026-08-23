@@ -56,14 +56,14 @@ TEST(MagnetometerBiasRemover, Basic)  // NOLINT
   remover.setBias(bias);
 
   EXPECT_TRUE(remover.hasBias());
-  auto maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  auto maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(0.360320, maybeMagUnbiased->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.153587, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(0.360320, maybe_mag_unbiased->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.153587, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 
   // New data
 
@@ -77,14 +77,14 @@ TEST(MagnetometerBiasRemover, Basic)  // NOLINT
   mag.magnetic_field.y = -0.533960;
   mag.magnetic_field.z = 0.149800;
 
-  maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(0.361427, maybeMagUnbiased->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.158304, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(0.361427, maybe_mag_unbiased->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.158304, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 }
 
 TEST(MagnetometerBiasRemover, ConfigFromParams)  // NOLINT
@@ -120,14 +120,14 @@ TEST(MagnetometerBiasRemover, ConfigFromParams)  // NOLINT
   mag.magnetic_field.y = -0.538677;
   mag.magnetic_field.z = 0.157033;
 
-  auto maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  auto maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(0.360320, maybeMagUnbiased->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.153587, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(0.360320, maybe_mag_unbiased->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.153587, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 
   // New data
 
@@ -141,14 +141,14 @@ TEST(MagnetometerBiasRemover, ConfigFromParams)  // NOLINT
   mag.magnetic_field.y = -0.533960;
   mag.magnetic_field.z = 0.149800;
 
-  maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(0.361427, maybeMagUnbiased->magnetic_field.x, 1e-6);
-  EXPECT_NEAR(0.158304, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(0.361427, maybe_mag_unbiased->magnetic_field.x, 1e-6);
+  EXPECT_NEAR(0.158304, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 }
 
 TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
@@ -199,14 +199,14 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
   mag.magnetic_field.y = -0.538677;
   mag.magnetic_field.z = 0.157033;
 
-  auto maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  auto maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(2 * 0.360320, maybeMagUnbiased->magnetic_field.x, 1e-5);
-  EXPECT_NEAR(0.153587, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.157033, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(2 * 0.360320, maybe_mag_unbiased->magnetic_field.x, 1e-5);
+  EXPECT_NEAR(0.153587, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.157033, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 
   // New data
 
@@ -220,18 +220,17 @@ TEST(MagnetometerBiasRemover, ConfigFromParamsWithScale)  // NOLINT
   mag.magnetic_field.y = -0.533960;
   mag.magnetic_field.z = 0.149800;
 
-  maybeMagUnbiased = remover.removeBias(mag);
-  ASSERT_TRUE(maybeMagUnbiased.has_value());
+  maybe_mag_unbiased = remover.removeBias(mag);
+  ASSERT_TRUE(maybe_mag_unbiased.has_value());
 
-  EXPECT_EQ(time, maybeMagUnbiased->header.stamp);
-  EXPECT_EQ("imu", maybeMagUnbiased->header.frame_id);
-  EXPECT_NEAR(2 * 0.361427, maybeMagUnbiased->magnetic_field.x, 1e-5);
-  EXPECT_NEAR(0.158304, maybeMagUnbiased->magnetic_field.y, 1e-6);
-  EXPECT_NEAR(0.149800, maybeMagUnbiased->magnetic_field.z, 1e-6);
+  EXPECT_EQ(time, maybe_mag_unbiased->header.stamp);
+  EXPECT_EQ("imu", maybe_mag_unbiased->header.frame_id);
+  EXPECT_NEAR(2 * 0.361427, maybe_mag_unbiased->magnetic_field.x, 1e-5);
+  EXPECT_NEAR(0.158304, maybe_mag_unbiased->magnetic_field.y, 1e-6);
+  EXPECT_NEAR(0.149800, maybe_mag_unbiased->magnetic_field.z, 1e-6);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

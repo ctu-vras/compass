@@ -22,9 +22,7 @@
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 
-namespace compass_conversions
-{
-
+namespace compass_conversions {
 using Unit = compass_interfaces::msg::Azimuth::_unit_type;
 using Orientation = compass_interfaces::msg::Azimuth::_orientation_type;
 using Reference = compass_interfaces::msg::Azimuth::_reference_type;
@@ -43,7 +41,7 @@ template<typename T, typename ::std::enable_if_t<
     std::is_same_v<T, geometry_msgs::msg::PoseWithCovarianceStamped> ||
     std::is_same_v<T, geometry_msgs::msg::QuaternionStamped> ||
     std::is_same_v<T, sensor_msgs::msg::Imu>
-  >* = nullptr>
+    >* = nullptr>
 std::string getAzimuthTopicSuffix(Unit unit, Orientation orientation, Reference reference);
 
 /**
@@ -57,10 +55,10 @@ std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(co
 /**
  * \brief Autodetect azimuth representation from connection header of a topic it came on.
  *
- * \param[in] connectionHeaderPtr Pointer to the connection header, should contain key "topic".
+ * \param[in] connection_header_ptr Pointer to the connection header, should contain key "topic".
  * \return The autodetected parameters, or nullopt if autodetection failed.
  */
 std::optional<std::tuple<Unit, Orientation, Reference>> parseAzimuthTopicName(
-  const std::shared_ptr<std::map<std::string, std::string>>& connectionHeaderPtr);
+    const std::shared_ptr<std::map<std::string, std::string>>& connection_header_ptr);
 
-}
+}  // namespace compass_conversions

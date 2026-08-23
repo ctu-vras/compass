@@ -9,6 +9,4 @@
 
 #include <message_filters/subscriber.hpp>
 
-struct Test : public message_filters::SubscriberBase<>
-{
-};
+struct Test : public message_filters::SubscriberBase<> {};

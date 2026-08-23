@@ -20,35 +20,33 @@
 #include <rclcpp/node_interfaces/node_logging_interface.hpp>
 #include <rclcpp/time.hpp>
 
-namespace magnetic_model
-{
+namespace magnetic_model {
 
 struct MagneticModelManagerPrivate;
 
 /**
  * \brief Earth magnetic model.
  */
-class MagneticModelManager
-{
+class MagneticModelManager {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface
+      NodeClockInterface,
+      NodeLoggingInterface
   >;
 
   /**
    * \brief Create magnetic model manager.
    *
    * \param[in] node The node to use.
-   * \param[in] modelPath Path to the folder with stored models. If nullopt, the default data distributed with this
-   *                      package will be used. If empty string, a default system location will be used. The default
-   *                      system location is determined by GeographicLib and can be influenced by setting environment
-   *                      variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
+   * \param[in] model_path Path to the folder with stored models. If nullopt, the default data distributed with this
+   *                       package will be used. If empty string, a default system location will be used. The default
+   *                       system location is determined by GeographicLib and can be influenced by setting environment
+   *                       variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
    */
-  explicit MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& modelPath = {});
+  explicit MagneticModelManager(RequiredInterfaces node, const std::optional<std::string>& model_path = {});
   virtual ~MagneticModelManager();
 
   /**
@@ -59,12 +57,12 @@ public:
 
   /**
    * \brief Set the path to the folder with stored models.
-   * \param[in] modelPath Path to the folder with stored models. If nullopt, the default data distributed with this
-   *                      package will be used. If empty string, a default system location will be used. The default
-   *                      system location is determined by GeographicLib and can be influenced by setting environment
-   *                      variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
+   * \param[in] model_path Path to the folder with stored models. If nullopt, the default data distributed with this
+   *                       package will be used. If empty string, a default system location will be used. The default
+   *                       system location is determined by GeographicLib and can be influenced by setting environment
+   *                       variables `GEOGRAPHICLIB_MAGNETIC_PATH` or `GEOGRAPHICLIB_DATA`.
    */
-  void setModelPath(const std::optional<std::string>& modelPath);
+  void setModelPath(const std::optional<std::string>& model_path);
 
   /**
    * \brief Get the best magnetic model for the given date.
@@ -80,7 +78,7 @@ public:
    * \return The magnetic model or error if there is no suitable model.
    */
   virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
-    const rclcpp::Time& stamp, bool strict) const;
+      const rclcpp::Time& stamp, bool strict) const;
 
   /**
    * \brief Get the magnetic model with the given name.
@@ -89,12 +87,12 @@ public:
    * \return The magnetic model or error if it cannot be found.
    */
   virtual cras::expected<std::shared_ptr<MagneticModel>, std::string> getMagneticModel(
-    const std::string& name, bool strict) const;
+      const std::string& name, bool strict) const;
 
 protected:
   //! \brief PIMPL data
-  std::unique_ptr<MagneticModelManagerPrivate> data;
-  RequiredInterfaces node;
+  std::unique_ptr<MagneticModelManagerPrivate> data_;
+  RequiredInterfaces node_;
 };
 
-}
+}  // namespace magnetic_model

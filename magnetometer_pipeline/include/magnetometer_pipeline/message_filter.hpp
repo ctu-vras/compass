@@ -20,8 +20,7 @@
 #include <rclcpp/node_interfaces/node_parameters_interface.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 
 /**
  * \brief Message filter to remove bias from 3-axis magnetometer measurements.
@@ -42,17 +41,16 @@ namespace magnetometer_pipeline
  * });
  * \endcode
  */
-class BiasRemoverFilter : public message_filters::SimpleFilter<sensor_msgs::msg::MagneticField>
-{
+class BiasRemoverFilter : public message_filters::SimpleFilter<sensor_msgs::msg::MagneticField> {
 public:
   using NodeClockInterface = rclcpp::node_interfaces::NodeClockInterface;
   using NodeLoggingInterface = rclcpp::node_interfaces::NodeLoggingInterface;
   using NodeParametersInterface = rclcpp::node_interfaces::NodeParametersInterface;
 
   using RequiredInterfaces = rclcpp::node_interfaces::NodeInterfaces<
-    NodeClockInterface,
-    NodeLoggingInterface,
-    NodeParametersInterface
+      NodeClockInterface,
+      NodeLoggingInterface,
+      NodeParametersInterface
   >;
 
   /**
@@ -61,31 +59,28 @@ public:
    * \tparam MagInput The type of the input filter.
    * \tparam BiasInput The type of the bias filter.
    * \param[in] node The node to use.
-   * \param[in] magInput The message filter producing raw magnetometer measurements messages.
-   * \param[in] biasInput The message filter producing magnetometer bias messages.
+   * \param[in] mag_input The message filter producing raw magnetometer measurements messages.
+   * \param[in] bias_input The message filter producing magnetometer bias messages.
    */
   template<class MagInput, class BiasInput>
-  BiasRemoverFilter(RequiredInterfaces node, MagInput& magInput, BiasInput& biasInput) : node(node)
-  {
-    this->remover = std::make_unique<MagnetometerBiasRemover>(node);
-    this->connectMagnetometerInput(magInput);
-    this->connectBiasInput(biasInput);
+  BiasRemoverFilter(RequiredInterfaces node, MagInput& mag_input, BiasInput& bias_input) : node_(node) {
+    this->remover_ = std::make_unique<MagnetometerBiasRemover>(node);
+    this->connectMagnetometerInput(mag_input);
+    this->connectBiasInput(bias_input);
   }
 
   virtual ~BiasRemoverFilter();
 
   template<class MagInput>
-  void connectMagnetometerInput(MagInput& f)
-  {
-    this->magConnection.disconnect();
-    this->magConnection = f.registerCallback(&BiasRemoverFilter::cbMag, this);
+  void connectMagnetometerInput(MagInput& f) {
+    this->mag_connection_.disconnect();
+    this->mag_connection_ = f.registerCallback(&BiasRemoverFilter::cbMag, this);
   }
 
   template<class BiasInput>
-  void connectBiasInput(BiasInput& f)
-  {
-    this->biasConnection.disconnect();
-    this->biasConnection = f.registerCallback(&BiasRemoverFilter::cbBias, this);
+  void connectBiasInput(BiasInput& f) {
+    this->bias_connection_.disconnect();
+    this->bias_connection_ = f.registerCallback(&BiasRemoverFilter::cbBias, this);
     // Bias can be a latched message, so we could miss the only message sent there. Resubscribe to be sure we get it.
     f.subscribe();
   }
@@ -105,11 +100,11 @@ protected:
   virtual void cbMag(const message_filters::MessageEvent<sensor_msgs::msg::MagneticField const>& event);
   virtual void cbBias(const message_filters::MessageEvent<sensor_msgs::msg::MagneticField const>& event);
 
-  message_filters::Connection magConnection;  //!< Connection to the magnetometer measurements input.
-  message_filters::Connection biasConnection;  //!< Connection to the bias input.
+  message_filters::Connection mag_connection_;  //!< Connection to the magnetometer measurements input.
+  message_filters::Connection bias_connection_;  //!< Connection to the bias input.
 
-  std::unique_ptr<MagnetometerBiasRemover> remover;  //!< The bias remover that does the actual computations.
-  RequiredInterfaces node;
+  std::unique_ptr<MagnetometerBiasRemover> remover_;  //!< The bias remover that does the actual computations.
+  RequiredInterfaces node_;
 };
 
-}
+}  // namespace magnetometer_pipeline

@@ -17,8 +17,7 @@
 #include <rclcpp/publisher.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 
-namespace magnetometer_pipeline
-{
+namespace magnetometer_pipeline {
 
 using Field = sensor_msgs::msg::MagneticField;
 
@@ -48,8 +47,7 @@ using Field = sensor_msgs::msg::MagneticField;
  * - `~initial_scaling_matrix` (double[9], optional): Magnetometer scaling matrix (row-major).
  *   - If you specify any of the `~initial_mag_bias_*` params, the node does not need to receive the bias messages.
  */
-class MagnetometerBiasRemoverNodelet : public rclcpp::Node
-{
+class MagnetometerBiasRemoverNodelet : public rclcpp::Node{
 public:
   explicit MagnetometerBiasRemoverNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~MagnetometerBiasRemoverNodelet() override;
@@ -57,12 +55,12 @@ public:
 
 protected:
   void cb(const Field& msg);
-  std::unique_ptr<BiasRemoverFilter> remover;  //!< \brief The bias remover doing the actual work.
+  std::unique_ptr<BiasRemoverFilter> remover_;  //!< \brief The bias remover doing the actual work.
 
-  std::unique_ptr<message_filters::Subscriber<Field>> magSub;  //!< \brief Subscriber for magnetic field measurements.
-  std::unique_ptr<message_filters::Subscriber<Field>> magBiasSub;  //!< \brief Subscriber for bias.
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_sub_;  //!< \brief Subscriber for magnetic field measurements.
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_bias_sub_;  //!< \brief Subscriber for bias.
 
-  rclcpp::Publisher<Field>::SharedPtr magUnbiasedPub;  //!< \brief Publisher of unbiased measurements.
+  rclcpp::Publisher<Field>::SharedPtr mag_unbiased_pub_;  //!< \brief Publisher of unbiased measurements.
 };
 
-}
+}  // namespace magnetometer_pipeline

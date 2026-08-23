@@ -13,7 +13,7 @@
 #include <compass_conversions/compass_converter.hpp>
 #include <compass_conversions/message_filter.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <cras_cpp_common/rate_limiter.h>
+#include <cras_cpp_common/rate_limiter.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <message_filters/subscriber.hpp>
 #include <rclcpp/node.hpp>
@@ -22,8 +22,7 @@
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <std_msgs/msg/int32.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Pose = geometry_msgs::msg::PoseWithCovarianceStamped;
@@ -77,8 +76,7 @@ using Zone = std_msgs::msg::Int32;
  *                                                if variance cannot be determined from the input messages (e.g. for
  *                                                `QuaternionStamped`).
  */
-class VisualizeAzimuthNodelet : public rclcpp::Node
-{
+class VisualizeAzimuthNodelet : public rclcpp::Node{
 public:
   explicit VisualizeAzimuthNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~VisualizeAzimuthNodelet() override;
@@ -88,17 +86,17 @@ public:
 protected:
   /**
    * \brief Callback Azimuth messages are received.
-   * \param[in] azimuth The Azimuth converted to pose.
+   * \param[in] azimuth_east The Azimuth converted to pose.
    */
-  void azimuthCb(const Az& azimuth);
+  void azimuthCb(const Az& azimuth_east);
 
-  std::unique_ptr<cras::RateLimiter> rateLimiter;
-  std::shared_ptr<compass_conversions::CompassConverter> converter;
-  std::unique_ptr<compass_conversions::UniversalAzimuthSubscriber> azSub;
-  std::unique_ptr<message_filters::Subscriber<Fix>> fixSub;
-  std::unique_ptr<message_filters::Subscriber<Zone>> zoneSub;
-  std::unique_ptr<compass_conversions::CompassFilter> filter;
+  std::unique_ptr<cras::RateLimiter> rate_limiter_;
+  std::shared_ptr<compass_conversions::CompassConverter> converter_;
+  std::unique_ptr<compass_conversions::UniversalAzimuthSubscriber> az_sub_;
+  std::unique_ptr<message_filters::Subscriber<Fix>> fix_sub_;
+  std::unique_ptr<message_filters::Subscriber<Zone>> zone_sub_;
+  std::unique_ptr<compass_conversions::CompassFilter> filter_;
 
-  rclcpp::Publisher<Pose>::SharedPtr visPub;
+  rclcpp::Publisher<Pose>::SharedPtr vis_pub_;
 };
-}
+}  // namespace magnetometer_compass

@@ -17,8 +17,7 @@
 
 using Az = compass_interfaces::msg::Azimuth;
 
-TEST(CompassMsgs, Unit)  // NOLINT
-{
+TEST(CompassMsgs, Unit) {  // NOLINT
   EXPECT_EQ(Az::UNIT_RAD, compass_interfaces::parseUnit("rad"));
   EXPECT_EQ(Az::UNIT_RAD, compass_interfaces::parseUnit("RAD"));
   EXPECT_EQ(Az::UNIT_RAD, compass_interfaces::parseUnit("Rad"));
@@ -34,8 +33,7 @@ TEST(CompassMsgs, Unit)  // NOLINT
   EXPECT_THROW(compass_interfaces::unitToString(10), std::runtime_error);
 }
 
-TEST(CompassMsgs, Orientation)  // NOLINT
-{
+TEST(CompassMsgs, Orientation) {  // NOLINT
   EXPECT_EQ(Az::ORIENTATION_ENU, compass_interfaces::parseOrientation("enu"));
   EXPECT_EQ(Az::ORIENTATION_ENU, compass_interfaces::parseOrientation("ENU"));
   EXPECT_EQ(Az::ORIENTATION_ENU, compass_interfaces::parseOrientation("Enu"));
@@ -51,8 +49,7 @@ TEST(CompassMsgs, Orientation)  // NOLINT
   EXPECT_THROW(compass_interfaces::orientationToString(10), std::runtime_error);
 }
 
-TEST(CompassMsgs, Reference)  // NOLINT
-{
+TEST(CompassMsgs, Reference) {  // NOLINT
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, compass_interfaces::parseReference("magnetic"));
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, compass_interfaces::parseReference("MAGNETIC"));
   EXPECT_EQ(Az::REFERENCE_MAGNETIC, compass_interfaces::parseReference("Magnetic"));
@@ -76,8 +73,7 @@ TEST(CompassMsgs, Reference)  // NOLINT
   EXPECT_THROW(compass_interfaces::referenceToString(10), std::runtime_error);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

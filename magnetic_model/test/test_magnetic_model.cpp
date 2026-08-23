@@ -43,7 +43,7 @@ TEST_F(MagneticModel, Construct)  // NOLINT
     node, magnetic_model::MagneticModel::WMM2025, TEST_DATA_DIR, true));
 
   ASSERT_THROW(magnetic_model::MagneticModel model(
-                 node, "nonexisting", TEST_DATA_DIR, true), std::invalid_argument);
+    node, "nonexisting", TEST_DATA_DIR, true), std::invalid_argument);
 }
 
 TEST_F(MagneticModel, GetField)
@@ -135,16 +135,16 @@ TEST_F(MagneticModel, GetFieldComponentsFromField)
   const auto result = model.getMagneticFieldComponents(field, stamp);
 
   ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(1.95e-05, result->values.horizontalMagnitude, 1e-6);
-  EXPECT_NEAR(4.95e-05, result->values.totalMagnitude, 1e-6);
+  EXPECT_NEAR(1.95e-05, result->values.horizontal_magnitude, 1e-6);
+  EXPECT_NEAR(4.95e-05, result->values.total_magnitude, 1e-6);
   EXPECT_NEAR(angles::from_degrees(4.04), result->values.declination, 1e-3);
   EXPECT_NEAR(1.165, result->values.inclination, 1e-3);
-  EXPECT_NEAR(4.2601598e-09, result->dt.horizontalMagnitude, 1e-12);
-  EXPECT_NEAR(5.210166e-08, result->dt.totalMagnitude, 1e-12);
+  EXPECT_NEAR(4.2601598e-09, result->dt.horizontal_magnitude, 1e-12);
+  EXPECT_NEAR(5.210166e-08, result->dt.total_magnitude, 1e-12);
   EXPECT_NEAR(3.0346225e-03, result->dt.declination, 1e-6);
   EXPECT_NEAR(3.600e-04, result->dt.inclination, 1e-6);
-  EXPECT_NEAR(1.28e-07, result->errors.horizontalMagnitude, 1e-9);
-  EXPECT_NEAR(1.45e-07, result->errors.totalMagnitude, 1e-9);
+  EXPECT_NEAR(1.28e-07, result->errors.horizontal_magnitude, 1e-9);
+  EXPECT_NEAR(1.45e-07, result->errors.total_magnitude, 1e-9);
   EXPECT_NEAR(0.007, result->errors.declination, 1e-3);
   EXPECT_NEAR(0.004, result->errors.inclination, 1e-3);
 
@@ -166,16 +166,16 @@ TEST_F(MagneticModel, GetFieldComponentsFromFix)
   const auto result = model.getMagneticFieldComponents(fix, fix.header.stamp);
 
   ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(1.95e-05, result->values.horizontalMagnitude, 1e-6);
-  EXPECT_NEAR(4.95e-05, result->values.totalMagnitude, 1e-6);
+  EXPECT_NEAR(1.95e-05, result->values.horizontal_magnitude, 1e-6);
+  EXPECT_NEAR(4.95e-05, result->values.total_magnitude, 1e-6);
   EXPECT_NEAR(angles::from_degrees(4.04), result->values.declination, 1e-2);
   EXPECT_NEAR(1.165, result->values.inclination, 1e-2);
-  EXPECT_NEAR(4.2601598e-09, result->dt.horizontalMagnitude, 1e-10);
-  EXPECT_NEAR(5.210166e-08, result->dt.totalMagnitude, 1e-10);
+  EXPECT_NEAR(4.2601598e-09, result->dt.horizontal_magnitude, 1e-10);
+  EXPECT_NEAR(5.210166e-08, result->dt.total_magnitude, 1e-10);
   EXPECT_NEAR(3.0346225e-03, result->dt.declination, 1e-5);
   EXPECT_NEAR(3.600e-04, result->dt.inclination, 1e-5);
-  EXPECT_NEAR(1.28e-07, result->errors.horizontalMagnitude, 1e-9);
-  EXPECT_NEAR(1.45e-07, result->errors.totalMagnitude, 1e-9);
+  EXPECT_NEAR(1.28e-07, result->errors.horizontal_magnitude, 1e-9);
+  EXPECT_NEAR(1.45e-07, result->errors.total_magnitude, 1e-9);
   EXPECT_NEAR(0.007, result->errors.declination, 1e-3);
   EXPECT_NEAR(0.004, result->errors.inclination, 1e-3);
 
@@ -202,13 +202,13 @@ TEST_F(MagneticModel, GazeboModel)
   // https://github.com/gazebosim/gz-sim/blob/gz-sim9/src/systems/magnetometer/Magnetometer.cc
   const auto result = model.getMagneticFieldComponents(fix, fix.header.stamp);
   ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(49 * 1e-6, result->values.totalMagnitude, 1e-6);
+  EXPECT_NEAR(49 * 1e-6, result->values.total_magnitude, 1e-6);
   EXPECT_NEAR(angles::from_degrees(3), result->values.declination, 1e-2);
   EXPECT_NEAR(angles::from_degrees(66), result->values.inclination, 1e-2);
-  EXPECT_NEAR(0, result->dt.totalMagnitude, 1e-10);
+  EXPECT_NEAR(0, result->dt.total_magnitude, 1e-10);
   EXPECT_NEAR(0, result->dt.declination, 1e-5);
   EXPECT_NEAR(0, result->dt.inclination, 1e-5);
-  EXPECT_NEAR(0, result->errors.totalMagnitude, 1e-9);
+  EXPECT_NEAR(0, result->errors.total_magnitude, 1e-9);
   EXPECT_NEAR(0, result->errors.declination, 1e-3);
   EXPECT_NEAR(0, result->errors.inclination, 1e-3);
 }
@@ -284,10 +284,11 @@ TEST_F(MagneticModelManager, SetModelPath)
   manager.setModelPath("");
   EXPECT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
   EXPECT_EQ(TEST_DATA_DIR, manager.getModelPath());
-  if (oldPath == nullptr)
+  if (oldPath == nullptr) {
     unsetenv("GEOGRAPHICLIB_MAGNETIC_PATH");
-  else
+  } else {
     setenv("GEOGRAPHICLIB_MAGNETIC_PATH", oldPath, true);
+  }
 
   manager.setModelPath(std::nullopt);
   EXPECT_TRUE(manager.getMagneticModel(magnetic_model::MagneticModel::WMM2020, true).has_value());
@@ -317,8 +318,7 @@ TEST_F(MagneticModelManager, GetModelByTime)
   EXPECT_TRUE(manager.getMagneticModel(cras::parseTime("1970-11-18T13:00:00Z"), false).has_value());
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

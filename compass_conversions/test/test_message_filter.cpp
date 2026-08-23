@@ -24,232 +24,224 @@
 using Az = compass_interfaces::msg::Azimuth;
 
 template<class T>
-class TestInput : public message_filters::SimpleFilter<T>
-{
+class TestInput : public message_filters::SimpleFilter<T> {
 public:
-  void add(const typename T::ConstSharedPtr& msg)
-  {
+  void add(const typename T::ConstSharedPtr& msg) {
     // Pass a complete MessageEvent to avoid calling node->now() to determine the missing timestamp
     this->signalMessage(message_filters::MessageEvent<T const>(msg, msg->header.stamp));
   }
 };
 
-TEST(MessageFilter, NoNavSatNeeded)  // NOLINT
-{
+TEST(MessageFilter, NoNavSatNeeded) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
 
-  TestInput<Az> azimuthInput;
+  TestInput<Az> azimuth_input;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuth_input, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
-  Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  Az::ConstSharedPtr out_message;
+  const auto cb =
+    [&out_message](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
-  Az::SharedPtr inMessage(new Az);
-  inMessage->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
-  inMessage->unit = Az::UNIT_DEG;
-  inMessage->orientation = Az::ORIENTATION_NED;
-  inMessage->reference = Az::REFERENCE_GEOGRAPHIC;
-  inMessage->azimuth = 90;
+  Az::SharedPtr in_message(new Az);
+  in_message->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
+  in_message->unit = Az::UNIT_DEG;
+  in_message->orientation = Az::ORIENTATION_NED;
+  in_message->reference = Az::REFERENCE_GEOGRAPHIC;
+  in_message->azimuth = 90;
 
-  outMessage.reset();
-  azimuthInput.add(inMessage);
+  out_message.reset();
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(0, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(0, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 }
 
-TEST(MessageFilter, NavSatNeededButNotGiven)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeededButNotGiven) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
-  TestInput<Az> azimuthInput;
-  TestInput<sensor_msgs::msg::NavSatFix> fixInput;
+  TestInput<Az> azimuth_input;
+  TestInput<sensor_msgs::msg::NavSatFix> fix_input;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuth_input, fix_input, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
-  Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  Az::ConstSharedPtr out_message;
+  const auto cb =
+    [&out_message](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
-  Az::SharedPtr inMessage(new Az);
-  inMessage->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
-  inMessage->unit = Az::UNIT_DEG;
-  inMessage->orientation = Az::ORIENTATION_NED;
-  inMessage->reference = Az::REFERENCE_MAGNETIC;
-  inMessage->azimuth = 90;
+  Az::SharedPtr in_message(new Az);
+  in_message->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
+  in_message->unit = Az::UNIT_DEG;
+  in_message->orientation = Az::ORIENTATION_NED;
+  in_message->reference = Az::REFERENCE_MAGNETIC;
+  in_message->azimuth = 90;
 
-  outMessage.reset();
-  azimuthInput.add(inMessage);
+  out_message.reset();
+  azimuth_input.add(in_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 }
 
-TEST(MessageFilter, NavSatNeeded)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeeded) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
-  TestInput<Az> azimuthInput;
-  TestInput<sensor_msgs::msg::NavSatFix> fixInput;
+  TestInput<Az> azimuth_input;
+  TestInput<sensor_msgs::msg::NavSatFix> fix_input;
   compass_conversions::CompassFilter filter(
-    node, nullptr, azimuthInput, fixInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, nullptr, azimuth_input, fix_input, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
-  Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  Az::ConstSharedPtr out_message;
+  const auto cb =
+    [&out_message](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
-  Az::SharedPtr inMessage(new Az);
-  inMessage->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
-  inMessage->unit = Az::UNIT_DEG;
-  inMessage->orientation = Az::ORIENTATION_NED;
-  inMessage->reference = Az::REFERENCE_MAGNETIC;
-  inMessage->azimuth = 90;
+  Az::SharedPtr in_message(new Az);
+  in_message->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
+  in_message->unit = Az::UNIT_DEG;
+  in_message->orientation = Az::ORIENTATION_NED;
+  in_message->reference = Az::REFERENCE_MAGNETIC;
+  in_message->azimuth = 90;
 
-  outMessage.reset();
-  azimuthInput.add(inMessage);
+  out_message.reset();
+  azimuth_input.add(in_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
-  sensor_msgs::msg::NavSatFix::SharedPtr fixMessage(new sensor_msgs::msg::NavSatFix);
-  fixMessage->header.stamp = inMessage->header.stamp;
-  fixMessage->latitude = 51;
-  fixMessage->longitude = 10;
-  fixMessage->altitude = 200;
-  fixInput.add(fixMessage);
+  sensor_msgs::msg::NavSatFix::SharedPtr fix_message(new sensor_msgs::msg::NavSatFix);
+  fix_message->header.stamp = in_message->header.stamp;
+  fix_message->latitude = 51;
+  fix_message->longitude = 10;
+  fix_message->altitude = 200;
+  fix_input.add(fix_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 }
 
-TEST(MessageFilter, NavSatNeededAndGivenAsInitValue)  // NOLINT
-{
+TEST(MessageFilter, NavSatNeededAndGivenAsInitValue) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
-  TestInput<Az> azimuthInput;
+  TestInput<Az> azimuth_input;
   auto converter = std::make_shared<compass_conversions::CompassConverter>(node, true);
   compass_conversions::CompassFilter filter(
-    node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, converter, azimuth_input, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
-  Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  Az::ConstSharedPtr out_message;
+  const auto cb =
+    [&out_message](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
-  Az::SharedPtr inMessage(new Az);
-  inMessage->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
-  inMessage->unit = Az::UNIT_DEG;
-  inMessage->orientation = Az::ORIENTATION_NED;
-  inMessage->reference = Az::REFERENCE_MAGNETIC;
-  inMessage->azimuth = 90;
+  Az::SharedPtr in_message(new Az);
+  in_message->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
+  in_message->unit = Az::UNIT_DEG;
+  in_message->orientation = Az::ORIENTATION_NED;
+  in_message->reference = Az::REFERENCE_MAGNETIC;
+  in_message->azimuth = 90;
 
-  outMessage.reset();
-  azimuthInput.add(inMessage);
+  out_message.reset();
+  azimuth_input.add(in_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
-  sensor_msgs::msg::NavSatFix::SharedPtr fixMessage(new sensor_msgs::msg::NavSatFix);
-  fixMessage->header.stamp = inMessage->header.stamp;
-  fixMessage->latitude = 51;
-  fixMessage->longitude = 10;
-  fixMessage->altitude = 200;
-  converter->setNavSatPos(*fixMessage);
+  sensor_msgs::msg::NavSatFix::SharedPtr fix_message(new sensor_msgs::msg::NavSatFix);
+  fix_message->header.stamp = in_message->header.stamp;
+  fix_message->latitude = 51;
+  fix_message->longitude = 10;
+  fix_message->altitude = 200;
+  converter->setNavSatPos(*fix_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 }
 
-TEST(MessageFilter, ForcedDeclination)  // NOLINT
-{
+TEST(MessageFilter, ForcedDeclination) {  // NOLINT
   rclcpp::Node node = rclcpp::Node("test_node");
-  TestInput<Az> azimuthInput;
+  TestInput<Az> azimuth_input;
   auto converter = std::make_shared<compass_conversions::CompassConverter>(node, true);
   compass_conversions::CompassFilter filter(
-    node, converter, azimuthInput, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
+      node, converter, azimuth_input, Az::UNIT_RAD, Az::ORIENTATION_ENU, Az::REFERENCE_GEOGRAPHIC);
 
-  Az::ConstSharedPtr outMessage;
-  const auto cb = [&outMessage](const message_filters::MessageEvent<Az const>& filteredMessage)
-  {
-    outMessage = filteredMessage.getConstMessage();
-  };
+  Az::ConstSharedPtr out_message;
+  const auto cb =
+    [&out_message](const message_filters::MessageEvent<Az const>& filteredMessage) {
+      out_message = filteredMessage.getConstMessage();
+    };
   filter.registerCallback(std::function<void(const message_filters::MessageEvent<Az const>&)>(cb));
 
-  Az::SharedPtr inMessage(new Az);
-  inMessage->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
-  inMessage->unit = Az::UNIT_DEG;
-  inMessage->orientation = Az::ORIENTATION_NED;
-  inMessage->reference = Az::REFERENCE_MAGNETIC;
-  inMessage->azimuth = 90;
+  Az::SharedPtr in_message(new Az);
+  in_message->header.stamp = cras::parseTime("2024-11-18T13:00:00.000Z");
+  in_message->unit = Az::UNIT_DEG;
+  in_message->orientation = Az::ORIENTATION_NED;
+  in_message->reference = Az::REFERENCE_MAGNETIC;
+  in_message->azimuth = 90;
 
-  outMessage.reset();
-  azimuthInput.add(inMessage);
+  out_message.reset();
+  azimuth_input.add(in_message);
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
   converter->forceMagneticDeclination(angles::from_degrees(4.04));
 
-  ASSERT_EQ(nullptr, outMessage);
+  ASSERT_EQ(nullptr, out_message);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 
-  azimuthInput.add(inMessage);
+  azimuth_input.add(in_message);
 
-  ASSERT_NE(nullptr, outMessage);
-  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, outMessage->azimuth, 1e-3);
-  EXPECT_EQ(Az::UNIT_RAD, outMessage->unit);
-  EXPECT_EQ(Az::ORIENTATION_ENU, outMessage->orientation);
-  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, outMessage->reference);
+  ASSERT_NE(nullptr, out_message);
+  EXPECT_NEAR(-angles::from_degrees(4.04) + 2 * M_PI, out_message->azimuth, 1e-3);
+  EXPECT_EQ(Az::UNIT_RAD, out_message->unit);
+  EXPECT_EQ(Az::ORIENTATION_ENU, out_message->orientation);
+  EXPECT_EQ(Az::REFERENCE_GEOGRAPHIC, out_message->reference);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

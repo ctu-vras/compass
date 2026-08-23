@@ -32,8 +32,7 @@
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>
 
-namespace magnetometer_compass
-{
+namespace magnetometer_compass {
 
 using Az = compass_interfaces::msg::Azimuth;
 using Quat = geometry_msgs::msg::QuaternionStamped;
@@ -43,61 +42,60 @@ using Field = sensor_msgs::msg::MagneticField;
 
 typedef message_filters::sync_policies::ApproximateTime<Imu, Field> SyncPolicy;
 
-struct AzimuthPublishersConfigForOrientation
-{
-  std::shared_ptr<compass_conversions::CompassConverter> converter;
+struct AzimuthPublishersConfigForOrientation {
+  std::shared_ptr<compass_conversions::CompassConverter> converter_;
 
-  rclcpp::Node::SharedPtr namespace_node;
-  rclcpp::Node* param_node;
+  rclcpp::Node::SharedPtr namespace_node_;
+  rclcpp::Node* param_node_;
 
-  rclcpp::Publisher<Quat>::SharedPtr quatPub;
-  rclcpp::Publisher<Imu>::SharedPtr imuPub;
-  rclcpp::Publisher<Pose>::SharedPtr posePub;
-  rclcpp::Publisher<Az>::SharedPtr radPub;
-  rclcpp::Publisher<Az>::SharedPtr degPub;
+  rclcpp::Publisher<Quat>::SharedPtr quat_pub_;
+  rclcpp::Publisher<Imu>::SharedPtr imu_pub_;
+  rclcpp::Publisher<Pose>::SharedPtr pose_pub_;
+  rclcpp::Publisher<Az>::SharedPtr rad_pub_;
+  rclcpp::Publisher<Az>::SharedPtr deg_pub_;
 
-  bool publishQuat{false};
-  bool publishImu{false};
-  bool publishPose{false};
-  bool publishRad{false};
-  bool publishDeg{false};
+  bool publish_quat_ {false};
+  bool publish_imu_ {false};
+  bool publish_pose_ {false};
+  bool publish_rad_ {false};
+  bool publish_deg_ {false};
 
-  bool publish{false};
+  bool publish_ {false};
 
   AzimuthPublishersConfigForOrientation();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-    const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, uint8_t orientation,
-    const std::string& referenceStr, const std::string& orientationStr);
+      rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+      const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+      const std::string& param_prefix, const std::string& topic_prefix, uint8_t reference, uint8_t orientation,
+      const std::string& reference_str, const std::string& orientation_str);
 
-  void publishAzimuths(const Az& azimuthRad, const Imu& imuInBody);
+  void publishAzimuths(const Az& azimuth_rad, const Imu& imu_in_body);
 };
 
-struct AzimuthPublishersConfig
-{
-  std::shared_ptr<compass_conversions::CompassConverter> converter;
+struct AzimuthPublishersConfig{
+  std::shared_ptr<compass_conversions::CompassConverter> converter_;
 
-  rclcpp::Node::SharedPtr namespace_node;
-  rclcpp::Node* param_node;
+  rclcpp::Node::SharedPtr namespace_node_;
+  rclcpp::Node* param_node_;
 
-  AzimuthPublishersConfigForOrientation ned;
-  AzimuthPublishersConfigForOrientation enu;
+  AzimuthPublishersConfigForOrientation ned_;
+  AzimuthPublishersConfigForOrientation enu_;
 
-  bool publish{false};
+  bool publish_ {false};
 
-  const tf2::Quaternion nedToEnu{-M_SQRT2 / 2, -M_SQRT2 / 2, 0, 0};
-  const tf2::Quaternion enuToNed{this->nedToEnu.inverse()};
+  const tf2::Quaternion ned_to_enu_ {-M_SQRT2 / 2, -M_SQRT2 / 2, 0, 0};
+  const tf2::Quaternion enu_to_ned_ {ned_to_enu_.inverse()};
 
   AzimuthPublishersConfig();
 
   void init(
-    rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
-    const std::shared_ptr<compass_conversions::CompassConverter>& converter,
-    const std::string& paramPrefix, const std::string& topicPrefix, uint8_t reference, const std::string& referenceStr);
+      rclcpp::Node::SharedPtr namespace_node, rclcpp::Node* param_node,
+      const std::shared_ptr<compass_conversions::CompassConverter>& converter,
+      const std::string& param_prefix, const std::string& topic_prefix, uint8_t reference,
+      const std::string& reference_str);
 
-  void publishAzimuths(const Az& nedAzimuth, const Imu& imuInBody);
+  void publishAzimuths(const Az& ned_azimuth, const Imu& imu_in_body);
 };
 
 /**
@@ -252,8 +250,7 @@ struct AzimuthPublishersConfig
  *      an automated decision is made based on the current year (or `~initial_year`, if set). This model is used for
  *      computing magnetic declination.
  */
-class MagnetometerCompassNodelet : public rclcpp::Node
-{
+class MagnetometerCompassNodelet : public rclcpp::Node{
 public:
   explicit MagnetometerCompassNodelet(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~MagnetometerCompassNodelet() override;
@@ -264,36 +261,36 @@ public:
 protected:
   //! \brief Joint callback when IMU and magnetometer messages are received.
   //! \param[in] imu IMU data. Only `orientation` is relevant, and it should contain filtered absolute orientation.
-  //! \param[in] mag Magnetometer data (biased).
-  void imuMagCb(const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& mag);
+  //! \param[in] mag_unbiased Magnetometer data (unbiased).
+  void imuMagCb(const sensor_msgs::msg::Imu& imu, const sensor_msgs::msg::MagneticField& mag_unbiased);
 
   //! \brief Callback for GPS fix (so that the node can compute magnetic declination and UTM grid convergence).
   //! \param[in] fix The fix message. Only `latitude`, `longitude`, `altitude` and `header.stamp` are relevant.
   void fixCb(const sensor_msgs::msg::NavSatFix& fix);
 
   //! \brief TF frame in which the compass should be expressed. Usually base_link.
-  std::string frame;
+  std::string frame_;
 
-  tf2_ros::Buffer::SharedPtr buffer;
-  std::shared_ptr<tf2_ros::TransformListener> listener;
+  tf2_ros::Buffer::SharedPtr buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> listener_;
 
-  std::shared_ptr<compass_conversions::CompassConverter> converter;
-  std::shared_ptr<magnetometer_compass::MagnetometerCompass> compass;
-  std::unique_ptr<message_filters::Subscriber<Imu>> imuSub;
-  std::unique_ptr<message_filters::Subscriber<Field>> magSub;
-  std::unique_ptr<message_filters::Subscriber<Field>> magBiasSub;
-  std::unique_ptr<message_filters::Subscriber<Field>> magUnbiasedSub;
-  std::unique_ptr<magnetometer_pipeline::BiasRemoverFilter> magBiasRemoverFilter;
-  std::unique_ptr<message_filters::Synchronizer<SyncPolicy>> syncSub;
-  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr fixSub;
+  std::shared_ptr<compass_conversions::CompassConverter> converter_;
+  std::shared_ptr<magnetometer_compass::MagnetometerCompass> compass_;
+  std::unique_ptr<message_filters::Subscriber<Imu>> imu_sub_;
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_sub_;
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_bias_sub_;
+  std::unique_ptr<message_filters::Subscriber<Field>> mag_unbiased_sub_;
+  std::unique_ptr<magnetometer_pipeline::BiasRemoverFilter> mag_bias_remover_filter_;
+  std::unique_ptr<message_filters::Synchronizer<SyncPolicy>> sync_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr fix_sub_;
 
-  rclcpp::Publisher<Field>::SharedPtr magUnbiasedPub;
-  bool publishMagUnbiased{false};
-  bool subscribeMagUnbiased{false};
+  rclcpp::Publisher<Field>::SharedPtr mag_unbiased_pub_;
+  bool publish_mag_unbiased_ {false};
+  bool subscribe_mag_unbiased_ {false};
 
-  AzimuthPublishersConfig magPublishers;
-  AzimuthPublishersConfig truePublishers;
-  AzimuthPublishersConfig utmPublishers;
+  AzimuthPublishersConfig mag_publishers_;
+  AzimuthPublishersConfig true_publishers_;
+  AzimuthPublishersConfig utm_publishers_;
 };
 
-}
+}  // namespace magnetometer_compass
