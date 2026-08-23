@@ -13,7 +13,7 @@
 #include <compass_conversions/compass_converter.hpp>
 #include <compass_conversions/message_filter.hpp>
 #include <compass_interfaces/msg/azimuth.hpp>
-#include <cras_cpp_common/rate_limiter.h>
+#include <cras_cpp_common/rate_limiter.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <message_filters/subscriber.hpp>
 #include <rclcpp/node.hpp>
