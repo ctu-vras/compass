@@ -14,7 +14,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Azimuth.msg"
   DEPENDENCIES std_msgs
 )
-ament_export_dependencies(rosidl_default_runtime)
+ament_export_dependencies(cras_cpp_common rosidl_default_runtime)
 
 rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
