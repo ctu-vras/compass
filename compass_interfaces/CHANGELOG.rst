@@ -5,6 +5,11 @@
 Changelog for package compass_interfaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix: Updated license strings to SPDX identifiers
+* Contributors: Martin Pecka
+
 4.0.0 (2026-08-23)
 ------------------
 * fix: Properly export cras_cpp_common dependency.
